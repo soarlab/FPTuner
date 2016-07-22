@@ -8,12 +8,12 @@ import sys
 # subroutines 
 # ======== 
 def checkGelpiaInstallation (): 
-    return False
+    return os.path.isfile("./gelpia/bin/gelpia")
 
 
 
 def checkFPTaylorInstallation (branch): 
-    return False 
+    return os.path.isfile("./FPTaylor-"+branch+"/fptaylor") 
 
 
 
@@ -25,7 +25,6 @@ def DownloadGelpia ():
     os.chdir("gelpia") 
     os.system("make requirements") 
     os.system("make") 
-    assert(os.path.isfile("./bin/gelpia")) 
     os.chdir("../") 
 
 
@@ -39,7 +38,6 @@ def DownloadFPTaylor (branch):
 
     os.chdir(d)
     os.system("make") 
-    assert(os.path.isfile("fptaylor")) 
     os.chdir("../") 
     
 
@@ -76,3 +74,11 @@ InstallGelpia()
 InstallFPTaylor("master")
 InstallFPTaylor("fptuner") 
 
+
+
+# ----
+# message 
+# ----
+print "========" 
+print "Please set the environment variables: " 
+print "========" 
