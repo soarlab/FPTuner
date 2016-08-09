@@ -33,17 +33,17 @@ def checkFPTaylorInstallation(branch):
             f_cfg_first = open(cfg_first, "a") 
             
             f_cfg_first.write("abs-error=false\n") 
-            f_cfg_verify.write("rel-error=false\n") 
+            f_cfg_first.write("rel-error=false\n") 
             
             f_cfg_first.close() 
 
             # modify for cfg_verify 
-            f_cfg_first = open(cfg_first, "a") 
+            f_cfg_verify = open(cfg_first, "a") 
             
-            f_cfg_first.write("abs-error=true\n") 
+            f_cfg_verify.write("abs-error=true\n") 
             f_cfg_verify.write("rel-error=false\n") 
             
-            f_cfg_first.close() 
+            f_cfg_verify.close() 
 
             return True 
         return False 
