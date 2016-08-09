@@ -10,7 +10,6 @@ import subprocess as subp
 # ========
 # global variables 
 # ========
-CFG_FILE = os.path.abspath("./FPTaylor/tft.cfg") 
 FNAME_FPT_QUERY = "__fpt_query" 
 FNAME_FPT_REL = "./tft_func_form"
 
@@ -139,8 +138,8 @@ def GetFirstDerivations (expr):
 
         # -- run fptaylor -- 
         tft_utils.checkFPTaylorInstallation("master") 
-        assert(os.path.isfile(CFG_FILE))
-        command_fpt = os.environ["FPTAYLOR"] + " -c " + CFG_FILE + " " + FNAME_FPT_QUERY 
+        cfg_first = os.environ["HOME_FPTAYLOR"] + "/" + tft_utils.FPT_CFG_FIRST 
+        command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_first + " " + FNAME_FPT_QUERY 
         if (VERBOSE): 
             os.system(command_fpt) 
         else:

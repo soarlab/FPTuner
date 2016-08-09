@@ -4,6 +4,13 @@ import sys
 from fractions import Fraction 
 
 
+# ======== 
+# global variables 
+# ========
+FPT_CFG_FIRST  = "__first.cfg" 
+FPT_CFG_VERIFY = "__verify.cfg" 
+
+
 # ========
 # routines 
 # ========
@@ -23,27 +30,29 @@ def checkFPTaylorInstallation(branch):
             cfg_default = os.environ["HOME_FPTAYLOR"] + "/default.cfg"
             assert(cfg_default) 
 
-            cfg_first  = os.environ["HOME_FPTAYLOR"] + "/__first.cfg" 
-            cfg_verify = os.environ["HOME_FPTAYLOR"] + "/__verify.cfg" 
-            
-            os.system("cp " + cfg_default + " " + cfg_first) 
-            os.system("cp " + cfg_default + " " + cfg_verify) 
-
             # modify for cfg_first 
-            f_cfg_first = open(cfg_first, "a") 
+            cfg_first  = os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_FIRST 
+            if (not os.path.isfile(cfg_first)): 
+                os.system("cp " + cfg_default + " " + cfg_first) 
+
+                f_cfg_first = open(cfg_first, "a") 
             
-            f_cfg_first.write("abs-error=false\n") 
-            f_cfg_first.write("rel-error=false\n") 
+                f_cfg_first.write("abs-error=false\n") 
+                f_cfg_first.write("rel-error=false\n") 
             
-            f_cfg_first.close() 
+                f_cfg_first.close() 
 
             # modify for cfg_verify 
-            f_cfg_verify = open(cfg_first, "a") 
+            cfg_verify = os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_VERIFY 
+            if (not os.path.isfile(cfg_verify)): 
+                os.system("cp " + cfg_default + " " + cfg_verify) 
+
+                f_cfg_verify = open(cfg_first, "a") 
+                
+                f_cfg_verify.write("abs-error=true\n") 
+                f_cfg_verify.write("rel-error=false\n") 
             
-            f_cfg_verify.write("abs-error=true\n") 
-            f_cfg_verify.write("rel-error=false\n") 
-            
-            f_cfg_verify.close() 
+                f_cfg_verify.close() 
 
             return True 
         return False 
