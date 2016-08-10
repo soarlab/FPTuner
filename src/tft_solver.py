@@ -10,11 +10,7 @@ import tft_utils
 import tft_expr
 import tft_error_form 
 import tft_ask_gurobi 
-import tft_ask_markian 
 import tft_ask_gelpia 
-import tft_ask_gelpias 
-import tft_ask_sampler 
-import tft_ask_samplers 
 import tft_alloc 
 import tft_ir_api as IR 
 
@@ -23,9 +19,6 @@ import tft_ir_api as IR
 ALL_OPTIMIZERS = ["gurobi", "markian", "gelpia", "gelpias", "sampler", "samplers"]
 ID_ERROR_SUM = 0 
 N_SAMPLES = 10000
-SAMPLER = tft_ask_sampler.Sampler(N_SAMPLES) 
-SAMPLERS = tft_ask_samplers.Samplers(N_SAMPLES) 
-GELPIAS = tft_ask_gelpias.Gelpias() 
 VERBOSE = True 
 
 OPTIMIZATION_SKIP_PRECISE_OPTS = False 
@@ -68,22 +61,17 @@ def FindExprBound (optimizer, obj_expr, direction, constraints = []):
 
     value_bound = None 
 
-    if (optimizer in ["samplers", "gelpias"]): 
-        sys.exit("ERROR: cannot call FindExprBound with optimizer in [\"samplers\", \"gelpias\"]") 
-
-    if (optimizer == "markian" or optimizer == "gelpia"): 
+    if (optimizer == "gelpia"): 
         assert(len(constraints) == 0) 
 
         if (direction == "min"): 
             obj_expr = IR.MakeBinaryExpr("*", -1, tft_expr.ConstantExpr(Fraction(-1, 1)), obj_expr, True)
 
         glob_solver = None 
-        if (optimizer == "markian"): 
-            glob_solver = tft_ask_markian.MarkianSolver() 
-        elif (optimizer == "gelpia"):
-            glob_solver = tft_ask_gelpia.GelpiaSolver() 
-        else:
-            pass 
+
+        assert(optimizer == "gelpia") 
+
+        glob_solver = tft_ask_gelpia.GelpiaSolver() 
 
         max_retries = 3 
         n_retries = 0 
@@ -101,28 +89,6 @@ def FindExprBound (optimizer, obj_expr, direction, constraints = []):
 
         if ((value_bound is not None) and (direction == "min")): 
             value_bound = value_bound * Fraction(-1, 1) 
-
-    elif (optimizer == "sampler"):
-        if ((SAMPLER.target_expr is None) or (not(SAMPLER.target_expr == obj_expr))): 
-            SAMPLER.reset(N_SAMPLES) 
-            SAMPLER.goSample(obj_expr, constraints) 
-
-        if (direction == "min"): 
-            retv = SAMPLER.getMin() 
-            if (retv is None): 
-                return None 
-            # assert(retv is not None)
-            value_bound = Fraction(retv) 
-
-        elif (direction == "max"): 
-            retv = SAMPLER.getMax() 
-            if (retv is None): 
-                return None 
-            # assert(retv is not None) 
-            value_bound = Fraction(retv) 
-
-        else: 
-            assert(False) 
 
     else: 
         sys.exit("ERROR: unknown optimizer: " + optimizer) 
@@ -155,12 +121,6 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
     assert(optimizers["vrange"] in ALL_OPTIMIZERS) 
     assert(optimizers["alloc"] in ALL_OPTIMIZERS)
     assert(all([isinstance(error_forms[i], tft_error_form.ErrorForm) for i in range(0, len(error_forms))]))
-
-
-    # ---- some pre-processings ----
-    if (optimizers["vrange"] in ["sampler", "samplers"]): 
-        SAMPLER.reset(N_SAMPLES)
-        SAMPLERS.reset(N_SAMPLES) 
 
 
     # ==== solve expressions' ranges ====

@@ -9,11 +9,7 @@ import tft_error_form
 import tft_solver 
 import tft_utils 
 import tft_ask_gelpia 
-import tft_ask_gelpias 
 import tft_ask_gurobi 
-import tft_ask_markian 
-import tft_ask_sampler 
-import tft_ask_samplers 
 import tft_sol_exprs 
 import tft_get_first_derivations 
 import tft_dat_def 

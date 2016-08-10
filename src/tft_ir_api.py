@@ -35,6 +35,9 @@ PREC_CANDIDATES = ["e32", "e64"]
 CPP_INSTS       = []
 
 
+TARGET_EXPR     = None 
+
+
 def VarEIndex (eid): 
     return "evar_" + str(eid) 
 
@@ -157,8 +160,8 @@ def DeclareBoundedVar (label, vtype, gid, lb, ub, check_prefix=True):
 
     return var
 
-def VE (label, vtype, gid, lb, ub, check_prefix=True): 
-    return DeclareBoundedVar(label, vtype, gid, lb, ub, check_prefix) 
+def RealVE (label, gid, lb, ub, check_prefix=True): 
+    return DeclareBoundedVar(label, Fraction, gid, lb, ub, check_prefix) 
 
 
 
@@ -354,6 +357,14 @@ def SetGroupWeight (gid, weight):
     assert((type(weight) is float) and (0 <= weight)) 
 
     GID_WEIGHT[gid] = weight 
+
+
+def TuneExpr (expr): 
+    global TARGET_EXPR 
+    
+    assert(isinstance(expr, tft_expr.ArithmeticExpr)) 
+
+    TARGET_EXPR = expr 
     
 
 
