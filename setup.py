@@ -48,6 +48,33 @@ def InstallFPTaylor (branch):
 
         os.chdir(d)
         os.system("make") 
+
+        cfg_default = "default.cfg" 
+        assert(os.path.isfile(cfg_default)) 
+
+        # write FPT_CFG_FIRST  
+        cfg_first  = tft_utils.FPT_CFG_FIRST 
+        os.system("cp " + cfg_default + " " + cfg_first) 
+
+        f_cfg_first = open(cfg_first, "a") 
+            
+        f_cfg_first.write("abs-error=false\n") 
+        f_cfg_first.write("rel-error=false\n") 
+            
+        f_cfg_first.close() 
+        
+        # write FPT_CFG_VERIFY 
+        cfg_verify = tft_utils.FPT_CFG_VERIFY 
+        os.system("cp " + cfg_default + " " + cfg_verify) 
+
+        f_cfg_verify = open(cfg_first, "a") 
+                
+        f_cfg_verify.write("abs-error=true\n") 
+        f_cfg_verify.write("rel-error=false\n") 
+            
+        f_cfg_verify.close() 
+
+        # end of the installation 
         os.chdir("../") 
 
         # set environment variables 
@@ -93,6 +120,8 @@ elif (OPT_SETUP == "uninstall"):
     os.system("rm *~") 
     os.system("rm *.pyc") 
     os.system("rm ./src/*.pyc")
+    os.system("rm -rf ./src/log") 
+    os.system("rm -rf ./src/tmp") 
     os.system("rm -rf ./src/__pycache__") 
     os.system("rm -rf gelpia") 
     os.system("rm -rf FPTaylor") 

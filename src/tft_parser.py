@@ -14,10 +14,8 @@ from fractions import Fraction
 # global variables 
 # ========
 BIAS_FLOAT_CONST = False 
-
-VERBOSE = True 
-
-COALESCE_CONST = True 
+COALESCE_CONST   = True 
+VERBOSE          = False
 
 
 # ========
@@ -64,7 +62,7 @@ def computeConstBinaryExpr (op, opd0, opd1):
     assert((type(v0) is int) or (type(v0) is float) or isinstance(v0, Fraction)) 
     assert((type(v1) is int) or (type(v1) is float) or isinstance(v1, Fraction)) 
 
-    if (op.label == "+"): 
+    if   (op.label == "+"): 
         return EXPR.ConstantExpr(v0 + v1) 
     elif (op.label == "-"): 
         return EXPR.ConstantExpr(v0 - v1) 
@@ -72,6 +70,8 @@ def computeConstBinaryExpr (op, opd0, opd1):
         return EXPR.ConstantExpr(v0 * v1) 
     elif (op.label == "/"):
         return EXPR.ConstantExpr(v0 / v1) 
+    elif (op.label == "^"): 
+        return EXPR.ConstantExpr(v0 ** v1) 
     else: 
         assert(False) 
 

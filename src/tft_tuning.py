@@ -17,6 +17,8 @@ import tft_dat_def
 
 # ==== global variables ==== 
 OPTIMIZERS = {} 
+OPTIMIZERS["vrange"] = "gelpia" 
+OPTIMIZERS["alloc"]  = "gurobi" 
 
 
 # ========

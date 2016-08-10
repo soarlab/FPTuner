@@ -25,35 +25,12 @@ def checkGelpiaInstallation(branch):
 def checkFPTaylorInstallation(branch): 
     if ("HOME_FPTAYLOR" in os.environ): 
         if ("FPTAYLOR" in os.environ): 
-            assert(os.path.isfile(os.environ["FPTAYLOR"]))
-            
-            cfg_default = os.environ["HOME_FPTAYLOR"] + "/default.cfg"
-            assert(cfg_default) 
-
-            # modify for cfg_first 
-            cfg_first  = os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_FIRST 
-            if (not os.path.isfile(cfg_first)): 
-                os.system("cp " + cfg_default + " " + cfg_first) 
-
-                f_cfg_first = open(cfg_first, "a") 
-            
-                f_cfg_first.write("abs-error=false\n") 
-                f_cfg_first.write("rel-error=false\n") 
-            
-                f_cfg_first.close() 
-
-            # modify for cfg_verify 
-            cfg_verify = os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_VERIFY 
-            if (not os.path.isfile(cfg_verify)): 
-                os.system("cp " + cfg_default + " " + cfg_verify) 
-
-                f_cfg_verify = open(cfg_first, "a") 
-                
-                f_cfg_verify.write("abs-error=true\n") 
-                f_cfg_verify.write("rel-error=false\n") 
-            
-                f_cfg_verify.close() 
-
+            if (not os.path.isfile(os.environ["FPTAYLOR"])): 
+                return False 
+            if (not os.path.isfile(os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_FIRST)): 
+                return False 
+            if (not os.path.isfile(os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_VERIFY)):
+                return False 
             return True 
         return False 
     return False 

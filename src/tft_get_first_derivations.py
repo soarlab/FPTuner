@@ -11,17 +11,14 @@ import subprocess as subp
 # global variables 
 # ========
 FNAME_FPT_QUERY = "__fpt_query" 
-FNAME_FPT_REL = "./tft_func_form"
 
 # please set this flag carefully... 
 # by setting this flag as true, function "ResetGetFirstDerivations" must be called somewhere 
 # in order to query FPTaylor at the first time. 
 # Therefore, the reused results are the desired results... 
-REUSE_FPT_REL = False 
-
+REUSE_FPT_REL    = False 
 CACHE_TEXT_TERMS = {} 
-
-VERBOSE = False 
+VERBOSE          = False 
 
 
 # ========
@@ -46,8 +43,6 @@ def ResetGetFirstDerivations ():
 
     if (os.path.isfile(FNAME_FPT_QUERY)): 
         os.system("rm " + FNAME_FPT_QUERY) 
-    if (os.path.isfile(FNAME_FPT_REL)): 
-        os.system("rm " + FNAME_FPT_REL) 
     CACHE_TEXT_TERMS = {} 
 
 
@@ -90,31 +85,82 @@ def WriteGetFirstDerivationQueryFile (expr, vs=[]):
     qfile.close() 
 
 
-def ParseFPTaylorResults (cstr_expr, vs=[]): 
+def ParseFPTaylorResults (cstr_expr, vs=[], fpt_outputs=[]): 
     global CACHE_TEXT_TERMS
     if (REUSE_FPT_REL): 
         assert(cstr_expr not in CACHE_TEXT_TERMS.keys()) 
+
+    # -- read FPTaylor output -- 
+    raw_expr_2_comment = {}
+    reading_phase = None 
     
-    # -- read result file -- 
-    assert(os.path.isfile(FNAME_FPT_REL)) 
-    rfile = open(FNAME_FPT_REL, "r") 
+    for aline in fpt_outputs: 
+        if   (reading_phase is None): 
+            if   (aline.startswith("Simplified rounding")): 
+                reading_phase = "raw_expr" 
+                continue 
+
+        elif (reading_phase == "raw_expr"): 
+            if (aline.startswith("Corresponding original subexpressions")): 
+                reading_phase = "comment" 
+                continue 
+
+            ii          = aline.find(" ") 
+            if (ii <= 0): 
+                continue 
+            
+            id_raw_expr = None 
+            try: 
+                id_raw_expr = int(aline[0:ii]) 
+            except: 
+                continue 
+
+            str_raw_expr_prefix = "exp = -53:"
+            ii          = aline.find(str_raw_expr_prefix) 
+            assert(ii > 0) 
+
+            raw_expr    = aline[ii+len(str_raw_expr_prefix):].strip() 
+            
+            if (id_raw_expr > 0): 
+                assert(id_raw_expr not in raw_expr_2_comment.keys()) 
+                raw_expr_2_comment[id_raw_expr] =  [raw_expr, None]
+
+        elif (reading_phase == "comment"): 
+            if (aline.startswith("bounds")): 
+                reading_phase = None 
+                continue 
+
+            ii         = aline.find(":") 
+            if (ii <= 0): 
+                continue 
+
+            id_comment = int(aline[0:ii]) 
+
+            comment    = aline[ii+1:].strip() 
+            assert(len(comment) > 0) 
+
+            assert(id_comment in raw_expr_2_comment.keys()) 
+            assert(len(raw_expr_2_comment[id_comment]) == 2) 
+            assert(raw_expr_2_comment[id_comment][1] is None) 
+            
+            raw_expr_2_comment[id_comment][1] = comment 
+
+        else: 
+            assert(False) 
+
 
     TEXT_TERMS = [] 
-    for aline in rfile: 
-        aline = aline.strip() 
-        tokens = tft_utils.String2Tokens(aline, ":") 
-        assert(len(tokens) == 3) 
+    for index,raw_expr_2_comment in raw_expr_2_comment.iteritems(): 
+        assert(len(raw_expr_2_comment) == 2) 
 
-        str_index = tokens[0] 
-        str_raw_expr = tokens[1] 
-        str_comment = tokens[2] 
+        str_raw_expr = raw_expr_2_comment[0] 
+        str_comment  = raw_expr_2_comment[1] 
 
-        # modify str_raw_expr 
-        str_expr = str_raw_expr 
+        assert(type(str_raw_expr) is str) 
+        assert(type(str_comment)  is str) 
+        
+        TEXT_TERMS.append(TextTerm(str_raw_expr, str_comment)) 
 
-        TEXT_TERMS.append(TextTerm(str_expr, str_comment)) 
-
-    rfile.close() 
     CACHE_TEXT_TERMS[cstr_expr] = TEXT_TERMS 
 
 
@@ -132,25 +178,26 @@ def GetFirstDerivations (expr):
         # -- create query file -- 
         WriteGetFirstDerivationQueryFile(expr, vs) 
 
-        # -- delete the result file -- 
-        if (os.path.isfile(FNAME_FPT_REL)): 
-            os.system("rm " + FNAME_FPT_REL) 
-
         # -- run fptaylor -- 
         tft_utils.checkFPTaylorInstallation("master") 
         cfg_first = os.environ["HOME_FPTAYLOR"] + "/" + tft_utils.FPT_CFG_FIRST 
+        assert(os.path.isfile(cfg_first)) 
+
         command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_first + " " + FNAME_FPT_QUERY 
-        if (VERBOSE): 
-            os.system(command_fpt) 
-        else:
-            exe_fpt = subp.Popen(command_fpt, shell=True, stdout=subp.PIPE, stderr=subp.PIPE) 
 
-            exe_fpt.communicate() 
+        exe_fpt = subp.Popen(command_fpt, shell=True, stdout=subp.PIPE, stderr=subp.PIPE) 
 
-            assert(os.path.isfile(FNAME_FPT_REL))
+        fpt_outputs = [] 
+        for aline in exe_fpt.stdout: 
+            aline = aline.strip() 
+            if (VERBOSE): 
+                print (aline) 
+            fpt_outputs.append(aline) 
+
+        exe_fpt.communicate() 
 
         # -- read result file -- 
-        ParseFPTaylorResults(cstr_expr, vs) 
+        ParseFPTaylorResults(cstr_expr, vs, fpt_outputs) 
 
     return CACHE_TEXT_TERMS[cstr_expr] 
 

@@ -16,10 +16,9 @@ import tft_ir_api as IR
 
 
 # ==== global variables ==== 
-ALL_OPTIMIZERS = ["gurobi", "markian", "gelpia", "gelpias", "sampler", "samplers"]
-ID_ERROR_SUM = 0 
-N_SAMPLES = 10000
-VERBOSE = True 
+ALL_OPTIMIZERS = ["gurobi", "gelpia"] 
+ID_ERROR_SUM   = 0 
+VERBOSE        = False 
 
 OPTIMIZATION_SKIP_PRECISE_OPTS = False 
 
