@@ -182,6 +182,10 @@ def TFTRun (fname_input):
 
 
 def PrintAlloc (alloc, eforms = []): 
+    if (alloc is None): 
+        print (str(alloc)) 
+        return 
+    
     assert(isinstance(alloc, tft_alloc.Alloc)) 
     assert(len(eforms) > 0) 
     assert(all([isinstance(ef, tft_error_form.ErrorForm) for ef in eforms])) 
