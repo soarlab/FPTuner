@@ -102,7 +102,7 @@ def DecisionTreePredict (this_feature = []):
     pred_cid = None 
     pred_prob = None 
 
-    for k,v in prob_cid.iteritems(): 
+    for k,v in prob_cid.items(): 
         if (k.startswith("cid=")): 
             cid = int(k[4:]) 
             
@@ -185,7 +185,7 @@ def TheoreticalPredictionAccuracy ():
             lowest_cid = None 
             lowest_hdlabel = None 
 
-            for cid,hdlabel in cid_hdlabel.iteritems(): 
+            for cid,hdlabel in cid_hdlabel.items(): 
                 if ((lowest_cid is None) and (lowest_hdlabel is None)): 
                     lowest_cid = cid
                     lowest_hdlabel = hdlabel 
@@ -508,7 +508,7 @@ def Testing ():
                     original_gid_epss = ef.gid2epsilons.copy() 
                 else: 
                     assert(original_gid_epss.keys() == ef.gid2epsilons.keys()) 
-                    for gid,epss in original_gid_epss.iteritems():
+                    for gid,epss in original_gid_epss.items():
                         assert(ef.gid2epsilons[gid] == epss) 
 
                 for et in ef.terms: 

@@ -107,7 +107,7 @@ class Alloc:
         if (len(self.gid2eps) != len(rhs.gid2eps)): 
             return False 
 
-        for gid,eps in self.gid2eps.iteritems(): 
+        for gid,eps in self.gid2eps.items(): 
             if (gid not in rhs.gid2eps.keys()): 
                 return False 
             if (rhs.gid2eps[gid] != eps): 
@@ -189,7 +189,7 @@ class Alloc:
     def shortString (self): 
         str_ret = "" 
         
-        for gid,eps in self.gid2eps.iteritems(): 
+        for gid,eps in self.gid2eps.items(): 
             str_ret = str_ret + str(gid) + ">" + str(eps) + " " 
 
         return str_ret.strip() 

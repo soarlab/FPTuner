@@ -223,7 +223,7 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                 assert(not et.refVar().hasBounds())
                 gurobi_solver.addVar(et.refVar())
 
-            for gid,epss in eform.gid2epsilons.iteritems(): 
+            for gid,epss in eform.gid2epsilons.items(): 
                 for ei in range(0, len(epss)): 
                     evar = tft_error_form.GroupErrorVar(gid, ei) 
                     assert(evar.hasBounds()) 
@@ -350,7 +350,7 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                 print ("==== solver: the optimal score is : " + str(float(levar_sum_max)))
 
         for eform in error_forms: 
-            for gid,c in eform.gid_counts.iteritems(): 
+            for gid,c in eform.gid_counts.items(): 
                 evvs = [] 
                 assert(gid in eform.gid2epsilons.keys()) 
 

@@ -157,7 +157,7 @@ def WriteExprsFile (fname, ipart, alloc = None):
 
     # write group epsilons 
     efile.write("group-epsilons:\n") 
-    for gid,epss in FILE_GID2EPSS.iteritems(): 
+    for gid,epss in FILE_GID2EPSS.items(): 
         if ((alloc is not None) and (gid in alloc.gid2eps.keys())): 
             epss = "[" + DEF.HDLValue2EPSString(DEF.EPS2HDLValue(alloc.gid2eps[gid])) + "]" 
         efile.write(str(gid) + " : " + epss + "\n") 

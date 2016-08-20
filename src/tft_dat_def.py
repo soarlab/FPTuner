@@ -199,7 +199,7 @@ def Alloc2HDLabel (alloc):
         hd_label = [None for i in range(0, DIM_HDL)]
 
 
-    for gid, eps in gid2eps.iteritems(): 
+    for gid, eps in gid2eps.items(): 
         if (first_alloc): 
             assert(gid not in GID_HDLID.keys())
             assert(len(hd_label) == DIM_HDL) 

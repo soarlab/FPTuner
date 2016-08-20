@@ -150,7 +150,7 @@ def ParseFPTaylorResults (cstr_expr, vs=[], fpt_outputs=[]):
 
 
     TEXT_TERMS = [] 
-    for index,raw_expr_2_comment in raw_expr_2_comment.iteritems(): 
+    for index,raw_expr_2_comment in raw_expr_2_comment.items(): 
         assert(len(raw_expr_2_comment) == 2) 
 
         str_raw_expr = raw_expr_2_comment[0] 
@@ -189,7 +189,7 @@ def GetFirstDerivations (expr):
 
         fpt_outputs = [] 
         for aline in exe_fpt.stdout: 
-            aline = aline.strip() 
+            aline = tft_utils.Bytes2String(aline) 
             if (VERBOSE): 
                 print (aline) 
             fpt_outputs.append(aline) 

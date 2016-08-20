@@ -74,7 +74,7 @@ def GroupErrorVarSum (gid, epss=[]):
 def CastingNumExprTemplate (func_compare, casting_map = {}, gid2epsilons = {}):
     # generate the casting num. expr. 
     cnum_expr = None 
-    for p,c in casting_map.iteritems(): 
+    for p,c in casting_map.items(): 
         assert(len(p) == 2) 
         assert((type(p[0]) is int) and (type(p[1]) is int)) 
 
@@ -154,11 +154,11 @@ def countOptsInsts (eforms):
     gids = [] 
     
     for ef in eforms:
-        for gid,epss in ef.gid2epsilons.iteritems():
+        for gid,epss in ef.gid2epsilons.items():
             if (gid not in gids):
                 gids.append(gid)
         
-        for gid,c in ef.gid_counts.iteritems(): 
+        for gid,c in ef.gid_counts.items(): 
             assert(gid in gids) 
 
             n_insts = n_insts + c 
@@ -304,7 +304,7 @@ class ErrorForm:
 
     def nInstances (self): 
         total_inst = 0 
-        for g,c in self.gid_counts.iteritems(): 
+        for g,c in self.gid_counts.items(): 
             if (g == tft_expr.PRESERVED_CONST_GID): 
                 continue 
             total_inst = total_inst + c 
@@ -313,7 +313,7 @@ class ErrorForm:
     def scalingUpFactor (self):         
         largest_eps = Fraction(0.0) 
         
-        for gid,epss in self.gid2epsilons.iteritems(): 
+        for gid,epss in self.gid2epsilons.items(): 
             for eps in epss: 
                 assert(eps.value() >= 0.0) 
 
@@ -439,18 +439,18 @@ class ErrorForm:
         str_ret = str_ret + str(self.upper_bound) + " * " + str(self.scalingUpFactor()) + "\n"
 
         str_ret = str_ret + "-- casting map --\n" 
-        for p,c in self.casting_map.iteritems(): 
+        for p,c in self.casting_map.items(): 
             str_ret = str_ret + str(p) + " : " + str(c) + "\n" 
         
         str_ret = str_ret + "-- gid 2 epsilons --\n" 
-        for gid,epss in self.gid2epsilons.iteritems(): 
+        for gid,epss in self.gid2epsilons.items(): 
             str_ret = str_ret + str(gid) + " :  " 
             for e in epss: 
                 str_ret = str_ret + e.toCString() + "  "
             str_ret = str_ret + "\n"
 
         str_ret = str_ret + "-- gid counts --\n" 
-        for gid,c in self.gid_counts.iteritems(): 
+        for gid,c in self.gid_counts.items(): 
             str_ret = str_ret + str(gid) + " : " + str(c) + "\n" 
 
         str_ret = str_ret + "-- eq gids -- \n" 
@@ -469,7 +469,7 @@ class ErrorForm:
     def scoreExpr (self): 
         ret_se = None 
 
-        for gid,c in self.gid_counts.iteritems(): 
+        for gid,c in self.gid_counts.items(): 
             if (gid == tft_expr.PRESERVED_CONST_GID): 
                 continue 
 

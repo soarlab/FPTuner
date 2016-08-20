@@ -32,7 +32,7 @@ def CountCastingsTemplate (func_comp, alloc, eforms = []):
 
     uni_casting_map, uni_gid2epsilons = tft_error_form.UnifyCastingMapAndGid2Epsilons(eforms) 
 
-    for p,c in uni_casting_map.iteritems(): 
+    for p,c in uni_casting_map.items(): 
         assert(len(p) == 2) 
         assert(alloc.isAssigned(p[0]) and alloc.isAssigned(p[1])) 
 

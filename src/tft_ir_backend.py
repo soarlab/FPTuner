@@ -118,7 +118,7 @@ def Expr2Ref (expr):
           isinstance(expr, tft_expr.UnaryExpr) or 
           isinstance(expr, tft_expr.BinaryExpr)): 
 
-        for e,eref in EREF_MAP.iteritems(): 
+        for e,eref in EREF_MAP.items(): 
             if (e == expr): 
                 return ExprRef(eref) 
 
@@ -391,7 +391,7 @@ def ExportCppInsts (n_repeats, ifname, fname_atext):
     alloc.loadFromStringFile(fname_atext) 
 
     type_def_map = {}
-    for gid,eps in alloc.gid2eps.iteritems(): 
+    for gid,eps in alloc.gid2eps.items(): 
         assert(TypeExpr(gid) not in type_def_map.keys()) 
 
         type_def_map[TypeExpr(gid)] = Eps2CtypeString(eps) 
@@ -411,7 +411,7 @@ def ExportCppInsts (n_repeats, ifname, fname_atext):
 
     ifile.write("\n") 
 
-    for tr,tv in type_def_map.iteritems(): 
+    for tr,tv in type_def_map.items(): 
         ifile.write("#define " + tr + " " + tv + "\n")
 
     ifile.write("\n") 
@@ -470,7 +470,7 @@ def ExportExpr2CppFile (expr_or_exprs, n_repeats, ifname, fname_atext):
 
     ifile.write("int main (int argc, char **argv) {\n") 
 
-    for ve,vr in ve_vrange.iteritems(): 
+    for ve,vr in ve_vrange.items(): 
         gid = ve.getGid() 
         ifile.write("\t" + Eps2CtypeString(alloc[gid]) + " " + ve.label() + " = " + str(random.uniform(ve_vrange[ve][0], ve_vrange[ve][1])) + ";\n") 
     ifile.write("\n") 
@@ -597,20 +597,20 @@ def ExportExpr2ExprsFile (expr_or_exprs, upper_bound, ifname):
 
     # write gid counts 
     ifile.write("gid-counts:\n") 
-    for gid,c in tft_ir_api.GID_COUNTS.iteritems(): 
+    for gid,c in tft_ir_api.GID_COUNTS.items(): 
         ifile.write(str(gid) + " : " + str(c) + "\n") 
 
     ifile.write("\n") 
 
     # write casting counts 
     ifile.write("casting-counts:\n") 
-    for p,c in tft_ir_api.CAST_COUNTS.iteritems(): 
+    for p,c in tft_ir_api.CAST_COUNTS.items(): 
         ifile.write(str(p) + " : " + str(c) + "\n") 
     ifile.write("\n") 
 
     # write gid weight 
     ifile.write("gid-weight:\n") 
-    for g,w in tft_ir_api.GID_WEIGHT.iteritems(): 
+    for g,w in tft_ir_api.GID_WEIGHT.items(): 
         ifile.write(str(g) + " : " + str(w) + "\n") 
     ifile.write("\n") 
     

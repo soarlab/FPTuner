@@ -98,7 +98,7 @@ def Cluster ():
     assert(DEF.HDLID_GID is not None)
     file_hdlid_gid = open(DEF.FNAME_HDLID_GID, "w")
 
-    for hdlid, gid in DEF.HDLID_GID.iteritems(): 
+    for hdlid, gid in DEF.HDLID_GID.items(): 
         assert((type(hdlid) is int) and (type(gid) is int))
         file_hdlid_gid.write(str(hdlid) + " " + str(gid) + "\n") 
     
@@ -139,7 +139,7 @@ def Cluster ():
             assert(cid not in EQ_CID.keys()) 
             EQ_CID[cid] = same_cid 
 
-    for fid,cid in FID_CID.iteritems(): 
+    for fid,cid in FID_CID.items(): 
         if (cid in EQ_CID.keys()): 
             FID_CID[fid] = EQ_CID[cid] 
             if (cid in DEF.CID_HDLabel.keys()): 
@@ -192,7 +192,7 @@ def Cluster ():
     # -- export CID_Training_Counts -- 
     file_ctc = open(DEF.FNAME_CID_Training_Counts, "w") 
 
-    for cid,tcounts in DEF.CID_Training_Counts.iteritems(): 
+    for cid,tcounts in DEF.CID_Training_Counts.items(): 
         file_ctc.write(str(cid) + " " + str(tcounts) + "\n") 
 
     file_ctc.close() 

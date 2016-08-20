@@ -141,6 +141,11 @@ def String2Int (s):
         assert(False) 
     return ret     
 
+def Bytes2String (bs, encode_mode = "utf-8"): 
+    assert(type(bs) is bytes) 
+    
+    return bs.decode(encode_mode).strip() 
+
 
 # ==== extract file ==== 
 def File2Strings (fname, remove_empty=False): 
@@ -167,17 +172,16 @@ def File2Strings (fname, remove_empty=False):
 
 # ==== check the equivalent of two mappings 
 def isSameMap (map1 = {}, map2 = {}): 
-    for k,v in map1.iteritems(): 
+    for k,v in map1.items(): 
         if (k not in map2.keys()): 
             return False 
         if (not (v == map2[k])): 
             return False 
-    for k,v in map2.iteritems(): 
+    for k,v in map2.items(): 
         if (k not in map1.keys()): 
             return False 
         if (not (v == map1[k])): 
             return False 
     return True 
-
 
 
