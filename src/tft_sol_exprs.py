@@ -10,6 +10,7 @@ import tft_utils
 import tft_parser 
 import tft_get_first_derivations 
 import tft_error_form 
+import tft_ir_backend 
 
 
 # ======== 
@@ -28,6 +29,7 @@ TARGET_EXPRS       = []
 
 ERROR_TYPE         = "abs"
 OPT_ERROR_FORM     = True 
+FPTAYLOR_M2_FQUERY = "__fptaylor_m2_check_query.txt" 
 
 
 # ---- saving the ErrorForms and the relative data ---- 
@@ -167,6 +169,19 @@ def EnsureM2 (alloc):
 
     for texpr in TARGET_EXPRS: 
         # -- export the query file for FPTaylor --
+        assert("HOME_FPTAYLOR" in os.environ.keys()) 
+        assert("FPTAYLOR" in os.environ.keys()) 
+
+        if (os.path.isfile(FPTAYLOR_M2_FQUERY)): 
+            print ("Warning: rewrite the existed file : " + FPTAYLOR_M2_FQUERY) 
+
+        tft_ir_backend.ExportExpr4FPTaylorSanitation(texpr, alloc, FPTAYLOR_M2_FQUERY) 
+
+        cfg_verify = os.environ["HOME_FPTAYLOR"] + "/" + tft_utils.FPT_CFG_VERIFY
+        command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_verify + " " + FPTAYLOR_M2_FQUERY 
+
+        os.system(command_fpt) 
+
         # -- run FPTaylor for the check -- 
         # -- get the result from FPTaylor -- 
 
@@ -174,7 +189,6 @@ def EnsureM2 (alloc):
 
     return True 
     
-
 
 # ==== solve from ErrorForms ==== 
 def SolveErrorForms (eforms = [], optimizers = {}): 

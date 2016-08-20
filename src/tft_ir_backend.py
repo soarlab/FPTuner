@@ -348,7 +348,7 @@ def FPTaylorExpr (expr, alloc):
 
 
 # ==== to FPTaylor query ====
-def ExportExpr4FPTaylorSanitation (expr, qfname): 
+def ExportExpr4FPTaylorSanitation (expr, alloc, qfname): 
     assert(isinstance(expr, tft_expr.Expr)) 
     assert(isinstance(alloc, tft_alloc.Alloc)) 
     
