@@ -144,6 +144,7 @@ class Expr (object):
 class ArithmeticExpr (Expr): 
     def __init__ (self, set_index=True): 
         if (sys.version_info.major == 2): 
+            sys.exit("Error: FPTuner is currently based on Python3 only...") 
             super(ArithmeticExpr, self).__init__(set_index) 
         elif (sys.version_info.major == 3):
             super().__init__(set_index) 
@@ -153,6 +154,7 @@ class ArithmeticExpr (Expr):
 class Predicate (Expr):     
     def __init__ (self, set_index=True): 
         if (sys.version_info.major == 2): 
+            sys.exit("Error: FPTuner is currently based on Python3 only...") 
             super(Predicate, self).__init__(set_index) 
         elif (sys.version_info.major == 3):
             super().__init__(set_index) 
@@ -169,6 +171,7 @@ class ConstantExpr (ArithmeticExpr):
             val = Fraction(val)
 
         if (sys.version_info.major == 2): 
+            sys.exit("Error: FPTuner is currently based on Python3 only...") 
             super(ConstantExpr, self).__init__(False) 
         elif (sys.version_info.major == 3):
             super().__init__(False) 
@@ -334,6 +337,7 @@ class VariableExpr (ArithmeticExpr):
         assert(type(gid) is int) 
         
         if (sys.version_info.major == 2): 
+            sys.exit("Error: FPTuner is currently based on Python3 only...") 
             super(VariableExpr, self).__init__() 
         elif (sys.version_info.major == 3):
             super().__init__() 
@@ -532,6 +536,7 @@ class UnaryExpr (ArithmeticExpr):
             sys.exit("ERROR: cannot directly create UnaryExpr -. It must be properly transfered to an expression tree...") 
 
         if (sys.version_info.major == 2): 
+            sys.exit("Error: FPTuner is currently based on Python3 only...") 
             super(UnaryExpr, self).__init__() 
         elif (sys.version_info.major == 3):
             super().__init__() 
@@ -732,6 +737,7 @@ class BinaryExpr (ArithmeticExpr):
             sys.exit("ERROR: cannot directly create BinaryExpr ^. It must be properly transfered to an expression tree...") 
 
         if (sys.version_info.major == 2): 
+            sys.exit("Error: FPTuner is currently based on Python3 only...") 
             super(BinaryExpr, self).__init__() 
         elif (sys.version_info.major == 3):
             super().__init__() 
@@ -974,6 +980,7 @@ class BinaryPredicate (Predicate):
         assert(relation.label in BinaryRelationLabels)
 
         if (sys.version_info.major == 2): 
+            sys.exit("Error: FPTuner is currently based on Python3 only...") 
             super(BinaryPredicate, self).__init__(False) 
         elif (sys.version_info.major == 3):
             super().__init__(False) 

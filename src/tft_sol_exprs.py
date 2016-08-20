@@ -12,6 +12,8 @@ import tft_get_first_derivations
 import tft_error_form 
 import tft_ir_backend 
 
+import subprocess as subp 
+
 
 # ======== 
 # global variables 
@@ -163,10 +165,23 @@ def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], 
 
 
 # ==== ensure M2 ====
+# return 'True' if the verification for M2 is passed 
+# otherwise, return the M2 error which is a float 
 def EnsureM2 (alloc): 
     ReadyToTune() 
     assert(isinstance(alloc, tft_alloc.Alloc)) 
 
+    # -- get the error threshold -- 
+    error_threshold = None 
+    for ef in EFORMS:
+        if   (error_threshold is None): 
+            error_threshold = ef.upper_bound.value() 
+        else: 
+            assert(error_threshold == ef.upper_bound.value()) 
+
+    assert(error_threshold is not None) 
+
+    # -- check M2 for every targeted expression -- 
     for texpr in TARGET_EXPRS: 
         # -- export the query file for FPTaylor --
         assert("HOME_FPTAYLOR" in os.environ.keys()) 
@@ -177,15 +192,38 @@ def EnsureM2 (alloc):
 
         tft_ir_backend.ExportExpr4FPTaylorSanitation(texpr, alloc, FPTAYLOR_M2_FQUERY) 
 
+        # -- run FPTaylor for the check -- 
         cfg_verify = os.environ["HOME_FPTAYLOR"] + "/" + tft_utils.FPT_CFG_VERIFY
         command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_verify + " " + FPTAYLOR_M2_FQUERY 
 
-        os.system(command_fpt) 
+        fpt_verify = subp.Popen(command_fpt, shell=True, stdout=subp.PIPE, stderr=subp.PIPE) 
 
-        # -- run FPTaylor for the check -- 
         # -- get the result from FPTaylor -- 
+        err_total = None 
+        err_M2    = None 
 
-        pass 
+        for aline in fpt_verify.stdout: 
+            aline = tft_utils.Bytes2String(aline) 
+
+            if   (aline.startswith("total2:")): 
+                err_M2    = float(aline[7:].strip())
+            elif (aline.startswith("Absolute error (exact):")): 
+                err_total = float(aline[23:].strip()) 
+            else: 
+                pass 
+
+        assert(type(err_total) is float) 
+        assert(type(err_M2)    is float) 
+
+        print ("-- ensure M2 --") 
+        print ("Total Error:     " + str(err_total)) 
+        print ("Total M2:        " + str(err_M2)) 
+        print ("Error Threshold: " + str(float(error_threshold))) 
+        print ("---------------") 
+        
+        # -- decide the ensuring result -- 
+        if (err_total > error_threshold): 
+            return err_M2 
 
     return True 
     
@@ -197,9 +235,33 @@ def SolveErrorForms (eforms = [], optimizers = {}):
     assert("vrange" in optimizers.keys()) 
     assert("alloc" in optimizers.keys())
 
-    alloc = tft_solver.FirstLevelAllocSolver(optimizers, eforms) 
+    alloc         = None
+
+    err_M2_ub     = None 
+    err_M2_lb     = 0.0
+
+    while (True): 
+        # -- solve the problem -- 
+        alloc = tft_solver.FirstLevelAllocSolver(optimizers, eforms) 
     
-    assert(EnsureM2(alloc)) 
+        # -- check the effect of M2 -- 
+        err_M2 = EnsureM2(alloc)
+    
+        if   (type(err_M2) is bool): 
+            if (err_M2): 
+                break 
+            else: 
+                sys.exit("Error: invalid return value of boolean EnsureM2")    
+        
+        elif (type(err_M2) is float): 
+            assert(err_M2 > err_M2_lb)
+
+            sys.exit("Error: need to design the algorithm for ensuring M2") 
+            
+        else: 
+            sys.exit("Error: invalid return value type of EnsureM2") 
+
+    assert(alloc is not None) 
 
     return eforms, alloc 
 
