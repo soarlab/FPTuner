@@ -13,6 +13,7 @@ import tft_ask_gurobi
 import tft_sol_exprs 
 import tft_get_first_derivations 
 import tft_dat_def 
+import tft_ir_backend 
 
 
 # ==== global variables ==== 
@@ -91,8 +92,6 @@ def LoadConfig (fname_config):
 
         elif (opt == "VERBOSE_GUROBI"): 
             tft_ask_gurobi.VERBOSE = tft_utils.String2Bool(val) 
-        elif (opt == "VERBOSE_MARKIAN"): 
-            tft_ask_markian.VERBOSE = tft_utils.String2Bool(val) 
         elif (opt == "VERBOSE_SAMPLER"):
             tft_ask_sampler.VERBOSE = tft_utils.String2Bool(val) 
         elif (opt == "VERBOSE_SAMPLERS"):
@@ -195,3 +194,5 @@ def PrintAlloc (alloc, eforms = []):
         print ("# L2H castings: " + str(CountCastingsL2H(alloc, eforms))) 
         print ("# H2L castings: " + str(CountCastingsH2L(alloc, eforms))) 
         print ("# Castings: " + str(CountCastings(alloc, eforms))) 
+
+

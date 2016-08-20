@@ -24,6 +24,7 @@ GID_WEIGHT         = {}
 CASTING_MAP        = {} 
 EQ_GIDS            = [] 
 CONSTRAINT_EXPRS   = [] 
+TARGET_EXPRS       = [] 
 
 ERROR_TYPE         = "abs"
 OPT_ERROR_FORM     = True 
@@ -39,6 +40,14 @@ M2                 = None
 # ========
 # subroutines 
 # ======== 
+def ReadyToTune (): 
+    assert(len(TARGET_EXPRS) > 0) 
+    assert(all([isinstance(TARGET_EXPRS[i], tft_expr.Expr) for i in range(0, len(TARGET_EXPRS))])) 
+    assert(EFORMS is not None) 
+    assert(len(EFORMS) > 0) 
+    assert(all([isinstance(ef, tft_error_form.ErrorForm) for ef in EFORMS])) 
+
+
 # ==== generate an Error Form from an expression ==== 
 def GenerateErrorTermsFromExpr (context_expr, expr, error_exprs = [], program_exprs = []): 
     assert(len(error_exprs) == len(program_exprs)) 
@@ -151,6 +160,22 @@ def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], 
     return eform 
 
 
+# ==== ensure M2 ====
+def EnsureM2 (alloc): 
+    ReadyToTune() 
+    assert(isinstance(alloc, tft_alloc.Alloc)) 
+
+    for texpr in TARGET_EXPRS: 
+        # -- export the query file for FPTaylor --
+        # -- run FPTaylor for the check -- 
+        # -- get the result from FPTaylor -- 
+
+        pass 
+
+    return True 
+    
+
+
 # ==== solve from ErrorForms ==== 
 def SolveErrorForms (eforms = [], optimizers = {}): 
     assert(len(eforms) > 0) 
@@ -159,6 +184,8 @@ def SolveErrorForms (eforms = [], optimizers = {}):
     assert("alloc" in optimizers.keys())
 
     alloc = tft_solver.FirstLevelAllocSolver(optimizers, eforms) 
+    
+    assert(EnsureM2(alloc)) 
 
     return eforms, alloc 
 
@@ -176,6 +203,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
     global EQ_GIDS     
     global CONSTRAINT_EXPRS 
     global OPT_ERROR_FORM 
+    global TARGET_EXPRS 
 
     EFORMS = None 
     E_UPPER_BOUND = None
@@ -186,7 +214,6 @@ def SolveExprs (fname_exprs, optimizers = {}):
 
     # variables
     input_vars = [] 
-    target_exprs = [] 
     E_UPPER_BOUND = None 
 
     # -- read expr file -- 
@@ -401,12 +428,12 @@ def SolveExprs (fname_exprs, optimizers = {}):
         target_expr = tft_parser.String2Expr(ilines[0], False) 
         assert(isinstance(target_expr, tft_expr.ArithmeticExpr)) 
 
-        target_exprs.append(target_expr)
+        TARGET_EXPRS.append(target_expr)
 
         ilines = ilines[1:] 
 
-    assert(len(target_exprs) > 0)
-    assert(all([isinstance(te, tft_expr.Expr) for te in target_exprs]))
+    assert(len(TARGET_EXPRS) > 0)
+    assert(all([isinstance(te, tft_expr.Expr) for te in TARGET_EXPRS]))
 
     # get constraints 
     assert(len(ilines) > 0)
@@ -438,11 +465,11 @@ def SolveExprs (fname_exprs, optimizers = {}):
     irstrings = None 
 
     EFORMS = [] 
-    for te in target_exprs: 
+    for te in TARGET_EXPRS: 
         ef = GenerateErrorFormFromExpr(te, ERROR_TYPE, E_UPPER_BOUND, M2, EQ_GIDS, CONSTRAINT_EXPRS) 
         EFORMS.append(ef) 
 
-    assert(len(EFORMS) == len(target_exprs)) 
+    assert(len(EFORMS) == len(TARGET_EXPRS)) 
 
     tstamp = time.time() - tstamp 
     
@@ -475,7 +502,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
     # ---- some finalize before return ---- 
     if (VERBOSE): 
         stat = {} 
-        for te in target_exprs: 
+        for te in TARGET_EXPRS: 
             tft_expr.ExprStatistics(te, stat) 
 
         assert("# constants"  in stat.keys()) 

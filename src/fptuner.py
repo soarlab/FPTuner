@@ -101,10 +101,7 @@ for i in range(0, len(ERROR_BOUNDS)):
 
     # otherwise, do some reset tasks 
     else: 
-        assert(tft_sol_exprs.EFORMS is not None) 
-        assert(len(tft_sol_exprs.EFORMS) > 0) 
-        assert(all([isinstance(ef, tft_error_form.ErrorForm) for ef in tft_sol_exprs.EFORMS])) 
-        assert(len(tft_tuning.OPTIMIZERS) > 0) 
+        tft_sol_exprs.ReadyToTune() 
 
         new_eup = tft_expr.ConstantExpr(ERROR_BOUNDS[i]) 
 

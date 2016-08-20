@@ -348,16 +348,13 @@ def FPTaylorExpr (expr, alloc):
 
 
 # ==== to FPTaylor query ====
-def ExportExpr4FPTaylorSanitation (expr, qfname, fname_atext): 
+def ExportExpr4FPTaylorSanitation (expr, qfname): 
     assert(isinstance(expr, tft_expr.Expr)) 
+    assert(isinstance(alloc, tft_alloc.Alloc)) 
     
     vs_all = expr.vars() 
 
     vs = [v for v in vs_all if (not tft_expr.isConstVar(v))] 
-
-    # -- load alloc. text file -- 
-    alloc = tft_alloc.Alloc()
-    alloc.loadFromStringFile(fname_atext) 
 
     qfile = open(qfname, "w") 
 
