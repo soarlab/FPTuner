@@ -273,8 +273,10 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
             # add M2 to ref_sum 
             M2             = eform.M2 
-            assert(isinstance(M2, tft_expr.ConstantExpr)) 
-            expr_scaled_M2 = IR.BE("*", -1, M2, expr_up_scaling, True) 
+            assert(isinstance(M2,              tft_expr.ConstantExpr)) 
+            assert(isinstance(expr_up_scaling, tft_expr.ConstantExpr))
+            expr_scaled_M2 = tft_expr.ConstantExpr(M2.value() * expr_up_scaling.value()) 
+            # expr_scaled_M2 = IR.BE("*", -1, M2, expr_up_scaling, True) 
             ref_sum        = IR.BE("+", -1, ref_sum, expr_scaled_M2, True) 
             
             # write error form upper found 
