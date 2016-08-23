@@ -20,7 +20,15 @@ git clone https://github.com/soarlab/FPTuner
 ```
 cd ./FPTuner
 ```
-3. Run the setup script *at the root directory of FPTuner*: 
+3. Run the setup script **at the root directory of FPTuner**: 
 ```
 python setup.py install 
 ```
+
+4. Set up the required environment variables. 
+The installation script used in the previous step will print out the instruction of setting up the related environment variables. 
+Please follow the instruction for the setup. 
+
+
+
+# Running a "Hello World" Example 
