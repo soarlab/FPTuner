@@ -8,8 +8,18 @@
 
 - Python3 
     - Your **python** command needs to be an alias of **python3**. 
+
 - git 
 
+- Gurobi v6.5 
+    - Please go to <a href=http://www.gurobi.com/>Gurobi website</a> and follow the installation instructions. 
+    - Please add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
+        - Gurobi is install under **/home/myname/gurobi650/linux64**. 
+        - There should be a directory similar to **/home/myname/gurobi650/linux64/lib/python3.4_utf32**. 
+        - Add path by 
+            ```
+            export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPATH
+	    ```
 
 ## How to install? 
 
