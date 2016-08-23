@@ -47,7 +47,7 @@ Total Error:     7.629395e-06
 Total M2:        1.694066e-21
 Error Threshold: 1e-05
 ---------------
-&#61;&#61;&#61;&#61; error bound : 1e-05 &#61;&#61;&#61;&#61;
+==== error bound : 1e-05 ====
 ---- alloc. ----
 Score: 2.0
 -- GIDs --
@@ -58,9 +58,9 @@ ErrorTerm(gid: 3) => EPSILON_64
 ErrorTerm(gid: 4) => EPSILON_64
 ----------------
 
-&#35; L2H castings: 2
-&#35; # H2L castings: 0
-&#35; # Castings: 2
+# L2H castings: 2
+# H2L castings: 0
+# Castings: 2
 ```
 
 ## Toy example 1 
