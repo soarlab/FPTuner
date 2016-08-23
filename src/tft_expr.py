@@ -23,13 +23,11 @@ ALL_VariableExprs = []
 # sub-routines 
 # ========
 def isConstVar (var): 
-    assert(isinstance(var, VariableExpr)) 
+    if (not isinstance(var, VariableExpr)): 
+        return False 
 
     if (var.label().startswith(PRESERVED_CONST_VPREFIX)): 
-        assert(var.getGid() == PRESERVED_CONST_GID) 
-
         return True 
-
     else: 
         return False 
 

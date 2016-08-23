@@ -226,7 +226,7 @@ def EnsureM2 (alloc):
             return float(err_total - error_threshold) 
 
     return True 
-    
+
 
 # ==== solve from ErrorForms ==== 
 def SolveErrorForms (eforms = [], optimizers = {}): 
@@ -445,10 +445,11 @@ def SolveExprs (fname_exprs, optimizers = {}):
         c   = int(tokens[1]) 
 
         assert(gid >= 0)
-        assert(c   > 0) 
+        assert(c   >= 0) 
         assert(gid not in GID_COUNTS.keys()) 
-
-        GID_COUNTS[gid] = c 
+        
+        if (c > 0): 
+            GID_COUNTS[gid] = c 
 
         ilines = ilines[1:] 
 

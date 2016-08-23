@@ -11,5 +11,3 @@ rel = IR.BE("+", 4, IR.BE("+", 3, var_AA, var_BB), var_CC)
 
 IR.TuneExpr(rel) 
 
-# tft_ir_backend.ExportExpr2ExprsFile(rel, 0.01, "toy0.exprs")
-# tft_ir_backend.ExportCppInsts(9, "toy0.cpp", "../__tft_alloc_text") 

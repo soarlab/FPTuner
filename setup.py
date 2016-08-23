@@ -123,6 +123,9 @@ elif (OPT_SETUP == "uninstall"):
     os.system("rm -rf ./src/log") 
     os.system("rm -rf ./src/tmp") 
     os.system("rm -rf ./src/__pycache__") 
+    os.system("rm -rf ./examples/*.pyc") 
+    os.system("rm -rf ./examples/*.exprs") 
+    os.system("rm -rf ./examples/__pycache__") 
     os.system("rm -rf gelpia") 
     os.system("rm -rf FPTaylor") 
 

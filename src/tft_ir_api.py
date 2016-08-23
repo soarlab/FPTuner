@@ -43,7 +43,7 @@ def VarEIndex (eid):
     return "evar_" + str(eid) 
 
 
-def CountGID (gid): 
+def CountGID (gid, n=1): 
     global GID_COUNTS 
 
     assert(type(gid) is int)
@@ -52,7 +52,7 @@ def CountGID (gid):
     if (gid not in GID_COUNTS.keys()): 
         GID_COUNTS[gid] = 0 
 
-    GID_COUNTS[gid] = GID_COUNTS[gid] + 1 
+    GID_COUNTS[gid] = GID_COUNTS[gid] + n
 
 
 def AppendCppInst (expr): 
@@ -184,7 +184,6 @@ def MakeUnaryExpr (op_label, op_gid, opd0, internal=False):
     assert(type(op_gid) is int) 
     assert(isinstance(opd0, tft_expr.Expr)) 
 
-
     if (COALESCE_CONST): 
         if (isinstance(opd0, tft_expr.ConstantExpr)): 
             if (op_label == "abs"): 
@@ -206,6 +205,15 @@ def MakeUnaryExpr (op_label, op_gid, opd0, internal=False):
 
             else: 
                 sys.exit("ERROR: unknown Unary Operator: " + op_label) 
+
+    # possibly bind the constant type 
+    if (tft_expr.isConstVar(opd0)): 
+        if   (opd0.getGid() == tft_expr.PRESERVED_CONST_GID): 
+            CountGID(tft_expr.PRESERVED_CONST_GID, -1) 
+            opd0.gid = op_gid 
+        else: 
+            if (opd0.getGId() != op_gid): 
+                print ("Warning: conflicting constant type...") 
 
     if (not internal): 
         CountGID(op_gid) 
@@ -273,6 +281,22 @@ def MakeBinaryExpr (op_label, op_gid, opd0, opd1, internal=False):
 
             else: 
                 sys.exit("ERROR: unknown Binary Operator: " + op_label) 
+
+    # possibly bind the constant type 
+    if (tft_expr.isConstVar(opd0)): 
+        if   (opd0.getGid() == tft_expr.PRESERVED_CONST_GID): 
+            CountGID(tft_expr.PRESERVED_CONST_GID, -1) 
+            opd0.gid = op_gid 
+        else: 
+            if (opd0.getGid() != op_gid): 
+                print ("Warning: conflicting constant type...") 
+    if (tft_expr.isConstVar(opd1)): 
+        if   (opd1.getGid() == tft_expr.PRESERVED_CONST_GID): 
+            CountGID(tft_expr.PRESERVED_CONST_GID, -1)
+            opd1.gid = op_gid 
+        else:
+            if (opd1.getGid() != op_gid): 
+                print ("Warning: conflicting constant type...") 
 
     if (not internal): 
         CountGID(op_gid) 

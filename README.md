@@ -4,8 +4,8 @@
 
 # Installation 
 
-
 ## Reguired applications 
+
 - Python3 
     - Your **python** command needs to be an alias of **python3**. 
 - git 
@@ -32,3 +32,4 @@ Please follow the instruction for the setup.
 
 
 # Running a "Hello World" Example 
+## How to run the "Hello world"? 

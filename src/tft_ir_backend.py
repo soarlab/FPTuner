@@ -101,9 +101,11 @@ def Eps2CtypeString (eps):
 
 
 
-def Expr2Ref (expr): 
+def Expr2Ref (expr, alloc): 
     global NEW_EREF 
     global EREF_LIST
+
+    assert(isinstance(alloc, tft_alloc.Alloc)) 
 
     if   (isinstance(expr, tft_expr.ConstantExpr)): 
         return expr.toCString() 
@@ -112,7 +114,18 @@ def Expr2Ref (expr):
           tft_expr.isConstVar(expr)): 
         assert(expr.lb().value() == expr.ub().value()) 
 
-        return str(float(expr.lb().value())) 
+        vstr = str(float(expr.lb().value())) 
+
+        my_bw = alloc[expr.getGid()] 
+
+        if   (my_bw == tft_alloc.EPSILON_32): 
+            vstr = vstr + "f" 
+        elif (my_bw == tft_alloc.EPSILON_64): 
+            vstr = vstr
+        else: 
+            sys.exit("Error: unsupported constant bit-width: " + str(my_bw)) 
+
+        return vstr 
 
     elif (isinstance(expr, tft_expr.VariableExpr) or 
           isinstance(expr, tft_expr.UnaryExpr) or 
@@ -144,7 +157,7 @@ def Expr2CStatement (expr, alloc):
     my_bw = alloc[gid]
     stype = TypeExpr(gid) 
 
-    rel = stype + " " + Expr2Ref(expr) + " = " 
+    rel = stype + " " + Expr2Ref(expr, alloc) + " = " 
 
 
     if   (isinstance(expr, tft_expr.ConstantExpr)): 
@@ -157,13 +170,13 @@ def Expr2CStatement (expr, alloc):
 
 
     elif (isinstance(expr, tft_expr.UnaryExpr)): 
-        sopd = "(" + stype + ")" + Expr2Ref(expr.opd()) 
+        sopd = "(" + stype + ")" + Expr2Ref(expr.opd(), alloc) 
         rel  = rel + UnaryOperatorString(expr.operator.label, my_bw) + "(" + sopd + ");" 
 
 
     elif (isinstance(expr, tft_expr.BinaryExpr)):
-        slhs = "(" + stype + ")" + Expr2Ref(expr.lhs()) 
-        srhs = "(" + stype + ")" + Expr2Ref(expr.rhs()) 
+        slhs = "(" + stype + ")" + Expr2Ref(expr.lhs(), alloc) 
+        srhs = "(" + stype + ")" + Expr2Ref(expr.rhs(), alloc) 
         rel  = rel + slhs + " " + expr.operator.label + " " + srhs + ";" 
 
 
@@ -172,81 +185,6 @@ def Expr2CStatement (expr, alloc):
 
 
     return rel 
-
-
-
-def Expr2CexprString (expr, gid_eps = {}): 
-    if (isinstance(expr, tft_expr.ConstantExpr)): 
-        return -1, str(float(expr.value())) 
-
-    my_gid = expr.getGid() 
-    assert(my_gid in gid_eps.keys()) 
-    
-    my_bw = gid_eps[my_gid] 
-
-    if (isinstance(expr, tft_expr.VariableExpr)): 
-        return my_bw, expr.label()
-
-    elif (isinstance(expr, tft_expr.UnaryExpr)): 
-        str_my_type = "(" + Eps2CtypeString(my_bw) + ")" 
-
-        bw_opd, str_opd = Expr2CexprString(expr.opd(), gid_eps) 
-
-        if (my_bw != bw_opd): 
-            str_opd = str_my_type + str_opd 
-
-        my_opt = UnaryOperatorString(expr.operator.label, my_bw)
-
-        return my_bw, ("(" + my_opt + "(" + str_opd + "))") 
-
-    elif (isinstance(expr, tft_expr.BinaryExpr)): 
-        str_my_type = "(" + Eps2CtypeString(my_bw) + ")" 
-
-        bw_lhs, str_lhs = Expr2CexprString(expr.lhs(), gid_eps) 
-        
-        bw_rhs, str_rhs = Expr2CexprString(expr.rhs(), gid_eps) 
-
-        if (my_bw != bw_lhs): 
-            str_lhs = str_my_type + str_lhs 
-            
-        if (my_bw != bw_rhs): 
-            str_rhs = str_my_type + str_rhs 
-
-        return my_bw, ("(" + str_lhs + " " + expr.operator.label + " " + str_rhs + ")") 
-    
-    else: 
-        sys.exit("Error: unsupported expression type...\n    Expr: " + expr.toCString()) 
-
-
-
-def InspectTargetedExpr (expr, gid_cnt = {}): 
-    assert(isinstance(expr, tft_expr.Expr)) 
-
-    if (isinstance(expr, tft_expr.ConstantExpr)): 
-        return 
-
-    gid = expr.getGid() 
-    
-    if (gid not in gid_cnt.keys()): 
-        gid_cnt[gid] = 0 
-        
-    gid_cnt[gid] = gid_cnt[gid] + 1 
-        
-    if (isinstance(expr, tft_expr.VariableExpr)): 
-        return 
-
-    if (isinstance(expr, tft_expr.UnaryExpr)): 
-        InspectTargetedExpr(expr.opd(), gid_cnt) 
-        return 
-
-    if (isinstance(expr, tft_expr.BinaryExpr)): 
-        InspectTargetedExpr(expr.lhs(), gid_cnt) 
-        InspectTargetedExpr(expr.rhs(), gid_cnt) 
-        return 
-
-    print ("ERROR: invalid expr. for InspectTargetedExpr...") 
-    assert(False) 
-
 
 
 def FPTaylorTypeCastWrap (bw, s): 

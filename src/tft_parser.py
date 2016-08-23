@@ -208,21 +208,23 @@ def String2BoundedVariableExpr (s):
         assert(len(tokens) == 2) 
         assert(tokens[1].startswith("[") and tokens[1].endswith("]")) 
 
-        var = String2Expr(tokens[0], True) 
+        var    = String2Expr(tokens[0], True) 
         assert(isinstance(var, EXPR.VariableExpr))
 
-        ran = tft_utils.String2Tokens(tokens[1][1:len(tokens[1])-1], ",") 
+        ran    = tft_utils.String2Tokens(tokens[1][1:len(tokens[1])-1], ",") 
         assert(len(ran) == 2)
-        vlb = EXPR.ConstantExpr(var.type()(ran[0])) 
-        vub = EXPR.ConstantExpr(var.type()(ran[1])) 
+        vlb    = EXPR.ConstantExpr(var.type()(ran[0])) 
+        vub    = EXPR.ConstantExpr(var.type()(ran[1])) 
         assert(isinstance(vlb, EXPR.ConstantExpr))
         assert(isinstance(vub, EXPR.ConstantExpr)) 
 
         if (not var.hasBounds()): 
             var.setBounds(vlb, vub) 
         else:
-            assert(var.lb() == vlb) 
-            assert(var.ub() == vub) 
+            # assert(var.lb() == vlb) 
+            # assert(var.ub() == vub) 
+            assert(abs(var.lb().value() - vlb.value()) <= float(1e-07)) 
+            assert(abs(var.ub().value() - vub.value()) <= float(1e-07)) 
 
         return var 
 
