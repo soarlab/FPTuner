@@ -12,11 +12,11 @@
 - git 
 
 - Gurobi v6.5 
-    - Please go to <a href=http://www.gurobi.com/>Gurobi website</a> and follow the installation instructions. 
-    - Please add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
-        - Gurobi is install under **/home/myname/gurobi650/linux64**. 
+    - Go to <a href=http://www.gurobi.com/>Gurobi website</a> and follow the installation instructions. 
+    - Add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
+        - Gurobi is install under **/home/myname/gurobi650/linux64**. (The Academic License is free.) 
         - There should be a directory similar to **/home/myname/gurobi650/linux64/lib/python3.4_utf32**. 
-        - Add path by 
+        - Add path (under bash) by 
             ```
             export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPATH
 	    ```
