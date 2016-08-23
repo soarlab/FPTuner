@@ -40,7 +40,7 @@ Please follow the instruction for the setup.
     ```
     python ./fptuner.py -e 0.00001 ../examples/toy0.py
     ```
-The output of FPTuner should be 
+The output of FPTuner should be the following: 
 ```
 -- ensure M2 --
 Total Error:     7.629395e-06
@@ -71,3 +71,23 @@ ErrorTerm(gid: 4) => EPSILON_64
     ```
     python ./fptuner.py -e 0.00004 ../examples/toy1.py
     ```
+The output of FPTuner should be the following: 
+```
+-- ensure M2 --
+Total Error:     1.954973e-05
+Total M2:        4.547474e-13
+Error Threshold: 4e-05
+---------------
+==== error bound : 4e-05 ====
+---- alloc. ----
+Score: 2.0
+-- GIDs --
+ErrorTerm(gid: 0) => EPSILON_32
+ErrorTerm(gid: 1) => EPSILON_32
+ErrorTerm(gid: 2) => EPSILON_64
+----------------
+
+# L2H castings: 1
+# H2L castings: 0
+# Castings: 1
+```
