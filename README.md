@@ -13,13 +13,13 @@
 ## How to install? 
 
 1. Acquire FPTuner from our github repository: 
-        ```
-        git clone https://github.com/soarlab/FPTuner
-        ```
+    ```
+    git clone https://github.com/soarlab/FPTuner
+    ```
 2. Go to the root directory of FPTuner. E.g., 
-```
-cd ./FPTuner
-```
+    ```
+    cd ./FPTuner
+    ```
 3. Run the setup script **at the root directory of FPTuner**: 
 ```
 python setup.py install 
