@@ -17,9 +17,10 @@
         - Gurobi is install under **/home/myname/gurobi650/linux64**. (The Academic License is free.) 
         - There should be a directory similar to **/home/myname/gurobi650/linux64/lib/python3.4_utf32**. 
         - Add path (under bash) by 
-            ```
-            export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPATH
-	    ```
+	      ```
+	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPAH
+	      ```
+
 
 ## How to install? 
 
