@@ -13,9 +13,9 @@
 ## How to install? 
 
 1. Acquire FPTuner from our github repository: 
-```
-git clone https://github.com/soarlab/FPTuner
-``` 
+        ```
+        git clone https://github.com/soarlab/FPTuner
+        ```
 2. Go to the root directory of FPTuner. E.g., 
 ```
 cd ./FPTuner
