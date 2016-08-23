@@ -166,7 +166,7 @@ def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], 
 
 # ==== ensure M2 ====
 # return 'True' if the verification for M2 is passed 
-# otherwise, return the M2 error which is a float 
+# otherwise, return the (actual error - error threshold) 
 def EnsureM2 (alloc): 
     ReadyToTune() 
     assert(isinstance(alloc, tft_alloc.Alloc)) 
@@ -223,7 +223,7 @@ def EnsureM2 (alloc):
         
         # -- decide the ensuring result -- 
         if (err_total > error_threshold): 
-            return err_M2 
+            return float(err_total - error_threshold) 
 
     return True 
     
@@ -235,29 +235,42 @@ def SolveErrorForms (eforms = [], optimizers = {}):
     assert("vrange" in optimizers.keys()) 
     assert("alloc" in optimizers.keys())
 
-    alloc         = None
+    alloc      = None
 
-    err_M2_ub     = None 
-    err_M2_lb     = 0.0
+    err_M2_gap = None 
+    err_M2     = 0.0
 
     while (True): 
         # -- solve the problem -- 
         alloc = tft_solver.FirstLevelAllocSolver(optimizers, eforms) 
     
         # -- check the effect of M2 -- 
-        err_M2 = EnsureM2(alloc)
+        err_exc = EnsureM2(alloc)
     
-        if   (type(err_M2) is bool): 
-            if (err_M2): 
+        if   (type(err_exc) is bool): 
+            if (err_exc): 
                 break 
             else: 
                 sys.exit("Error: invalid return value of boolean EnsureM2")    
         
-        elif (type(err_M2) is float): 
-            assert(err_M2 > err_M2_lb)
+        elif (type(err_exc) is float): 
+            assert(err_exc > 0.0) 
 
-            sys.exit("Error: need to design the algorithm for ensuring M2") 
+            print ("Retune... for the actual error is " + str(err_exc) + " higher than the threshold...") 
+
+            alloc = None 
             
+            if   (err_M2_gap is None): 
+                err_M2_gap = err_exc / 10.0 
+
+            else: 
+                assert(err_M2_gap > 0.0) 
+                err_M2 = err_M2 + err_M2_gap 
+                   
+            # -- adjust the M2 -- 
+            for ef in eforms: 
+                ef.M2 = tft_expr.ConstantExpr(err_M2) 
+
         else: 
             sys.exit("Error: invalid return value type of EnsureM2") 
 
