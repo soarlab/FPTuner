@@ -7,6 +7,7 @@
 
 ## Reguired applications 
 - Python3 
+    - Your **python** command needs to be an alias of **python3**. 
 - git 
 
 

@@ -10,6 +10,7 @@ import tft_error_form
 import tft_ir_api as IR 
 import tft_ir_backend 
 import tft_tuning 
+import tft_alloc 
 
 import imp 
 
@@ -22,7 +23,6 @@ import imp
 # ==== get parameters ====
 INPUT_FILE   = None 
 CONFIG_FILE  = "default.fptconf" 
-ERROR_BOUNDS = [] 
 
 i = 1
 while True: 
@@ -42,10 +42,10 @@ while True:
     elif (arg_in == "-e"): 
         i = i + 1 
 
-        tokens       = tft_utils.String2Tokens(sys.argv[i], " ") 
-        ERROR_BOUNDS = [float(tokens[ii]) for ii in range(0, len(tokens))] 
+        tokens                  = tft_utils.String2Tokens(sys.argv[i], " ") 
+        tft_tuning.ERROR_BOUNDS = [float(tokens[ii]) for ii in range(0, len(tokens))] 
         
-        assert(all([ERROR_BOUNDS[ii] > 0.0 for ii in range(0, len(ERROR_BOUNDS))]))
+        assert(all([tft_tuning.ERROR_BOUNDS[ii] > 0.0 for ii in range(0, len(tft_tuning.ERROR_BOUNDS))]))
         
     else: 
         assert(INPUT_FILE is None) 
@@ -58,7 +58,7 @@ while True:
 assert(os.path.isfile(INPUT_FILE)) 
 assert(INPUT_FILE.endswith(".py")) 
 
-if (len(ERROR_BOUNDS) == 0): 
+if (len(tft_tuning.ERROR_BOUNDS) == 0): 
     sys.exit("Error: no error bound is specified... Please use -e to specify error bounds.") 
 
 assert(os.path.isfile(CONFIG_FILE)) 
@@ -72,9 +72,11 @@ module_name = tokens[-1]
 assert(module_name.endswith(".py")) 
 module_name = module_name[0:len(module_name)-3] 
 
-module_in   = imp.load_source(module_name, INPUT_FILE) 
+IR.LOAD_CPP_INSTS = True 
+module_in         = imp.load_source(module_name, INPUT_FILE) 
 if (IR.TARGET_EXPR is None): 
     sys.exit("Warning: no tuning target expression was specified...") 
+IR.LOAD_CPP_INSTS = False 
 
 
 # ==== tune the targeted expression ==== 
@@ -85,7 +87,7 @@ if (os.path.isfile(EXPRS_NAME)):
     os.system("rm " + EXPRS_NAME) 
 
 # go tuning 
-for i in range(0, len(ERROR_BOUNDS)): 
+for i in range(0, len(tft_tuning.ERROR_BOUNDS)): 
     eforms = None 
     alloc  = None 
 
@@ -93,7 +95,7 @@ for i in range(0, len(ERROR_BOUNDS)):
     # Need to generate the .exprs file first. 
     if (i == 0): 
         tft_ir_backend.ExportExpr2ExprsFile(IR.TARGET_EXPR, 
-                                            ERROR_BOUNDS[0], 
+                                            tft_tuning.ERROR_BOUNDS[0], 
                                             EXPRS_NAME) 
 
         # tune! 
@@ -103,7 +105,7 @@ for i in range(0, len(ERROR_BOUNDS)):
     else: 
         tft_sol_exprs.ReadyToTune() 
 
-        new_eup = tft_expr.ConstantExpr(ERROR_BOUNDS[i]) 
+        new_eup = tft_expr.ConstantExpr(tft_tuning.ERROR_BOUNDS[i]) 
 
         for ef in tft_sol_exprs.EFORMS : 
             ef.upper_bound = new_eup 
@@ -112,9 +114,21 @@ for i in range(0, len(ERROR_BOUNDS)):
         eforms, alloc = tft_sol_exprs.SolveErrorForms(tft_sol_exprs.EFORMS, tft_tuning.OPTIMIZERS) 
 
     # show the allocation 
-    print ("==== error bound : " + str(ERROR_BOUNDS[i]) + " ====") 
+    print ("==== error bound : " + str(tft_tuning.ERROR_BOUNDS[i]) + " ====") 
     tft_tuning.PrintAlloc(alloc, eforms) 
     print ("") 
 
-    # -- export the cpp file -- 
-    
+    # -- synthesize the mixed precision cpp file -- 
+    if   (alloc is None): 
+        print ("Warning: no allocation was generated... Thus no .cpp file will be generated...") 
+    else: 
+        assert(isinstance(alloc, tft_alloc.Alloc))
+        assert(eforms is not None) 
+
+        str_error_bound = str(float(tft_tuning.ERROR_BOUNDS[i])) 
+        fname_cpp = module_name.strip() + "." + str_error_bound + ".cpp" 
+        
+        if (os.path.isfile(fname_cpp)): 
+            print ("Warning: overwrite the existed .cpp file: " + fname_cpp) 
+        
+        tft_ir_backend.ExportCppInsts(alloc, fname_cpp) 

@@ -21,6 +21,8 @@ OPTIMIZERS = {}
 OPTIMIZERS["vrange"] = "gelpia" 
 OPTIMIZERS["alloc"]  = "gurobi" 
 
+ERROR_BOUNDS         = [] 
+
 
 # ========
 # sub-routines 
@@ -176,7 +178,8 @@ def TFTSystemReset ():
 
 # --------
 def TFTRun (fname_input): 
-    eforms, alloc = tft_sol_exprs.SolveExprs(fname_input, OPTIMIZERS) 
+    eforms, alloc = tft_sol_exprs.SolveExprs(fname_input, OPTIMIZERS)  
+
     return eforms, alloc 
 
 

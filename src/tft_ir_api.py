@@ -32,6 +32,7 @@ TUNE_FOR_ALL    = False
 PREC_CANDIDATES = ["e32", "e64"] 
 
 
+LOAD_CPP_INSTS  = False 
 CPP_INSTS       = []
 
 
@@ -52,6 +53,15 @@ def CountGID (gid):
         GID_COUNTS[gid] = 0 
 
     GID_COUNTS[gid] = GID_COUNTS[gid] + 1 
+
+
+def AppendCppInst (expr): 
+    global CPP_INSTS 
+
+    assert(isinstance(expr, tft_expr.Expr)) 
+    
+    if (LOAD_CPP_INSTS): 
+        CPP_INSTS.append(expr) 
 
 
 def CountCasting (from_opd, to_gid): 
@@ -122,7 +132,6 @@ def FConst (fpn):
 def DeclareBoundedVar (label, vtype, gid, lb, ub, check_prefix=True): 
     global EXTERNAL_GIDS 
     global INPUT_VARS 
-    global CPP_INSTS
 
     if (TUNE_FOR_ALL): 
         gid = 0 
@@ -156,7 +165,7 @@ def DeclareBoundedVar (label, vtype, gid, lb, ub, check_prefix=True):
     if (var not in INPUT_VARS): 
         INPUT_VARS.append(var) 
         
-    CPP_INSTS.append(var) 
+    AppendCppInst(var) 
 
     return var
 
@@ -167,7 +176,6 @@ def RealVE (label, gid, lb, ub, check_prefix=True):
 
 def MakeUnaryExpr (op_label, op_gid, opd0, internal=False): 
     global EXTERNAL_GIDS 
-    global CPP_INSTS
 
     if ((not internal) and (TUNE_FOR_ALL)): 
         op_gid = 0 
@@ -181,19 +189,19 @@ def MakeUnaryExpr (op_label, op_gid, opd0, internal=False):
         if (isinstance(opd0, tft_expr.ConstantExpr)): 
             if (op_label == "abs"): 
                 eret = tft_expr.ConstantExpr(abs(opd0.value()))
-                CPP_INSTS.append(eret) 
+                AppendCppInst(eret) 
                 return eret 
 
             elif (op_label == "-"): 
                 eret = tft_expr.ConstantExpr(-1.0 * opd0.value()) 
-                CPP_INSTS.append(eret) 
+                AppendCppInst(eret) 
                 return eret 
 
             elif (op_label == "sqrt"): 
                 cv = opd0.value() 
                 assert(cv >= 0.0) 
                 eret = tft_expr.ConstantExpr(math.sqrt(cv)) 
-                CPP_INSTS.append(eret) 
+                AppendCppInst(eret) 
                 return eret 
 
             else: 
@@ -217,7 +225,7 @@ def MakeUnaryExpr (op_label, op_gid, opd0, internal=False):
     else:
         ret_expr = tft_expr.UnaryExpr(tft_expr.UnaryOp(op_gid, op_label), opd0.copy((not internal))) 
 
-        CPP_INSTS.append(ret_expr) 
+        AppendCppInst(ret_expr) 
 
     return ret_expr 
 
@@ -228,7 +236,6 @@ def UE (op_label, op_gid, opd0, internal=False):
 
 def MakeBinaryExpr (op_label, op_gid, opd0, opd1, internal=False):
     global EXTERNAL_GIDS 
-    global CPP_INSTS
 
     if ((not internal) and (TUNE_FOR_ALL)): 
         op_gid = 0 
@@ -246,22 +253,22 @@ def MakeBinaryExpr (op_label, op_gid, opd0, opd1, internal=False):
 
             if (op_label == "+"): 
                 eret = tft_expr.ConstantExpr(v0 + v1) 
-                CPP_INSTS.append(eret) 
+                AppendCppInst(eret) 
                 return eret 
         
             elif (op_label == "-"): 
                 eret = tft_expr.ConstantExpr(v0 - v1)
-                CPP_INSTS.append(eret) 
+                AppendCppInst(eret) 
                 return eret 
             
             elif (op_label == "*"):
                 eret = tft_expr.ConstantExpr(v0 * v1) 
-                CPP_INSTS.append(eret) 
+                AppendCppInst(eret) 
                 return eret 
 
             elif (op_label == "/"): 
                 eret = tft_expr.ConstantExpr(v0 / v1) 
-                CPP_INSTS.append(eret) 
+                AppendCppInst(eret) 
                 return eret 
 
             else: 
@@ -281,7 +288,7 @@ def MakeBinaryExpr (op_label, op_gid, opd0, opd1, internal=False):
 
     ret_expr = tft_expr.BinaryExpr(tft_expr.BinaryOp(op_gid, op_label), opd0.copy((not internal)), opd1.copy((not internal))) 
 
-    CPP_INSTS.append(ret_expr) 
+    AppendCppInst(ret_expr) 
 
     return ret_expr 
 

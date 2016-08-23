@@ -16,7 +16,7 @@ FNAME_GELPIA_QUERY = os.path.abspath(NAME_QUERY)
 FNAME_GELPIA_LOG   = os.path.abspath("__tft_gelpia_log") 
 
 
-SAVE_QUERY        = True 
+SAVE_QUERY        = False 
 DIR_SAVED_QUERIES = "saved-gelpia-queries" 
 
 

@@ -12,11 +12,11 @@ import tft_alloc
 # ========
 # global variables 
 # ========
-VERBOSE     = False 
-TYPE_PREFIX = "FPTT_" 
-CPP_INSTS   = [] 
-NEW_EREF    = 0
-EREF_MAP    = {}
+VERBOSE       = False 
+TYPE_PREFIX   = "FPTT_" 
+NEW_EREF      = 0
+EREF_LIST     = []
+N_CPP_REPEATS = 1000000
 
 
 # ========
@@ -103,7 +103,7 @@ def Eps2CtypeString (eps):
 
 def Expr2Ref (expr): 
     global NEW_EREF 
-    global EREF_MAP 
+    global EREF_LIST
 
     if   (isinstance(expr, tft_expr.ConstantExpr)): 
         return expr.toCString() 
@@ -118,14 +118,18 @@ def Expr2Ref (expr):
           isinstance(expr, tft_expr.UnaryExpr) or 
           isinstance(expr, tft_expr.BinaryExpr)): 
 
-        for e,eref in EREF_MAP.items(): 
+        for e_eref in EREF_LIST: 
+            assert(len(e_eref) == 2)
+            e    = e_eref[0] 
+            eref = e_eref[1] 
+
             if (e == expr): 
                 return ExprRef(eref) 
 
         eref     = NEW_EREF 
         NEW_EREF = NEW_EREF + 1 
 
-        EREF_MAP[expr] = eref
+        EREF_LIST.append([expr, eref]) 
         
         return ExprRef(eref) 
         
@@ -379,13 +383,11 @@ def ExportExpr4FPTaylorSanitation (expr, alloc, qfname):
 
 
 # ==== to .cpp file ==== 
-def ExportCppInsts (n_repeats, ifname, fname_atext): 
-    assert((type(n_repeats) is int) and (1 <= n_repeats)) 
+def ExportCppInsts (alloc, ifname): 
+    assert((type(N_CPP_REPEATS) is int) and (1 <= N_CPP_REPEATS)) 
+    assert(isinstance(alloc, tft_alloc.Alloc)) 
     assert(all([isinstance(expr, tft_expr.Expr) for expr in tft_ir_api.CPP_INSTS])) 
 
-    # -- load alloc. text file -- 
-    alloc = tft_alloc.Alloc()
-    alloc.loadFromStringFile(fname_atext) 
 
     type_def_map = {}
     for gid,eps in alloc.gid2eps.items(): 
@@ -415,7 +417,7 @@ def ExportCppInsts (n_repeats, ifname, fname_atext):
 
     ifile.write("int main (int argc, char **argv) {\n") 
     
-    ifile.write("\n\tfor(int __r = 0 ; __r < " + str(n_repeats) + " ; __r++) {\n") 
+    ifile.write("\n\tfor(int __r = 0 ; __r < " + str(N_CPP_REPEATS) + " ; __r++) {\n") 
 
     for expr in tft_ir_api.CPP_INSTS: 
         if (isinstance(expr, tft_expr.VariableExpr) and 
@@ -428,65 +430,6 @@ def ExportCppInsts (n_repeats, ifname, fname_atext):
         
     ifile.write("\n\treturn 0;\n}") 
 
-
-
-# ==== to .cpp file ==== 
-def ExportExpr2CppFile (expr_or_exprs, n_repeats, ifname, fname_atext): 
-    sys.exit("This function will be deprecated...") 
-    assert((type(n_repeats) is int) and (1 <= n_repeats)) 
-
-    if (isinstance(expr_or_exprs, tft_expr.Expr)): 
-        expr_or_exprs = [expr_or_exprs] 
-
-    assert(all([isinstance(expr, tft_expr.Expr) for expr in expr_or_exprs])) 
-
-    # -- load alloc. text file -- 
-    alloc = tft_alloc.Alloc()
-    alloc.loadFromStringFile(fname_atext) 
-    
-    # -- write .cpp file -- 
-    ve_vrange = {} 
-
-    for expr in expr_or_exprs: 
-        for ve in expr.vars(): 
-            assert(ve.getGid() in alloc.gid2eps.keys()) 
-            assert(ve.hasBounds()) 
-            
-            if (ve not in ve_vrange.keys()): 
-                ve_vrange[ve] = [ve.lb().value(), ve.ub().value()] 
-            
-            assert(ve.lb().value() == ve_vrange[ve][0])
-            assert(ve.ub().value() == ve_vrange[ve][1]) 
-
-    ifile = open(ifname, "w")
-
-    ifile.write("#include <iostream>\n")
-    ifile.write("#include <math.h>\n") 
-    ifile.write("\n") 
-    ifile.write("using namespace std;\n\n") 
-
-    ifile.write("int main (int argc, char **argv) {\n") 
-
-    for ve,vr in ve_vrange.items(): 
-        gid = ve.getGid() 
-        ifile.write("\t" + Eps2CtypeString(alloc[gid]) + " " + ve.label() + " = " + str(random.uniform(ve_vrange[ve][0], ve_vrange[ve][1])) + ";\n") 
-    ifile.write("\n") 
-
-    ifile.write("\tfor (int ii = 0 ; ii < " + str(n_repeats) + " ; ii++) {\n") 
-
-    id_expr = 0 
-    for expr in expr_or_exprs: 
-        bw_expr, str_expr = Expr2CexprString(expr, alloc.gid2eps) 
-        
-        ifile.write("\t" + Eps2CtypeString(bw_expr) + " ____expr_" + str(id_expr) + " = " + str_expr + ";\n") 
-
-        id_expr = id_expr + 1 
-
-    ifile.write("\n}\n\n") 
-
-    ifile.write("\treturn 0;\n}\n") 
-
-    ifile.close() 
 
 
 # ==== to .input file ====
