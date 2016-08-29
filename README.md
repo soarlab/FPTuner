@@ -132,12 +132,16 @@ B = IR.RealVE("B", 1, 0.0, 100.0)
 C = IR.RealVE("C", 2, 0.0, 100.0) 
 ```
 Function **IR.RealVE** returns a variable (variable expression) with taking four arguments: 
+
 1. The label of the variable. 
+
 2. The group ID of the variable. 
 Expressions assigned with the same group ID will be assigned with the same bit-width. 
 In this example, we assume that we want to assign different bit-widths to the variables. 
 Thus, the three variables have different ID: A has 1, B has 2, and C has 3.
+
 3. The lower bound of the value range. 
+
 4. The upper bound of the value range. 
 
 
