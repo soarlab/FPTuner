@@ -249,7 +249,7 @@ def ExpandConstPowerExpression (op, e_base, c_power):
 
     else: 
         return EXPR.BinaryExpr(EXPR.BinaryOp(op.gid, "*"), 
-                               ExpandConstPowerExpression(e_base, (c_power - 1)), 
+                               ExpandConstPowerExpression(op, e_base, (c_power - 1)), 
                                e_base) 
 
 
