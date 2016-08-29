@@ -176,7 +176,7 @@ A binary expression.
 1. The binary operator. It is specified by a string which is one of the follows: 
     1. **+** : addition 
     2. **-** : subtraction 
-    3. **\*** : multiplication 
+    3. **<em>*</em>** : multiplication 
     4. **/** : division 
 
 2. The group ID. Type: integer 
