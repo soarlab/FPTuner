@@ -109,7 +109,9 @@ ErrorTerm(gid: 2) => EPSILON_64
 FPTuner decides the optimal bit-widths of the operators in the floating-point implementations of real-number computations.
 At this point, FPTuner provides a Python interface that allows the users to specify their the real-number computations. 
 In this section, we introduce how to use the Python interface through a simple example: 
-| (A + B) * C
+```
+(A + B) * C
+```
 which is the *hello-world 0* example. 
 
 
@@ -143,6 +145,55 @@ Thus, the three variables have different ID: A has 1, B has 2, and C has 3.
 3. The lower bound of the value range. 
 
 4. The upper bound of the value range. 
+
+
+## Specify binary expressions 
+There are two binary expressions in our example, and they can be specified with function **IR.BE** as shown in the following line: 
+```
+rel = IR.BE("*", 4, IR.BE("+", 3, A, B), C) 
+```
+
+The application 
+```
+IR.BE("+", 3, A, B)
+``` 
+results in a binary expression ```(A + B)```. 
+The four arguments are explained as follows: 
+
+1. The first argument is a string which specifies the binary operator. 
+In this case, "+" specifies the addition. 
+
+2. The second argument is an integer which gives the group ID. 
+Expressions having the same group ID will be assigned with the same bit-width. 
+
+3. The third argument is the left-hand-side operand. 
+In this case, it is variable A. 
+
+4. The forth argument is the right-hand-side operand. 
+In this case, it is variable B. 
+
+Similarly, 
+``` 
+IR.BE("*", 4, IR.BE("+", 3, A, B), C) 
+```
+returns expression 
+```
+(A + B) * C
+```
+
+
+## Tune for expression (A + B) * C
+To assign ```(A + B) * C`` to FPTuner as the tuning target, we use the following line: 
+```
+IR.TuneExpr(rel)
+``` 
+
+**rel** is the reference of our targeted expression. 
+Function **IR.TuneExpr** specifies the expression to tune. 
+
+
+
+# Command Line Arguments of FPTuner 
 
 
 
@@ -181,9 +232,9 @@ A binary expression.
 
 2. The group ID. Type: integer 
 
-3. The left-hand-side argument. Type: expression 
+3. The left-hand-side operand. Type: expression 
 
-4. The right-hand-side argument. Type: expression 
+4. The right-hand-side operand. Type: expression 
 
 
 
