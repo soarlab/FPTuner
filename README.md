@@ -192,6 +192,27 @@ IR.TuneExpr(rel)
 Function **IR.TuneExpr** specifies the expression to tune. 
 
 
+## Run FPTuner 
+**examples/helloworld0.py** shows the above steps of our example. 
+With the specification of the real-number computation (described in the Python file **examples/helloworld0.py**), we can now run FPTuner to decide the bit-widths for the operators. 
+The following steps tell how to run FPTuner on this example: 
+
+1. Ensure that command **python** is an alias of **python3**. 
+
+2. Choose the desired error threshold. Assume that **0.00005** is chosen. 
+
+3. Go to the **src** directory under the root directory of FPTuner. 
+
+4. Use the following command 
+    ```
+    python ./fptuner.py -e 0.00005 ../examples/helloworld0.py 
+    ```
+    - The error threshold is specified with **-e**. 
+    - The targeted real-number computation is specified by the last argument which is the path to the Python file. 
+
+
+## The output of FPTuner 
+
 
 # Command Line Arguments of FPTuner 
 
