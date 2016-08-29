@@ -183,7 +183,7 @@ returns expression
 
 
 ## Tune for expression (A + B) * C
-To assign ```(A + B) * C`` to FPTuner as the tuning target, we use the following line: 
+To assign ```(A + B) * C``` to FPTuner as the tuning target, we use the following line: 
 ```
 IR.TuneExpr(rel)
 ``` 
