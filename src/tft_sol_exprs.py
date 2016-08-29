@@ -243,6 +243,9 @@ def SolveErrorForms (eforms = [], optimizers = {}):
     while (True): 
         # -- solve the problem -- 
         alloc = tft_solver.FirstLevelAllocSolver(optimizers, eforms) 
+        
+        if (alloc is None): 
+            break 
     
         # -- check the effect of M2 -- 
         err_exc = EnsureM2(alloc)
@@ -274,7 +277,7 @@ def SolveErrorForms (eforms = [], optimizers = {}):
         else: 
             sys.exit("Error: invalid return value type of EnsureM2") 
 
-    assert(alloc is not None) 
+    # assert(alloc is not None) 
 
     return eforms, alloc 
 

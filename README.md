@@ -211,7 +211,7 @@ The following steps tell how to run FPTuner on this example:
     - The targeted real-number computation is specified by the last argument which is the path to the Python file. 
 
 
-## The output of FPTuner 
+## The outputs of FPTuner 
 
 
 # Command Line Arguments of FPTuner 
