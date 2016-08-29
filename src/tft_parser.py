@@ -230,6 +230,30 @@ def String2BoundedVariableExpr (s):
 
 
 # ========
+# expand power expression 
+# E.g., expand x^3 to ((x * x) * x) 
+# ========
+def ExpandConstPowerExpression (op, e_base, c_power): 
+    assert((isinstance(op, EXPR.BinaryOp)) and (op.label == "^"))
+    assert(isinstance(e_base, EXPR.Expr))
+    assert(float(c_power) == int(c_power)) 
+
+    c_power = int(c_power)
+    assert(c_power >= 0) 
+
+    if   (c_power == 0): 
+        return EXPR.ConstantExpr(1.0) 
+
+    elif (c_power == 1): 
+        return e_base
+
+    else: 
+        return EXPR.BinaryExpr(EXPR.BinaryOp(op.gid, "*"), 
+                               ExpandConstPowerExpression(e_base, (c_power - 1)), 
+                               e_base) 
+
+
+# ========
 # string to constant consisted binary expression
 # ======== 
 def String2ConstBinaryExpr (s): 
@@ -262,7 +286,11 @@ def String2ConstBinaryExpr (s):
             return computeConstBinaryExpr(op, opd0, opd1) 
 
         else: 
-            return EXPR.BinaryExpr(op, opd0, opd1) 
+            if (op.label == "^"): 
+                assert(isinstance(opd1, EXPR.ConstantExpr)) 
+                return ExpandConstPowerExpression(op, opd0, opd1.value()) 
+            else: 
+                return EXPR.BinaryExpr(op, opd0, opd1) 
 
 
 # ========
@@ -304,7 +332,11 @@ def EList2BinaryExpr (elist = []):
             return computeConstBinaryExpr(elist[1], elist[0], elist[2]) 
 
         else:
-            return EXPR.BinaryExpr(elist[1], elist[0], elist[2]) 
+            if (elist[1].label == "^"): 
+                assert(isinstance(elist[2], EXPR.ConstantExpr)) 
+                return ExpandConstPowerExpression(elist[1], elist[0], elist[2].value()) 
+            else: 
+                return EXPR.BinaryExpr(elist[1], elist[0], elist[2]) 
 
 
 def EList2BinaryPredicate (elist = []): 
