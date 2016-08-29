@@ -146,5 +146,46 @@ Thus, the three variables have different ID: A has 1, B has 2, and C has 3.
 
 
 
+# Interface Reference 
+
+## RealVE 
+### Return 
+A variable expression which has a bounded and contiguous value range specified in the arguments. 
+
+### Arguments 
+
+1. The label of the variable. Type: string
+
+2. The group ID of the variable. Type: integer 
+
+3. The lower bound of the value range. Type: floating-point number 
+
+4. The upper bound of the value range. Type: floating-point number 
+
+**Constraints** 
+
+- The lower bound must be less than or equal to the upper bound. 
+
+
+## BE 
+### Return 
+A binary expression. 
+
+### Arguments 
+
+1. The binary operator. It is specified by a string which is one of the follows: 
+    1. **+** : addition 
+    2. **-** : subtraction 
+    3. ***** : multiplication 
+    4. **/** : division 
+
+2. The group ID. Type: integer 
+
+3. The left-hand-side argument. Type: expression 
+
+4. The right-hand-side argument. Type: expression 
+
+
+
 # Acknowledgements 
 Supported in part by NSF grants 1643056, 1421726, and 1642958. 
