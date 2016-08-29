@@ -42,14 +42,14 @@ Please follow the instruction for the setup.
 
 
 
-# Running Toy Examples 
-## Toy example 0
+# Running Hello-world Examples 
+## Hello-world example 0
 
 1. Go to directory **src** under the root of FPTuner. 
 
 2. Run command 
     ```
-    python ./fptuner.py -e 0.00001 ../examples/toy0.py
+    python ./fptuner.py -e 0.00001 ../examples/helloworld0.py
     ```
 The output of FPTuner should be the following: 
 ```
@@ -74,13 +74,13 @@ ErrorTerm(gid: 4) => EPSILON_64
 # Castings: 2
 ```
 
-## Toy example 1 
+## Hello-world example 1 
 
 1. Go to directory **src** under the root of FPTuner. 
 
 2. Run command 
     ```
-    python ./fptuner.py -e 0.00004 ../examples/toy1.py
+    python ./fptuner.py -e 0.00004 ../examples/helloworld1.py
     ```
 The output of FPTuner should be the following: 
 ```
@@ -102,6 +102,44 @@ ErrorTerm(gid: 2) => EPSILON_64
 # H2L castings: 0
 # Castings: 1
 ```
+
+
+
+# Creating Your Own Examples
+FPTuner decides the optimal bit-widths of the operators in the floating-point implementations of real-number computations.
+At this point, FPTuner provides a Python interface that allows the users to specify their the real-number computations. 
+In this section, we introduce how to use the Python interface through a simple example: 
+| (A + B) * C
+which is the *hello-world 0* example. 
+
+
+## Invoke the interface module 
+- In a python (.py) file, use the following line to invoke the interface module: 
+    ```
+    import tft_ir_api as IR
+    ```
+
+- Note that the **src** directory under the FPTuner root directory should be added to the environment variable **PYTHONPATH**. 
+
+
+## Declare bounded variables
+FPTuner currently supports variables which have bounded and contiguous ranges. 
+For example, we want to declare three variables, A, B, and C, and assign [0.0, 100.0] as their ranges. 
+This can be achieved with function **IR.RealVE** as shown in the following lines: 
+```
+A = IR.RealVE("A", 0, 0.0, 100.0) 
+B = IR.RealVE("B", 1, 0.0, 100.0) 
+C = IR.RealVE("C", 2, 0.0, 100.0) 
+```
+Function **IR.RealVE** returns a variable (variable expression) with taking four arguments: 
+1. The label of the variable. 
+2. The group ID of the variable. 
+Expressions assigned with the same group ID will be assigned with the same bit-width. 
+In this example, we assume that we want to assign different bit-widths to the variables. 
+Thus, the three variables have different ID: A has 1, B has 2, and C has 3.
+3. The lower bound of the value range. 
+4. The upper bound of the value range. 
+
 
 
 # Acknowledgements 
