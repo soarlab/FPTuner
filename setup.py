@@ -85,7 +85,7 @@ def InstallFPTaylor (branch):
 
 
 
-def CleanDir (d): 
+def CleanDir (d, more_commands = []): 
     assert(os.path.isdir(d)) 
 
     d_curr = os.getcwd()
@@ -98,7 +98,10 @@ def CleanDir (d):
 
     os.system("rm -rf log") 
     os.system("rm -rf tmp")     
-    os.system("rm -rf __pycache__") 
+    os.system("rm -rf __pycache__")
+    
+    for c in more_commands: 
+        os.system(c) 
 
     os.chdir(d_curr)
 
@@ -107,18 +110,14 @@ def CleanDir (d):
 def MakeClean (): 
     CleanDir("./") 
 
-    CleanDir("./src") 
-    assert(os.path.isdir("./src"))
-    os.chdir("./src") 
-    os.system("rm __fptaylor_m2_check_query.txt") 
-    os.system("rm __fpt_query") 
-    os.system("rm gurobi.log") 
-    os.system("rm -rf saved-gelpia-queries") 
-    os.chdir("../") 
+    CleanDir("./src", ["rm __fptaylor_m2_check_query.txt", 
+                       "rm __fpt_query", 
+                       "rm gurobi.log",
+                       "rm -rf saved-gelpia-queries"])
 
-    CleanDir("./examples")
+    CleanDir("./examples", ["rm *.cpp"]) 
 
-    CleanDir("./examples/primitives") 
+    CleanDir("./examples/primitives", ["rm *.cpp"]) 
 
 
 

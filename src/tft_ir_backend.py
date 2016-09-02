@@ -120,7 +120,8 @@ def Expr2Ref (expr, alloc):
 
         if   (my_bw == tft_alloc.EPSILON_32): 
             vstr = vstr + "f" 
-        elif (my_bw == tft_alloc.EPSILON_64): 
+        elif (my_bw == tft_alloc.EPSILON_64 or 
+              my_bw == tft_alloc.EPSILON_128): 
             vstr = vstr
         else: 
             sys.exit("Error: unsupported constant bit-width: " + str(my_bw)) 

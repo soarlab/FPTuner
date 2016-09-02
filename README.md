@@ -239,6 +239,9 @@ Please remember to use quotation marks to enclose the thresholds.
 
 The later use case is for trying different error thesholds and generate the optimal allocation for each of them. 
 
+### Default 
+There is no default value for **-e** option. 
+
 
 ## -b : candidate bit-widths 
 
@@ -258,6 +261,9 @@ Again, please remember to use quotation marks to enclose the bit-widths.
 
 FPTuner currently supports the above two sets of candidates. 
 
+### Default 
+The default of **-b** option is "32 64". 
+
 
 
 # Interface Reference 
@@ -265,6 +271,7 @@ FPTuner currently supports the above two sets of candidates.
 ## FConst 
 ### Return 
 A constant expression which bit-width is automatically matched with the operator which consumes the constant. 
+(However, for 128-bit operators, the constants are assigned with 64-bit.) 
 
 ### Arguments 
 
