@@ -216,6 +216,48 @@ The following steps tell how to run FPTuner on this example:
 
 # Command Line Arguments of FPTuner 
 
+## -e 
+
+```
+-e [a single floating-point value as the error threshold (absolute error)] 
+```
+, e.g., 
+```
+-e 0.0001
+```
+
+or 
+
+```
+-e "[error theshold 1] [error threshold 2] ..." 
+```
+, e.g., 
+```
+-e "0.0001 0.0002 0.0003"
+```
+Please remember to use quotation marks to enclose the thresholds. 
+
+The later use case is for trying different error thesholds and generate the optimal allocation for each of them. 
+
+
+## -b 
+
+Use 
+```
+-b "32 64" 
+``` 
+to tune with two bit-width candidates, 32-bit and 64-bit. 
+
+Use 
+```
+-b "64 128" 
+``` 
+to tune with two candidates, 64-bit and 128-bit. 
+
+Again, please remember to use quotation marks to enclose the bit-widths. 
+
+FPTuner currently supports the above two sets of candidates. 
+
 
 
 # Interface Reference 
