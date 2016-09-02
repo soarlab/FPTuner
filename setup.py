@@ -85,6 +85,43 @@ def InstallFPTaylor (branch):
 
 
 
+def CleanDir (d): 
+    assert(os.path.isdir(d)) 
+
+    d_curr = os.getcwd()
+
+    os.chdir(d) 
+
+    os.system("rm *~")
+    os.system("rm *.exprs") 
+    os.system("rm *.pyc")
+
+    os.system("rm -rf log") 
+    os.system("rm -rf tmp")     
+    os.system("rm -rf __pycache__") 
+
+    os.chdir(d_curr)
+
+
+
+def MakeClean (): 
+    CleanDir("./") 
+
+    CleanDir("./src") 
+    assert(os.path.isdir("./src"))
+    os.chdir("./src") 
+    os.system("rm __fptaylor_m2_check_query.txt") 
+    os.system("rm __fpt_query") 
+    os.system("rm gurobi.log") 
+    os.system("rm -rf saved-gelpia-queries") 
+    os.chdir("../") 
+
+    CleanDir("./examples")
+
+    CleanDir("./examples/primitives") 
+
+
+
 # ========
 # main 
 # ========
@@ -116,16 +153,12 @@ if   (OPT_SETUP == "install"):
     print ("========") 
 
 
+elif (OPT_SETUP == "clean"): 
+    MakeClean() 
+
+
 elif (OPT_SETUP == "uninstall"): 
-    os.system("rm *~") 
-    os.system("rm *.pyc") 
-    os.system("rm ./src/*.pyc")
-    os.system("rm -rf ./src/log") 
-    os.system("rm -rf ./src/tmp") 
-    os.system("rm -rf ./src/__pycache__") 
-    os.system("rm -rf ./examples/*.pyc") 
-    os.system("rm -rf ./examples/*.exprs") 
-    os.system("rm -rf ./examples/__pycache__") 
+    MakeClean() 
     os.system("rm -rf gelpia") 
     os.system("rm -rf FPTaylor") 
 
