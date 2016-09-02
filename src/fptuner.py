@@ -46,7 +46,21 @@ while True:
         tft_tuning.ERROR_BOUNDS = [float(tokens[ii]) for ii in range(0, len(tokens))] 
         
         assert(all([tft_tuning.ERROR_BOUNDS[ii] > 0.0 for ii in range(0, len(tft_tuning.ERROR_BOUNDS))]))
+
+    elif (arg_in == "-b"): 
+        i = i + 1 
         
+        tokens = tft_utils.String2Tokens(sys.argv[i], " ") 
+        bwidths = [int(tokens[ii]) for ii in range(0, len(tokens))] 
+        bwidths.sort()
+
+        if   (bwidths == [32, 64]): 
+            IR.PREC_CANDIDATES = ["e32", "e64"] 
+        elif (bwidths == [64, 128]): 
+            IR.PREC_CANDIDATES = ["e64", "e128"] 
+        else: 
+            sys.exit("Error: not supported bit-width candidates: " + str(bwidths)) 
+
     else: 
         assert(INPUT_FILE is None) 
         INPUT_FILE = arg_in 

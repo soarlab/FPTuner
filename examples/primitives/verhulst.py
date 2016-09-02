@@ -1,8 +1,6 @@
 
 import tft_ir_api as IR
 
-# IR.SetPrecCandidates(["e64", "e128"]) 
-
 const_r = IR.FConst(4.0)
 const_k = IR.FConst(1.11)
 
