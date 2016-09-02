@@ -216,7 +216,7 @@ The following steps tell how to run FPTuner on this example:
 
 # Command Line Arguments of FPTuner 
 
-## -e 
+## -e : error thresholds 
 
 ```
 -e [a single floating-point value as the error threshold (absolute error)] 
@@ -240,7 +240,7 @@ Please remember to use quotation marks to enclose the thresholds.
 The later use case is for trying different error thesholds and generate the optimal allocation for each of them. 
 
 
-## -b 
+## -b : candidate bit-widths 
 
 Use 
 ```
