@@ -262,6 +262,15 @@ FPTuner currently supports the above two sets of candidates.
 
 # Interface Reference 
 
+## FConst 
+### Return 
+A constant expression which bit-width is automatically matched with the operator which consumes the constant. 
+
+### Arguments 
+
+1. The value of the constant expression. 
+
+
 ## RealVE 
 ### Return 
 A variable expression which has a bounded and contiguous value range specified in the arguments. 
