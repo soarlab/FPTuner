@@ -3,9 +3,9 @@ import tft_ir_api as IR
 
 delta = 1e-08 
 
-var_x1 = IR.DeclareBoundedVar("x1", 0, (-15.0 - delta), (15.0 + delta))   
-var_x2 = IR.DeclareBoundedVar("x2", 1, (-15.0 - delta), (15.0 + delta)) 
-var_x3 = IR.DeclareBoundedVar("x3", 2, (-15.0 - delta), (15.0 + delta)) 
+var_x1 = IR.RealVE("x1", 0, (-15.0 - delta), (15.0 + delta))   
+var_x2 = IR.RealVE("x2", 1, (-15.0 - delta), (15.0 + delta)) 
+var_x3 = IR.RealVE("x3", 2, (-15.0 - delta), (15.0 + delta)) 
     
 sub_x1x2   = IR.BE("*",  3, var_x1, var_x2) 
 sub_x1x2x3 = IR.BE("*",  4, sub_x1x2, var_x3) 
