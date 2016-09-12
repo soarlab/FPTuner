@@ -58,8 +58,10 @@ def InstallFPTaylor (branch):
 
         f_cfg_first = open(cfg_first, "a") 
             
+        f_cfg_first.write("\n") 
         f_cfg_first.write("abs-error=false\n") 
-        f_cfg_first.write("rel-error=false\n") 
+        f_cfg_first.write("rel-error=false\n")
+        f_cfg_first.write("fail-on-exception=false\n") 
             
         f_cfg_first.close() 
         
@@ -69,8 +71,10 @@ def InstallFPTaylor (branch):
 
         f_cfg_verify = open(cfg_first, "a") 
                 
+        f_cfg_verify.write("\n") 
         f_cfg_verify.write("abs-error=true\n") 
-        f_cfg_verify.write("rel-error=false\n") 
+        f_cfg_verify.write("rel-error=false\n")
+        f_cfg_verify.write("fail-on-exception=false\n") 
             
         f_cfg_verify.close() 
 
