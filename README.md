@@ -303,7 +303,7 @@ A binary expression.
 
 ### Arguments 
 
-1. The binary operator. It is specified by a string which is one of the follows: 
+1. The binary operator. It is specified by a string which is one of the following:
     1. **+** : addition 
     2. **-** : subtraction 
     3. **<em>*</em>** : multiplication 
@@ -314,6 +314,33 @@ A binary expression.
 3. The left-hand-side operand. Type: expression 
 
 4. The right-hand-side operand. Type: expression 
+
+
+## UE
+### Return 
+A unary expression. 
+
+### Arguments
+1. The unary operator. It is specified by a string which is one of the following: 
+    1. **-** : negation
+    2. **exp** : exponential 
+    3. **sqrt** : square root
+
+2. The group ID. Type: integer
+
+3. The operand. Type: expression
+
+
+## SetGroupWeight
+This function is for assigning a higher/lower weight to an operator group that allows prioritizing lower/higher bit-width assignments. 
+
+### Return
+No return value. 
+
+### Arguments 
+1. The group ID. Type: iteger
+
+2. The desired weight. Type: floating-point
 
 
 
