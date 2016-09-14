@@ -259,9 +259,13 @@ Use
 ``` 
 to tune with two candidates, 64-bit and 128-bit. 
 
-Again, please remember to use quotation marks to enclose the bit-widths. 
+USE 
+```
+-b "32 64 128"
+``` 
+to tune with three candidates, 32-bit, 64-bit, and 128-bit. 
 
-FPTuner currently supports the above two sets of candidates. 
+Again, please remember to use quotation marks to enclose the bit-widths. 
 
 ### Default 
 The default of **-b** option is "32 64". 
