@@ -33,6 +33,8 @@ ERROR_TYPE         = "abs"
 OPT_ERROR_FORM     = True 
 FPTAYLOR_M2_FQUERY = "__fptaylor_m2_check_query.txt" 
 
+TIME_PARSING       = None
+
 
 # ---- saving the ErrorForms and the relative data ---- 
 EFORMS             = None 
@@ -297,9 +299,13 @@ def SolveExprs (fname_exprs, optimizers = {}):
     global OPT_ERROR_FORM 
     global TARGET_EXPRS 
 
+    global TIME_PARSING
+
     EFORMS = None 
     E_UPPER_BOUND = None
     M2 = None 
+
+    TIME_PARSING = time.time() 
 
     assert(os.path.isfile(fname_exprs)) 
     assert(ERROR_TYPE in ["abs", "rel"]) 
@@ -574,6 +580,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
         print ("==== sol_exprs: solve the ErrorForms...") 
 
     tstamp = time.time() 
+    TIME_PARSING = time.time() - TIME_PARSING 
 
     EFORMS, target_alloc = SolveErrorForms(EFORMS, optimizers) 
 
@@ -615,5 +622,8 @@ def SolveExprs (fname_exprs, optimizers = {}):
 #        print ("---- # of (dynamic) instances: " + str(n_insts) + " ----") 
 
     # ---- return ----
+    print ("Time for parsing:    " + str(TIME_PARSING)) 
+    print ("Time for global opt: " + str(tft_solver.TIME_GLOBAL_OPT))
+    print ("Time for allocation: " + str(tft_solver.TIME_ALLOCATION)) 
     return EFORMS, target_alloc 
 

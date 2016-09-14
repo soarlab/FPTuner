@@ -27,6 +27,9 @@ SEGFAULT_PROTECTION = True
 LIMIT_N_CASTINGS = False 
 N_MAX_CASTINGS   = 3 
 
+TIME_GLOBAL_OPT  = None
+TIME_ALLOCATION  = None
+
 
 # ========
 # sub-routines 
@@ -115,11 +118,16 @@ def FindExprBound (optimizer, obj_expr, direction, constraints = []):
 # ========
 # ---- return an alloc. ----
 def FirstLevelAllocSolver (optimizers, error_forms = []): 
+    global TIME_GLOBAL_OPT
+    global TIME_ALLOCATION
+
     assert(len(error_forms) > 0) 
     assert(("vrange" in optimizers.keys()) and ("alloc" in optimizers.keys())) 
     assert(optimizers["vrange"] in ALL_OPTIMIZERS) 
     assert(optimizers["alloc"] in ALL_OPTIMIZERS)
     assert(all([isinstance(error_forms[i], tft_error_form.ErrorForm) for i in range(0, len(error_forms))]))
+
+    TIME_GLOBAL_OPT = time.time()
 
 
     # ==== solve expressions' ranges ====
@@ -207,6 +215,9 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
                 if (VERBOSE): 
                     print ("--------------------------------------------------")
+
+    TIME_GLOBAL_OPT = time.time() - TIME_GLOBAL_OPT 
+    TIME_ALLOCATION = time.time()
         
 
     # ==== solve the allocation problem ==== 
@@ -381,6 +392,7 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                         alloc[gid] = eps.value() 
                         break 
 
+        TIME_ALLOCATION = time.time() - TIME_ALLOCATION
         return alloc
 
     else: 
