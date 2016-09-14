@@ -5,7 +5,6 @@ import math
 from fractions import Fraction 
 import tft_utils 
 import tft_expr 
-import tft_error_form 
 
 EPSILON_16  = Fraction(1, int(math.pow(2, 10))) 
 AVX_RE_23   = Fraction(1, int(math.pow(2, 23))) 

@@ -248,7 +248,8 @@ class GelpiaSolver :
             target_token = "guaranteed ub:"
 
             for aline in flog: 
-                aline = aline.decode(encoding='UTF-8').strip() 
+                if (type(aline) is not str):
+                    aline = aline.decode(encoding='UTF-8').strip() 
 
                 if (VERBOSE): 
                     print ("Gelpia (stderr) >> " + aline) 

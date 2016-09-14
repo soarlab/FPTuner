@@ -10,7 +10,10 @@ from fractions import Fraction
 
 
 # ==== global variables ==== 
-
+EPS_SCORE = {}
+EPS_SCORE[tft_alloc.EPSILON_32]  = 100.0
+EPS_SCORE[tft_alloc.EPSILON_64]  = 1.0
+EPS_SCORE[tft_alloc.EPSILON_128] = 0.0
 
 
 # ==== sub-routines ==== 
@@ -469,31 +472,76 @@ class ErrorForm:
     def scoreExpr (self): 
         ret_se = None 
 
-        for gid,c in self.gid_counts.items(): 
-            if (gid == tft_expr.PRESERVED_CONST_GID): 
-                continue 
+        if   (len(IR.PREC_CANDIDATES) == 2): 
+            for gid,c in self.gid_counts.items(): 
+                if (gid == tft_expr.PRESERVED_CONST_GID): 
+                    continue 
 
-            checkValidEpsilonList(self.gid2epsilons[gid]) 
+                checkValidEpsilonList(self.gid2epsilons[gid]) 
             
-            group_evar = GroupErrorVar(gid, 0)
-            expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(int(c)), True) 
+                group_evar = GroupErrorVar(gid, 0)
+                expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(int(c)), True) 
 
-            assert(group_evar.hasBounds()) 
+                assert(group_evar.hasBounds()) 
 
-            if gid in self.gid_weight.keys(): 
-                weight = self.gid_weight[gid] 
-                assert((type(weight) is float) and (0 <= weight)) 
+                if gid in self.gid_weight.keys(): 
+                    weight = self.gid_weight[gid] 
+                    assert((type(weight) is float) and (0 <= weight)) 
 
-                expr_score = IR.BE("*", -1, expr_score, tft_expr.ConstantExpr(weight), True) 
+                    expr_score = IR.BE("*", -1, expr_score, tft_expr.ConstantExpr(weight), True) 
             
-            if (ret_se is None): 
-                ret_se = expr_score 
-            else: 
-                ret_se = IR.BE("+", -1, ret_se, expr_score, True)
+                if (ret_se is None): 
+                    ret_se = expr_score 
+                else: 
+                    ret_se = IR.BE("+", -1, ret_se, expr_score, True)
 
-        assert(ret_se is not None)
-        return ret_se
+            assert(ret_se is not None)
+            return ret_se
 
+        elif (len(IR.PREC_CANDIDATES) >= 3): 
+            for gid,c in self.gid_counts.items(): 
+                if (gid == tft_expr.PRESERVED_CONST_GID): 
+                    continue 
+
+                checkValidEpsilonList(self.gid2epsilons[gid]) 
+                
+                for ei in range(0, len(self.gid2epsilons[gid])): 
+                    expr_score = None 
+
+                    group_evar = GroupErrorVar(gid, ei)
+                    assert(group_evar.hasBounds()) 
+
+                    eps = self.gid2epsilons[gid][ei].value()
+                    assert(eps in EPS_SCORE.keys())
+                    
+                    weight = EPS_SCORE[eps]
+                    assert(type(weight) is float) 
+
+                    weight = weight * float(c) 
+
+                    if gid in self.gid_weight.keys(): 
+                        ext_weight = self.gid_weight[gid]
+                        assert((type(ext_weight) is float) and (0 <= ext_weight)) 
+                        weight = weight * ext_weight 
+
+                    assert(0 <= weight) 
+
+                    if (weight > 0.0): 
+                        expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(weight), True) 
+
+                        if (ret_se is None): 
+                            ret_se = expr_score 
+                        else: 
+                            ret_se = IR.BE("+", -1, ret_se, expr_score, True)
+
+                    else: 
+                        pass 
+
+            assert(ret_se is not None)
+            return ret_se
+
+        else: 
+            sys.exit("Error: invalid # of bit-width candidates...") 
 
 
 # ========

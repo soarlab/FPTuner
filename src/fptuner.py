@@ -57,7 +57,9 @@ while True:
         if   (bwidths == [32, 64]): 
             IR.PREC_CANDIDATES = ["e32", "e64"] 
         elif (bwidths == [64, 128]): 
-            IR.PREC_CANDIDATES = ["e64", "e128"] 
+            IR.PREC_CANDIDATES = ["e64", "e128"]
+        elif (bwidths == [32, 64, 128]): 
+            IR.PREC_CANDIDATES = ["e32", "e64", "e128"]
         else: 
             sys.exit("Error: not supported bit-width candidates: " + str(bwidths)) 
 

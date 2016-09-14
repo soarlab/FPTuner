@@ -381,7 +381,8 @@ def ExportExpr2ExprsFile (expr_or_exprs, upper_bound, ifname):
     if   (tft_ir_api.PREC_CANDIDATES == ["e32", "e64"]): 
         tft_ir_api.GID_EPSS[tft_expr.PRESERVED_CONST_GID] = ["e64"] 
     
-    elif (tft_ir_api.PREC_CANDIDATES == ["e64", "e128"]): 
+    elif (tft_ir_api.PREC_CANDIDATES == ["e64", "e128"] or 
+          tft_ir_api.PREC_CANDIDATES == ["e32", "e64", "e128"]): 
         tft_ir_api.GID_EPSS[tft_expr.PRESERVED_CONST_GID] = ["e128"] 
 
     else:
