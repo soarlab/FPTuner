@@ -75,7 +75,8 @@ def WriteGetFirstDerivationQueryFile (expr, vs=[]):
     # write definition
     qfile.write("Definitions\n") 
     qfile.write(vname_rel + " rnd64= ") 
-    qfile.write(expr.toASTString() + ";\n") 
+    qfile.write(expr.toASTString() + ";\n")
+    qfile.write("\n") 
 
     # write expression 
     qfile.write("Expressions\n") 

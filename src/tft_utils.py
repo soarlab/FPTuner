@@ -7,13 +7,27 @@ from fractions import Fraction
 # ======== 
 # global variables 
 # ========
-FPT_CFG_FIRST  = "__first.cfg" 
-FPT_CFG_VERIFY = "__verify.cfg" 
+FPT_CFG_FIRST   = "__first.cfg" 
+FPT_CFG_VERIFY  = "__verify.cfg" 
+
+FPTUNER_VERBOSE = False
+FPTUNER_DEBUG   = False 
 
 
 # ========
 # routines 
 # ========
+def VerboseMessage (mess): 
+    assert(type(mess) is str) 
+    if (FPTUNER_VERBOSE): 
+        print ("[FPTuner]: " + mess) 
+
+def DebugMessage (mess): 
+    assert(type(mess) is str) 
+    if (FPTUNER_DEBUG): 
+        print ("[FPTuner-debug]: " + mess)
+
+
 def checkGelpiaInstallation(branch): 
     if ("HOME_GELPIA" in os.environ): 
         if ("GELPIA" in os.environ): 

@@ -125,7 +125,11 @@ def GenerateErrorTermsFromExpr (context_expr, expr, error_exprs = [], program_ex
 
 def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], constraint_exprs = []): 
     # -- call FPTaylor for first derivation -- 
+    tft_utils.DebugMessage("calling FPTaylor for the first derivatives...") 
+
     text_terms = tft_get_first_derivations.GetFirstDerivations(expr) 
+
+    tft_utils.DebugMessage("first derivatives acquired") 
 
     error_exprs   = [] 
     program_exprs = [] 
@@ -306,6 +310,8 @@ def SolveExprs (fname_exprs, optimizers = {}):
     M2 = None 
 
     TIME_PARSING = time.time() 
+    tft_utils.VerboseMessage("parsing input expression...")
+    tft_utils.DebugMessage("reading .exprs file...")
 
     assert(os.path.isfile(fname_exprs)) 
     assert(ERROR_TYPE in ["abs", "rel"]) 
@@ -313,12 +319,6 @@ def SolveExprs (fname_exprs, optimizers = {}):
     # variables
     input_vars = [] 
     E_UPPER_BOUND = None 
-
-    # -- read expr file -- 
-    if (VERBOSE): 
-        print ("==== sol_exprs: read exprs file: " + fname_exprs) 
-
-    tstamp = time.time() 
 
     ilines = [] 
 
@@ -549,16 +549,9 @@ def SolveExprs (fname_exprs, optimizers = {}):
 
         ilines = ilines[1:] 
 
-    tstamp = time.time() - tstamp 
-
-    if (VERBOSE): 
-        print ("==== sol_exprs: finished reading exprs file in " + str(tstamp)) 
-
     # ---- generate the Error Forms ----     
-    if (VERBOSE): 
-        print ("==== sol_exprs: generate the ErrorForms... ") 
-        
-    tstamp = time.time() 
+    tft_utils.DebugMessage(".exprs file read") 
+    tft_utils.DebugMessage("generating ErrorForms...")
 
     target_alloc = None 
     irstrings = None 
@@ -569,18 +562,12 @@ def SolveExprs (fname_exprs, optimizers = {}):
         EFORMS.append(ef) 
 
     assert(len(EFORMS) == len(TARGET_EXPRS)) 
-
-    tstamp = time.time() - tstamp 
     
-    if (VERBOSE): 
-        print ("==== sol_exprs: finished generating the ErrorForms in " + str(tstamp)) 
-
     # ---- solve from the ErrorForms ---- 
-    if (VERBOSE):
-        print ("==== sol_exprs: solve the ErrorForms...") 
+    tft_utils.DebugMessage("ErrorForms generated")
 
-    tstamp = time.time() 
     TIME_PARSING = time.time() - TIME_PARSING 
+    tft_utils.VerboseMessage("parsing completed in " + str(TIME_PARSING) + " sec.")
 
     EFORMS, target_alloc = SolveErrorForms(EFORMS, optimizers) 
 
@@ -593,11 +580,6 @@ def SolveExprs (fname_exprs, optimizers = {}):
     if (target_alloc is None): 
         print ("TFT: no available allocation for the main expr...")
         return EFORMS, None
-
-    tstamp = time.time() - tstamp 
-
-    if (VERBOSE): 
-        print ("==== sol_exprs: finished solving the ErrorForms in " + str(tstamp)) 
 
     # ---- some finalize before return ---- 
     if (VERBOSE): 
@@ -622,8 +604,5 @@ def SolveExprs (fname_exprs, optimizers = {}):
 #        print ("---- # of (dynamic) instances: " + str(n_insts) + " ----") 
 
     # ---- return ----
-    print ("Time for parsing:    " + str(TIME_PARSING)) 
-    print ("Time for global opt: " + str(tft_solver.TIME_GLOBAL_OPT))
-    print ("Time for allocation: " + str(tft_solver.TIME_ALLOCATION)) 
     return EFORMS, target_alloc 
 

@@ -39,6 +39,13 @@ while True:
         arg_in      = sys.argv[i] 
         CONFIG_FILE = arg_in
 
+    elif (arg_in == "-v"): 
+        tft_utils.FPTUNER_VERBOSE = True 
+
+    elif (arg_in == "-debug"): 
+        tft_utils.FPTUNER_VERBOSE = True
+        tft_utils.FPTUNER_DEBUG   = True
+
     elif (arg_in == "-e"): 
         i = i + 1 
 
@@ -71,7 +78,10 @@ while True:
 
 
 # ==== check parameters ====
-assert(os.path.isfile(INPUT_FILE)) 
+if (INPUT_FILE is None): 
+    sys.exit("Error: no input file is specified...") 
+if (not os.path.isfile(INPUT_FILE)): 
+    sys.exit("Error: input expression file doesn't exist: " + INPUT_FILE)
 assert(INPUT_FILE.endswith(".py")) 
 
 if (len(tft_tuning.ERROR_BOUNDS) == 0): 

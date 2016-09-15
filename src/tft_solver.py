@@ -128,6 +128,7 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
     assert(all([isinstance(error_forms[i], tft_error_form.ErrorForm) for i in range(0, len(error_forms))]))
 
     TIME_GLOBAL_OPT = time.time()
+    tft_utils.VerboseMessage("invoking global optimization to bound first derivatives...") 
 
 
     # ==== solve expressions' ranges ====
@@ -218,6 +219,8 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
     TIME_GLOBAL_OPT = time.time() - TIME_GLOBAL_OPT 
     TIME_ALLOCATION = time.time()
+    tft_utils.VerboseMessage("first derivatives bounded in " + str(TIME_GLOBAL_OPT) + " sec.") 
+    tft_utils.VerboseMessage("allocating bit-widths...") 
         
 
     # ==== solve the allocation problem ==== 
@@ -393,6 +396,8 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                         break 
 
         TIME_ALLOCATION = time.time() - TIME_ALLOCATION
+        if (tft_utils.FPTUNER_VERBOSE): 
+            print ("[FPTuner]: allocation completed in " + str(TIME_ALLOCATION) + " sec.")
         return alloc
 
     else: 
