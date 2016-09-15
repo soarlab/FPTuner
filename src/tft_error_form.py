@@ -314,7 +314,17 @@ class ErrorForm:
         return total_inst 
 
     def scalingUpFactor (self):         
-        largest_eps = Fraction(0.0) 
+        if   (IR.PREC_CANDIDATES == ["e32", "e64"]): 
+            return tft_expr.ConstantExpr(math.pow(2, 21))
+        elif (IR.PREC_CANDIDATES == ["e64", "e128"]):
+            return tft_expr.ConstantExpr(math.pow(2, 50))
+        elif (IR.PREC_CANDIDATES == ["e32", "e64", "e128"]):
+            return tft_expr.ConstantExpr(math.pow(2, 48))
+        else: 
+            sys.exit("Error: invalid setting of IR.PREC_CANDIDATES: " + str(IR.PREC_CANDIDATES))
+
+        # scaling_eps = Fraction(0.0) 
+        scaling_eps = Fraction(1.0) 
         
         for gid,epss in self.gid2epsilons.items(): 
             for eps in epss: 
@@ -323,11 +333,11 @@ class ErrorForm:
                 if (eps.value() == 0.0): 
                     continue 
 
-                if (largest_eps < eps.value()): 
-                    largest_eps = eps.value() 
-            
-        up_fac = Fraction(largest_eps.denominator, largest_eps.numerator) 
-        
+#                if (scaling_eps < eps.value()): 
+                if (scaling_eps > eps.value()): 
+                    scaling_eps = eps.value() 
+
+        up_fac = Fraction(scaling_eps.denominator, scaling_eps.numerator) 
         # return tft_expr.ConstantExpr(up_fac) 
         # return tft_expr.ConstantExpr(up_fac * 512.0) 
         return tft_expr.ConstantExpr(up_fac / 8.0 ) # It is just a heuristic to divide by 8.0 

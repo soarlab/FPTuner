@@ -242,8 +242,6 @@ def SolveErrorForms (eforms = [], optimizers = {}):
     assert("alloc" in optimizers.keys())
 
     alloc      = None
-
-    err_M2_gap = None 
     err_M2     = 0.0
 
     while (True): 
@@ -265,17 +263,11 @@ def SolveErrorForms (eforms = [], optimizers = {}):
         elif (type(err_exc) is float): 
             assert(err_exc > 0.0) 
 
-            print ("Retune... for the actual error is " + str(err_exc) + " higher than the threshold...") 
+            alloc  = None 
+            err_M2 = err_M2 + (err_exc / 10.0)
 
-            alloc = None 
-            
-            if   (err_M2_gap is None): 
-                err_M2_gap = err_exc / 10.0 
+            print ("For the actual error is " + str(err_exc) + " higher than the threshold, retune with M2 = " + str(err_M2))
 
-            else: 
-                assert(err_M2_gap > 0.0) 
-                err_M2 = err_M2 + err_M2_gap 
-                   
             # -- adjust the M2 -- 
             for ef in eforms: 
                 ef.M2 = tft_expr.ConstantExpr(err_M2) 
