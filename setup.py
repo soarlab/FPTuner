@@ -137,7 +137,7 @@ if   (OPT_SETUP == "install"):
     # install the required tools
     # ----
     InstallGelpia("master") 
-    InstallFPTaylor("master")
+    InstallFPTaylor("develop")
 
 
     # ----

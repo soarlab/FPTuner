@@ -21,7 +21,7 @@
 	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPAH
 	      ```
 
-- OCaml
+- OCaml 4.0 or later
 
 
 ## How to install? 
