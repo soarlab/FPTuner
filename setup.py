@@ -62,6 +62,7 @@ def InstallFPTaylor (branch):
         f_cfg_first.write("abs-error=false\n") 
         f_cfg_first.write("rel-error=false\n")
         f_cfg_first.write("fail-on-exception=false\n") 
+        f_cfg_first.write("find-bounds=false\n")
             
         f_cfg_first.close() 
         
@@ -74,7 +75,6 @@ def InstallFPTaylor (branch):
         f_cfg_verify.write("\n") 
         f_cfg_verify.write("abs-error=true\n") 
         f_cfg_verify.write("rel-error=false\n")
-        f_cfg_verify.write("fail-on-exception=false\n") 
             
         f_cfg_verify.close() 
 
@@ -148,7 +148,8 @@ if   (OPT_SETUP == "install"):
     print ("export HOME_FPTUNER=" + os.path.abspath("./")) 
     print ("export HOME_GELPIA=" + os.environ["HOME_GELPIA"]) 
     print ("export GELPIA=" + os.environ["GELPIA"]) 
-    print ("export HOME_FPTAYLOR=" + os.environ["HOME_FPTAYLOR"]) 
+#    print ("export HOME_FPTAYLOR=" + os.environ["HOME_FPTAYLOR"]) 
+    print ("export FPTAYLOR_BASE=" + os.environ["HOME_FPTAYLOR"]) 
     print ("export FPTAYLOR=" + os.environ["FPTAYLOR"]) 
     print ("") 
     print ("Please append the environment variables: ") 
