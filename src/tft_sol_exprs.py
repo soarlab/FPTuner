@@ -190,7 +190,7 @@ def EnsureM2 (alloc):
     # -- check M2 for every targeted expression -- 
     for texpr in TARGET_EXPRS: 
         # -- export the query file for FPTaylor --
-        assert("HOME_FPTAYLOR" in os.environ.keys()) 
+        assert("FPTAYLOR_BASE" in os.environ.keys()) 
         assert("FPTAYLOR" in os.environ.keys()) 
 
         if (os.path.isfile(FPTAYLOR_M2_FQUERY)): 
@@ -199,7 +199,7 @@ def EnsureM2 (alloc):
         tft_ir_backend.ExportExpr4FPTaylorSanitation(texpr, alloc, FPTAYLOR_M2_FQUERY) 
 
         # -- run FPTaylor for the check -- 
-        cfg_verify = os.environ["HOME_FPTAYLOR"] + "/" + tft_utils.FPT_CFG_VERIFY
+        cfg_verify  = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY
         command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_verify + " " + FPTAYLOR_M2_FQUERY 
 
         fpt_verify = subp.Popen(command_fpt, shell=True, stdout=subp.PIPE, stderr=subp.PIPE) 

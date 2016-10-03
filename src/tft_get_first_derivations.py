@@ -181,7 +181,7 @@ def GetFirstDerivations (expr):
 
         # -- run fptaylor -- 
         tft_utils.checkFPTaylorInstallation("master") 
-        cfg_first = os.environ["HOME_FPTAYLOR"] + "/" + tft_utils.FPT_CFG_FIRST 
+        cfg_first = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_FIRST 
         assert(os.path.isfile(cfg_first)) 
 
         command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_first + " " + FNAME_FPT_QUERY 
