@@ -106,9 +106,9 @@ Tuning for mixed 64- and 128-bit can be done with option
 -b "64 128"
 ```
 FPTuner currently supports tuning for the following three bit-width candidate sets: 
-- 32- and 64-bit
-- 64- and 128-bit 
-- 32-, 64-, and 128-bit
+- 32- and 64-bit (specified with ```-b "32 64"```)
+- 64- and 128-bit (specified with ```-b "64 128"```)
+- 32-, 64-, and 128-bit (specified with ```-b 32 64 128```) 
 
 ### Multiple error thresholds
 FPTuner can take multiple error thresholds and generate the optimal allocation of each threshold. 
