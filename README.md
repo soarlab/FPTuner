@@ -45,8 +45,8 @@ Please follow the instruction for the setup.
 
 
 
-# Running Hello-world Examples 
-## Hello-world example 0
+# Using FPTuner 
+To test the installation, please try out the hello-world example through the following steps: 
 
 1. Go to directory **src** under the root of FPTuner. 
 
@@ -58,41 +58,34 @@ The console output of FPTuner should be the following:
 ```
 ==== error bound : 1e-05 ====
 ---- alloc. ----
-Score: 2.0
--- GIDs --
-ErrorTerm(gid: 0) => EPSILON_32
-ErrorTerm(gid: 1) => EPSILON_32
-ErrorTerm(gid: 2) => EPSILON_64
-ErrorTerm(gid: 3) => EPSILON_64
-ErrorTerm(gid: 4) => EPSILON_64
+Group 0 : 32-bit
+Group 1 : 32-bit
+Group 2 : 64-bit
+Group 3 : 64-bit
+Group 4 : 64-bit
 ----------------
 
 # L2H castings: 2
 # H2L castings: 0
 # Castings: 2
 ```
+In addition, a .cpp file **helloworld0.1e-05.cpp** will be generated. 
+Now we describe how to use FPTuner with this hello-world example. 
 
-## Hello-world example 1 
 
-1. Go to directory **src** under the root of FPTuner. 
+## The Input and the output of FPTuner
+FPTuner takes an expression specification and an user-specified error threshold for generating the optimal allocation. 
+In the command ```python3 ./fptuner.py -e 0.00001 ../examples/helloworld0.py```, file **helloworld0.py** is the expression specification and **-e 0.00001** specifies 1e-05 as the error threshold. 
 
-2. Run command 
-    ```
-    python3 ./fptuner.py -e 0.00004 ../examples/helloworld1.py
-    ```
-The console output of FPTuner should be the following: 
+FPTuner prints the allocation on console. 
+In the example output, for example, 
 ```
-==== error bound : 4e-05 ====
----- alloc. ----
 Group 0 : 32-bit
-Group 1 : 32-bit
-Group 2 : 32-bit
-----------------
-
-# L2H castings: 1
-# H2L castings: 0
-# Castings: 1
 ```
+denotes that the group 0 (gang 0) operators are assigned 32-bit. 
+**# L2H castings** (resp., **# H2L castings**) indicates the number of low-to-high (resp., high-to-low) type casts in this allocation. 
+**# Castings** is the summation of **# L2H castings** and **# H2L castings**. 
+In addition to the console output, a .cpp file is synthesized by FPTuner which implements the allocation. 
 
 
 
