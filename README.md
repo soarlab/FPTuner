@@ -145,6 +145,11 @@ The following table offers the benchmark names and their relative paths to the r
 | doppler 3    | examples/primitives/doppler-3.py |
 | carbonGas    | examples/primitives/carbonGas.py |
 | jet          | examples/primitives/jet.py |
+| cone-area    | examples/math/cone-area.py |
+| Gaussian     | examples/math/gaussian.py |
+| Maxwell-Boltzmann | examples/math/maxwell-boltzmann.py |
+| reduction    | examples/micro/reduction.py |
+
 
 
 
