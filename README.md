@@ -52,11 +52,11 @@ To test the installation, please try out the hello-world example through the fol
 
 2. Run command 
     ```
-    python3 ./fptuner.py -e 0.00001 ../examples/helloworld0.py
+    python3 ./fptuner.py -e 0.001 ../examples/helloworld0.py
     ```
 The console output of FPTuner should be the following: 
 ```
-==== error bound : 1e-05 ====
+==== error bound : 0.001 ====
 ---- alloc. ----
 Group 0 : 32-bit
 Group 1 : 32-bit
@@ -69,14 +69,18 @@ Group 4 : 64-bit
 # H2L castings: 0
 # Castings: 2
 ```
-In addition, a .cpp file **helloworld0.1e-05.cpp** will be generated. 
+In addition, a .cpp file **helloworld0.0.001.cpp** will be generated. 
 Now we describe how to use FPTuner with this hello-world example. 
 
 
-## The Input and the output of FPTuner
+## Input 
 FPTuner takes an expression specification and an user-specified error threshold for generating the optimal allocation. 
-In the command ```python3 ./fptuner.py -e 0.00001 ../examples/helloworld0.py```, file **helloworld0.py** is the expression specification and **-e 0.00001** specifies 1e-05 as the error threshold. 
+In the command ```python3 ./fptuner.py -e 0.001 ../examples/helloworld0.py```, file **helloworld0.py** is the expression specification and **-e 0.001** specifies 1e-03 as the error threshold. 
 
+The later section "**Creating Your Own Examples**" describes how to specify the expression through the python-based interface. 
+
+
+## Output
 FPTuner prints the allocation on console. 
 In the example output, for example, 
 ```
@@ -91,6 +95,7 @@ In addition to the console output, a .cpp file is synthesized by FPTuner which i
 
 # Creating Your Own Examples
 FPTuner decides the optimal bit-widths of the operators in the floating-point implementations of real-number computations.
+
 At this point, FPTuner provides a Python interface that allows the users to specify their the real-number computations. 
 In this section, we introduce how to use the Python interface through a simple example: 
 ```
@@ -174,161 +179,6 @@ IR.TuneExpr(rel)
 
 **rel** is the reference of our targeted expression. 
 Function **IR.TuneExpr** specifies the expression to tune. 
-
-
-## Run FPTuner 
-**examples/helloworld0.py** shows the above steps of our example. 
-With the specification of the real-number computation (described in the Python file **examples/helloworld0.py**), we can now run FPTuner to decide the bit-widths for the operators. 
-The following steps tell how to run FPTuner on this example: 
-
-1. Ensure that command **python** is an alias of **python3**. 
-
-2. Choose the desired error threshold. Assume that **0.00005** is chosen. 
-
-3. Go to the **src** directory under the root directory of FPTuner. 
-
-4. Use the following command 
-    ```
-    python ./fptuner.py -e 0.00005 ../examples/helloworld0.py 
-    ```
-    - The error threshold is specified with **-e**. 
-    - The targeted real-number computation is specified by the last argument which is the path to the Python file. 
-
-
-## The outputs of FPTuner 
-
-
-# Command Line Arguments of FPTuner 
-
-## -e : error thresholds 
-
-```
--e [a single floating-point value as the error threshold (absolute error)] 
-```
-, e.g., 
-```
--e 0.0001
-```
-
-or 
-
-```
--e "[error theshold 1] [error threshold 2] ..." 
-```
-, e.g., 
-```
--e "0.0001 0.0002 0.0003"
-```
-Please remember to use quotation marks to enclose the thresholds. 
-
-The later use case is for trying different error thesholds and generate the optimal allocation for each of them. 
-
-### Default 
-There is no default value for **-e** option. 
-
-
-## -b : candidate bit-widths 
-
-Use 
-```
--b "32 64" 
-``` 
-to tune with two bit-width candidates, 32-bit and 64-bit. 
-
-Use 
-```
--b "64 128" 
-``` 
-to tune with two candidates, 64-bit and 128-bit. 
-
-USE 
-```
--b "32 64 128"
-``` 
-to tune with three candidates, 32-bit, 64-bit, and 128-bit. 
-
-Again, please remember to use quotation marks to enclose the bit-widths. 
-
-### Default 
-The default of **-b** option is "32 64". 
-
-
-
-# Interface Reference 
-
-## FConst 
-### Return 
-A constant expression which bit-width is automatically matched with the operator which consumes the constant. 
-(However, for 128-bit operators, the constants are assigned with 64-bit.) 
-
-### Arguments 
-
-1. The value of the constant expression. 
-
-
-## RealVE 
-### Return 
-A variable expression which has a bounded and contiguous value range specified in the arguments. 
-
-### Arguments 
-
-1. The label of the variable. Type: string
-
-2. The group ID of the variable. Type: integer 
-
-3. The lower bound of the value range. Type: floating-point number 
-
-4. The upper bound of the value range. Type: floating-point number 
-
-**Constraints** 
-
-- The lower bound must be less than or equal to the upper bound. 
-
-
-## BE 
-### Return 
-A binary expression. 
-
-### Arguments 
-
-1. The binary operator. It is specified by a string which is one of the following:
-    1. **+** : addition 
-    2. **-** : subtraction 
-    3. **<em>*</em>** : multiplication 
-    4. **/** : division 
-
-2. The group ID. Type: integer 
-
-3. The left-hand-side operand. Type: expression 
-
-4. The right-hand-side operand. Type: expression 
-
-
-## UE
-### Return 
-A unary expression. 
-
-### Arguments
-1. The unary operator. It is specified by a string which is one of the following: 
-    1. **-** : negation
-    2. **exp** : exponential 
-    3. **sqrt** : square root
-
-2. The group ID. Type: integer
-
-3. The operand. Type: expression
-
-
-## SetGroupWeight
-This function is for assigning a higher/lower weight to an operator group that allows prioritizing lower/higher bit-width assignments. 
-
-### Return
-No return value. 
-
-### Arguments 
-1. The group ID. Type: iteger
-
-2. The desired weight. Type: floating-point
 
 
 
