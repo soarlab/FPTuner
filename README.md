@@ -93,7 +93,34 @@ In addition to the console output, a .cpp file is synthesized by FPTuner which i
 
 
 ## Reference
-The complete reference of FPTuner is <a href="https://github.com/soarlab/FPTuner/blob/master/Reference.md">here</a>. 
+The complete reference of FPTuner is given in <a href="https://github.com/soarlab/FPTuner/blob/master/Reference.md">Reference.md</a>. 
+
+
+## Advance usages
+Based on this hello-world example, we introduce some more tuning options provided by FPTuner.
+ 
+### Candidate bit-widths
+FPTuner tunes for mixed 32- and 64-bit by default. 
+Tuning for mixed 64- and 128-bit can be done with option 
+```
+-b "64 128"
+```
+FPTuner currently supports tuning for the following three bit-width candidate sets: 
+- 32- and 64-bit
+- 64- and 128-bit 
+- 32-, 64-, and 128-bit
+
+### Multiple error thresholds
+FPTuner can take multiple error thresholds and generate the optimal allocation of each threshold. 
+For example, the following option results in two allocations generated for the two error thresholds (0.001 and 0.0001): 
+```
+-e "0.001 0.0001
+```
+
+
+
+# Running the Benchmarks 
+
 
 
 
