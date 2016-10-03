@@ -75,6 +75,7 @@ def InstallFPTaylor (branch):
         f_cfg_verify.write("\n") 
         f_cfg_verify.write("abs-error=true\n") 
         f_cfg_verify.write("rel-error=false\n")
+        f_cfg_verify.write("opt = gelpia\n") 
             
         f_cfg_verify.close() 
 
@@ -136,7 +137,8 @@ if   (OPT_SETUP == "install"):
     # ---- 
     # install the required tools
     # ----
-    InstallGelpia("master") 
+    # InstallGelpia("master") 
+    InstallGelpia("FPTaylorCompat") 
     InstallFPTaylor("develop")
 
 

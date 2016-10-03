@@ -114,7 +114,7 @@ FPTuner currently supports tuning for the following three bit-width candidate se
 FPTuner can take multiple error thresholds and generate the optimal allocation of each threshold. 
 For example, the following option results in two allocations generated for the two error thresholds (0.001 and 0.0001): 
 ```
--e "0.001 0.0001
+-e "0.001 0.0001"
 ```
 
 
