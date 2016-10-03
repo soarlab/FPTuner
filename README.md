@@ -108,7 +108,7 @@ Tuning for mixed 64- and 128-bit can be done with option
 FPTuner currently supports tuning for the following three bit-width candidate sets: 
 - 32- and 64-bit (specified with ```-b "32 64"```)
 - 64- and 128-bit (specified with ```-b "64 128"```)
-- 32-, 64-, and 128-bit (specified with ```-b 32 64 128```) 
+- 32-, 64-, and 128-bit (specified with ```-b "32 64 128"```) 
 
 ### Multiple error thresholds
 FPTuner can take multiple error thresholds and generate the optimal allocation of each threshold. 
@@ -120,7 +120,30 @@ For example, the following option results in two allocations generated for the t
 
 
 # Running the Benchmarks 
+FPTuner is evaluated with a set of benchmarks. 
+Similar to the hello-world example, we can run each of the benchmarks with the following command (under directory **src**): 
+```
+python3 ./fptuner.py -e "0.001 0.0001" -b "32 64" path-to-the-benchmark
+```
+(The desired error thresholds and the bit-width candidates are specified with options -e and -b respectively.) 
+The following table offers the benchmark names and their relative paths to the root directory of FPTuner. 
 
+**Benchmark Name** | **Relative Path to the Root of FPTuner** 
+sine         | examples/primitives/sine.py
+sqroot       | examples/primitives/sqroot.py
+sineOrder3   | examples/primitives/sineOrder3.py 
+predatorPrey | examples/primitives/predatorPrey.py
+verhulst     | examples/primitives/verhulst.py
+rigidBody 1  | examples/primitives/rigidBody-1.py
+rigidBody 2  | examples/primitives/rigidBody-2.py
+turbine 1    | examples/primitives/turbine-1.py
+turbine 2    | examples/primitives/turbine-2.py
+turbine 3    | examples/primitives/turbine-3.py
+doppler 1    | examples/primitives/doppler-1.py
+doppler 2    | examples/primitives/doppler-2.py
+doppler 3    | examples/primitives/doppler-3.py
+carbonGas    | examples/primitives/carbonGas.py 
+jet          | examples/primitives/jet.py
 
 
 
