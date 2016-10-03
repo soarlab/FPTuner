@@ -129,21 +129,21 @@ python3 ./fptuner.py -e "0.001 0.0001" -b "32 64" path-to-the-benchmark
 The following table offers the benchmark names and their relative paths to the root directory of FPTuner. 
 
 **Benchmark Name** | **Relative Path to the Root of FPTuner** 
-sine         | examples/primitives/sine.py
-sqroot       | examples/primitives/sqroot.py
-sineOrder3   | examples/primitives/sineOrder3.py 
-predatorPrey | examples/primitives/predatorPrey.py
-verhulst     | examples/primitives/verhulst.py
-rigidBody 1  | examples/primitives/rigidBody-1.py
-rigidBody 2  | examples/primitives/rigidBody-2.py
-turbine 1    | examples/primitives/turbine-1.py
-turbine 2    | examples/primitives/turbine-2.py
-turbine 3    | examples/primitives/turbine-3.py
-doppler 1    | examples/primitives/doppler-1.py
-doppler 2    | examples/primitives/doppler-2.py
-doppler 3    | examples/primitives/doppler-3.py
-carbonGas    | examples/primitives/carbonGas.py 
-jet          | examples/primitives/jet.py
+| sine         | examples/primitives/sine.py | 
+| sqroot       | examples/primitives/sqroot.py | 
+| sineOrder3   | examples/primitives/sineOrder3.py | 
+| predatorPrey | examples/primitives/predatorPrey.py |
+| verhulst     | examples/primitives/verhulst.py |
+| rigidBody 1  | examples/primitives/rigidBody-1.py |
+| rigidBody 2  | examples/primitives/rigidBody-2.py |
+| turbine 1    | examples/primitives/turbine-1.py |
+| turbine 2    | examples/primitives/turbine-2.py |
+| turbine 3    | examples/primitives/turbine-3.py |
+| doppler 1    | examples/primitives/doppler-1.py |
+| doppler 2    | examples/primitives/doppler-2.py |
+| doppler 3    | examples/primitives/doppler-3.py |
+| carbonGas    | examples/primitives/carbonGas.py |
+| jet          | examples/primitives/jet.py |
 
 
 
