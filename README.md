@@ -52,15 +52,10 @@ Please follow the instruction for the setup.
 
 2. Run command 
     ```
-    python ./fptuner.py -e 0.00001 ../examples/helloworld0.py
+    python3 ./fptuner.py -e 0.00001 ../examples/helloworld0.py
     ```
-The output of FPTuner should be the following: 
+The console output of FPTuner should be the following: 
 ```
--- ensure M2 --
-Total Error:     7.629395e-06
-Total M2:        1.694066e-21
-Error Threshold: 1e-05
----------------
 ==== error bound : 1e-05 ====
 ---- alloc. ----
 Score: 2.0
@@ -83,22 +78,15 @@ ErrorTerm(gid: 4) => EPSILON_64
 
 2. Run command 
     ```
-    python ./fptuner.py -e 0.00004 ../examples/helloworld1.py
+    python3 ./fptuner.py -e 0.00004 ../examples/helloworld1.py
     ```
-The output of FPTuner should be the following: 
+The console output of FPTuner should be the following: 
 ```
--- ensure M2 --
-Total Error:     1.954973e-05
-Total M2:        4.547474e-13
-Error Threshold: 4e-05
----------------
 ==== error bound : 4e-05 ====
 ---- alloc. ----
-Score: 2.0
--- GIDs --
-ErrorTerm(gid: 0) => EPSILON_32
-ErrorTerm(gid: 1) => EPSILON_32
-ErrorTerm(gid: 2) => EPSILON_64
+Group 0 : 32-bit
+Group 1 : 32-bit
+Group 2 : 32-bit
 ----------------
 
 # L2H castings: 1

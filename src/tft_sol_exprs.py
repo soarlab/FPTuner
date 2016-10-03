@@ -221,11 +221,12 @@ def EnsureM2 (alloc):
         assert(type(err_total) is float) 
         assert(type(err_M2)    is float) 
 
-        print ("-- ensure M2 --") 
-        print ("Total Error:     " + str(err_total)) 
-        print ("Total M2:        " + str(err_M2)) 
-        print ("Error Threshold: " + str(float(error_threshold))) 
-        print ("---------------") 
+        if (tft_utils.FPTUNER_VERBOSE): 
+            print ("-- ensure M2 --") 
+            print ("Total Error:     " + str(err_total)) 
+            print ("Total M2:        " + str(err_M2)) 
+            print ("Error Threshold: " + str(float(error_threshold))) 
+            print ("---------------") 
         
         # -- decide the ensuring result -- 
         if (err_total > error_threshold): 

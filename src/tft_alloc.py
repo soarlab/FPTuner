@@ -141,21 +141,30 @@ class Alloc:
     def __str__ (self): 
         str_ret = "---- alloc. ----\n" 
 
-        str_ret = str_ret + "Score: " 
-        if (self.score is None): 
-            str_ret = str_ret + "not set...\n" 
-        else:
-            str_ret = str_ret + str(self.score) + "\n" 
+        if (tft_utils.FPTUNER_VERBOSE): 
+            str_ret = str_ret + "Score: " 
+            if (self.score is None): 
+                str_ret = str_ret + "not set...\n" 
+            else:
+                str_ret = str_ret + str(self.score) + "\n" 
 
-        str_ret = str_ret + "-- GIDs --\n"
+#        str_ret = str_ret + "-- GIDs --\n"
         gids = sorted(self.gid2eps.keys(), key = lambda g : g) 
         for gid in gids: 
             assert(0 <= gid) 
 
             eps = self.gid2eps[gid] 
 
-            etname = "ErrorTerm(gid: " + str(gid) + ")" 
-            str_ret = str_ret + etname + " => " + Eps2ReaderString(eps) + "\n" 
+            etname = "Group " + str(gid)
+            str_eps = Eps2ReaderString(eps)
+            if   (str_eps == "EPSILON_32"): 
+                str_ret = str_ret + etname + " : 32-bit\n"
+            elif (str_eps == "EPSILON_64"): 
+                str_ret = str_ret + etname + " : 64-bit\n"
+            elif (str_eps == "EPSILON_128"):
+                str_ret = str_ret + etname + " : 128-bit\n"
+            else:
+                sys.exit("Error: unknown bit-width candidate " + str_eps)
 
         str_ret = str_ret + "----------------\n"
         return str_ret 
