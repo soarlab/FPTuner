@@ -128,7 +128,8 @@ python3 ./fptuner.py -e "0.001 0.0001" -b "32 64" path-to-the-benchmark
 (The desired error thresholds and the bit-width candidates are specified with options -e and -b respectively.) 
 The following table offers the benchmark names and their relative paths to the root directory of FPTuner. 
 
-**Benchmark Name** | **Relative Path to the Root of FPTuner** 
+| **Benchmark Name** | **Relative Path to the Root of FPTuner** |
+|--------|--------|
 | sine         | examples/primitives/sine.py | 
 | sqroot       | examples/primitives/sqroot.py | 
 | sineOrder3   | examples/primitives/sineOrder3.py | 
