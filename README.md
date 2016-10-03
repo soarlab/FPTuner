@@ -77,7 +77,7 @@ Now we describe how to use FPTuner with this hello-world example.
 FPTuner takes an expression specification and an user-specified error threshold for generating the optimal allocation. 
 In the command ```python3 ./fptuner.py -e 0.001 ../examples/helloworld0.py```, file **helloworld0.py** is the expression specification and **-e 0.001** specifies 1e-03 as the error threshold. 
 
-The later section "**Creating Your Own Examples**" describes how to specify the expression through the python-based interface. 
+The later section "**Example of Expression Specification**" describes how to specify the expression through the python-based interface. 
 
 
 ## Output
@@ -92,8 +92,12 @@ denotes that the group 0 (gang 0) operators are assigned 32-bit.
 In addition to the console output, a .cpp file is synthesized by FPTuner which implements the allocation. 
 
 
+## Reference
+The complete reference of FPTuner is <a href="https://github.com/soarlab/FPTuner/blob/master/Reference.md">here</a>. 
 
-# Creating Your Own Examples
+
+
+# Example of Expression Specification
 FPTuner decides the optimal bit-widths of the operators in the floating-point implementations of real-number computations.
 
 At this point, FPTuner provides a Python interface that allows the users to specify their the real-number computations. 
@@ -127,7 +131,7 @@ Function **IR.RealVE** returns a variable (variable expression) with taking four
 1. The label of the variable. 
 
 2. The group ID of the variable. 
-Expressions assigned with the same group ID will be assigned with the same bit-width. 
+Expressions assigned with the same group (gang) ID will be assigned with the same bit-width. 
 In this example, we assume that we want to assign different bit-widths to the variables. 
 Thus, the three variables have different ID: A has 1, B has 2, and C has 3.
 
