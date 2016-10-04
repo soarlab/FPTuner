@@ -314,7 +314,7 @@ def ExportExpr4FPTaylorSanitation (expr, alloc, qfname):
 
     # write expressions 
     qfile.write("Expressions\n") 
-    qfile.write("  __final_resutl = " + FPTaylorExpr(expr, alloc) + "\n") 
+    qfile.write("  __final_result = " + FPTaylorExpr(expr, alloc) + "\n") 
     qfile.write(";\n\n") 
 
     qfile.close() 

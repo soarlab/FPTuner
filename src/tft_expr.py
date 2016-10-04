@@ -218,7 +218,7 @@ class ConstantExpr (ArithmeticExpr):
         else: 
             sys.exit("ERROR: invalid type of ConstantExpr found in __str__") 
 
-    def toCString (self): # to int or float string 
+    def toCString (self, const_inline=False): # to int or float string 
         if (self.type() == int): 
             return str(self.value()) 
         elif (self.type() == Fraction): 
@@ -373,7 +373,10 @@ class VariableExpr (ArithmeticExpr):
     def idLabel (self): 
         return self.label() + "_eid_" + str(self.index) 
 
-    def toCString (self): 
+    def toCString (self, const_inline=False): 
+        if (isConstVar(self)): 
+            assert(self.lb().value() == self.ub().value())
+            return self.lb().toCString()
         return self.label() 
 
     def toIRString (self):
@@ -555,8 +558,8 @@ class UnaryExpr (ArithmeticExpr):
     def __str__ (self): 
         return "([UExpr] " + str(self.operator) + " " + str(self.opd()) + ")" 
 
-    def toCString (self):         
-        return self.operator.toCString() + "(" + self.opd().toCString() + ")" 
+    def toCString (self, const_inline=False):         
+        return self.operator.toCString() + "(" + self.opd().toCString(const_inline) + ")" 
 
     def toIRString (self): 
         return "(" + self.operator.toIRString() + "$" + str(self.getGid()) + "(" + self.opd().toIRString() + "))" 
@@ -762,8 +765,8 @@ class BinaryExpr (ArithmeticExpr):
     def __str__ (self): 
         return "([BiExpr] " + str(self.operator) + " " + str(self.lhs()) + " " + str(self.rhs()) + ")" 
 
-    def toCString (self):         
-        return "(" + self.lhs().toCString() + " " + self.operator.toCString() + " " + self.rhs().toCString() + ")" 
+    def toCString (self, const_inline=False):         
+        return "(" + self.lhs().toCString(const_inline) + " " + self.operator.toCString() + " " + self.rhs().toCString(const_inline) + ")" 
 
     def toIRString (self):
         return "(" + self.lhs().toIRString() + " " + self.operator.toIRString() + "$" + str(self.getGid()) + " " + self.rhs().toIRString() + ")" 

@@ -10,7 +10,7 @@ tft_utils = imp.load_source("tft_utils", "./src/tft_utils.py")
 # ========
 # subroutines 
 # ======== 
-def InstallGelpia (branch): 
+def InstallGelpia (branch, set_path=True): 
     assert(type(branch) is str) 
 
     if (not tft_utils.checkGelpiaInstallation(branch)): 
@@ -27,8 +27,9 @@ def InstallGelpia (branch):
         os.chdir("../") 
 
         # set environment variables 
-        os.environ["HOME_GELPIA"] = os.path.abspath(d) 
-        os.environ["GELPIA"]      = os.environ["HOME_GELPIA"] + "/bin/gelpia"
+        if (set_path):
+            os.environ["HOME_GELPIA"] = os.path.abspath(d) 
+            os.environ["GELPIA"]      = os.environ["HOME_GELPIA"] + "/bin/gelpia"
 
     assert(tft_utils.checkGelpiaInstallation(branch)) 
 
@@ -47,6 +48,9 @@ def InstallFPTaylor (branch):
         assert(os.path.isdir(d))  
 
         os.chdir(d)
+
+        InstallGelpia("FPTaylorCompat", False) 
+
         os.system("make") 
 
         cfg_default = "default.cfg" 
@@ -137,8 +141,8 @@ if   (OPT_SETUP == "install"):
     # ---- 
     # install the required tools
     # ----
-    # InstallGelpia("master") 
-    InstallGelpia("FPTaylorCompat") 
+    InstallGelpia("master") 
+    # InstallGelpia("FPTaylorCompat") 
     InstallFPTaylor("develop")
 
 

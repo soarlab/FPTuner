@@ -81,7 +81,7 @@ class GelpiaSolver :
         qfile.write("-oe " + str(float(self.tolerance)) + "\n") 
 
         # maximization objective 
-        qfile.write("-f \"" + expr_optobj.toCString() + "\"\n") 
+        qfile.write("-f \"" + expr_optobj.toCString(True) + "\"\n") 
 
         # specify the timeout
         qfile.write("-t " + str(TIMEOUT) + "\n") 
@@ -93,11 +93,12 @@ class GelpiaSolver :
         qfile.write("-L " + fname_log + "\n") 
 
         # variables and their ranges 
+        non_const_vars = [v for v in expr_optobj.vars() if (not tft_expr.isConstVar(v))]
         str_vars = "-i \"{" 
-        if (len(expr_optobj.vars()) == 0): 
+        if (len(non_const_vars) == 0): 
             str_vars = str_vars + "}\"\n"
         else:
-            for var in expr_optobj.vars(): 
+            for var in non_const_vars: 
                 assert(isinstance(var, tft_expr.VariableExpr)) 
                 assert(var.hasBounds()) 
                 if (var.type() is Fraction):
