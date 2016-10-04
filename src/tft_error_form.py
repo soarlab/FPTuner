@@ -553,6 +553,33 @@ class ErrorForm:
         else: 
             sys.exit("Error: invalid # of bit-width candidates...") 
 
+    def SummarizeOperatorBitwidths (self, alloc): 
+        assert(isinstance(alloc, tft_alloc.Alloc))
+
+        count_bw = {}
+        count_bw[tft_alloc.EPSILON_32]  = 0
+        count_bw[tft_alloc.EPSILON_64]  = 0
+        count_bw[tft_alloc.EPSILON_128] = 0
+        
+        for gid,eps in alloc.gid2eps.items(): 
+            assert(gid in self.gid_counts.keys())
+            assert(eps in count_bw.keys())
+            count_bw[eps] = count_bw[eps] + self.gid_counts[gid] 
+
+        print ("Total # of operators: " + str(sum(count_bw.values())))
+            
+        for str_bw in IR.PREC_CANDIDATES: 
+            if   (str_bw == "e32"):
+                print ("# of 32-bit operators: "  + str(count_bw[tft_alloc.EPSILON_32]))
+            elif (str_bw == "e64"): 
+                print ("# of 64-bit operators: "  + str(count_bw[tft_alloc.EPSILON_64]))
+            elif (str_bw == "e128"):
+                print ("# of 128-bit operators: " + str(count_bw[tft_alloc.EPSILON_128]))
+                pass 
+            else: 
+                sys.exit("Error: invalid bit-width string: " + str_bw) 
+
+
 
 # ========
 # ErrorForm Optimization 

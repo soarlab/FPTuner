@@ -88,6 +88,35 @@ def InstallFPTaylor (branch):
             
         f_cfg_verify.close() 
 
+        # write FPT_CFG_VERIFY_DETAIL_GELPIA
+        cfg_verify_dg = tft_utils.FPT_CFG_VERIFY_DETAIL_GELPIA
+        os.system("cp " + cfg_default + " " + cfg_verify_dg) 
+
+        f_cfg_verify_dg = open(cfg_verify_dg, "a") 
+
+        f_cfg_verify_dg.write("\n")
+        f_cfg_verify_dg.write("abs-error=true\n")
+        f_cfg_verify_dg.write("rel-error=false\n")
+        f_cfg_verify_dg.write("intermediate-opt = true\n") 
+        f_cfg_verify_dg.write("opt = gelpia\n") 
+
+        f_cfg_verify_dg.close()
+
+        # write FPT_CFG_VERIFY_DETAIL_BB 
+        cfg_verify_bb = tft_utils.FPT_CFG_VERIFY_DETAIL_BB 
+        os.system("cp " + cfg_default + " " + cfg_verify_bb)
+
+        f_cfg_verify_bb = open(cfg_verify_bb, "a")
+
+        f_cfg_verify_bb.write("\n") 
+        f_cfg_verify_bb.write("abs-error=true\n")
+        f_cfg_verify_bb.write("rel-error=false\n")
+        f_cfg_verify_bb.write("fp-power2-model=true\n") 
+        f_cfg_verify_bb.write("intermediate-opt = true\n")
+        f_cfg_verify_bb.write("opt = bb\n") 
+        
+        f_cfg_verify_bb.close()
+
         # end of the installation 
         os.chdir("../") 
 

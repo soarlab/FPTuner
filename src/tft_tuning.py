@@ -192,6 +192,10 @@ def PrintAlloc (alloc, eforms = []):
     assert(len(eforms) > 0) 
     assert(all([isinstance(ef, tft_error_form.ErrorForm) for ef in eforms])) 
 
+    for ef in eforms: 
+        ef.SummarizeOperatorBitwidths(alloc) 
+        print("") 
+
     print (str(alloc))
     if (alloc is not None):  
         print ("# L2H castings: " + str(CountCastingsL2H(alloc, eforms))) 

@@ -171,6 +171,37 @@ def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], 
 
 
 # ==== ensure M2 ====
+def CheckM2WithFPTaylor (fname_config):
+    assert(type(fname_config) is str)
+    assert(os.path.isfile(fname_config))
+    assert("FPTAYLOR" in os.environ.keys()) 
+
+    command_fpt = os.environ["FPTAYLOR"] + " -c " + fname_config + " " + FPTAYLOR_M2_FQUERY 
+    fpt_verify = subp.Popen(command_fpt, shell=True, stdout=subp.PIPE, stderr=subp.PIPE) 
+
+    # -- get the result from FPTaylor -- 
+    err_total = None 
+    err_M2    = None 
+    
+    for aline in fpt_verify.stdout: 
+        aline = tft_utils.Bytes2String(aline) 
+
+        if   (aline.startswith("total2:")): 
+            err_M2    = float(aline[7:].strip())
+        elif (aline.startswith("Absolute error (exact):")): 
+            err_total = float(aline[23:].strip()) 
+        else: 
+            pass 
+
+    assert(type(err_total) is float) 
+    assert(type(err_M2)    is float) 
+
+    if (tft_utils.FPTUNER_VERBOSE): 
+        print ("[FPTaylor]: Check M2(" + fname_config + ")... M2: " + str(err_M2) + " Total: " + str(err_total)) 
+
+    return err_total, err_M2
+    
+
 # return 'True' if the verification for M2 is passed 
 # otherwise, return the (actual error - error threshold) 
 def EnsureM2 (alloc): 
@@ -191,7 +222,6 @@ def EnsureM2 (alloc):
     for texpr in TARGET_EXPRS: 
         # -- export the query file for FPTaylor --
         assert("FPTAYLOR_BASE" in os.environ.keys()) 
-        assert("FPTAYLOR" in os.environ.keys()) 
 
         if (os.path.isfile(FPTAYLOR_M2_FQUERY)): 
             print ("Warning: rewrite the existed file : " + FPTAYLOR_M2_FQUERY) 
@@ -199,37 +229,16 @@ def EnsureM2 (alloc):
         tft_ir_backend.ExportExpr4FPTaylorSanitation(texpr, alloc, FPTAYLOR_M2_FQUERY) 
 
         # -- run FPTaylor for the check -- 
-        cfg_verify  = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY
-        command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_verify + " " + FPTAYLOR_M2_FQUERY 
-
-        fpt_verify = subp.Popen(command_fpt, shell=True, stdout=subp.PIPE, stderr=subp.PIPE) 
-
-        # -- get the result from FPTaylor -- 
-        err_total = None 
-        err_M2    = None 
-
-        for aline in fpt_verify.stdout: 
-            aline = tft_utils.Bytes2String(aline) 
-
-            if   (aline.startswith("total2:")): 
-                err_M2    = float(aline[7:].strip())
-            elif (aline.startswith("Absolute error (exact):")): 
-                err_total = float(aline[23:].strip()) 
-            else: 
-                pass 
-
-        assert(type(err_total) is float) 
-        assert(type(err_M2)    is float) 
-
-        if (tft_utils.FPTUNER_VERBOSE): 
-            print ("-- ensure M2 --") 
-            print ("Total Error:     " + str(err_total)) 
-            print ("Total M2:        " + str(err_M2)) 
-            print ("Error Threshold: " + str(float(error_threshold))) 
-            print ("---------------") 
+        cfg_verify       = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY
+        err_total, err_M2 = CheckM2WithFPTaylor(cfg_verify) 
+        
+        if (err_total > error_threshold): 
+            cfg_verify_detail = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY_DETAIL_BB
+            err_total, err_M2 = CheckM2WithFPTaylor(cfg_verify_detail) 
         
         # -- decide the ensuring result -- 
         if (err_total > error_threshold): 
+            tft_utils.VerboseMessage("M2 is higher than the threshold by " + str(float(err_total - error_threshold)))
             return float(err_total - error_threshold) 
 
     return True 
@@ -267,7 +276,7 @@ def SolveErrorForms (eforms = [], optimizers = {}):
             alloc  = None 
             err_M2 = err_M2 + (err_exc / 2.0)
 
-            print ("For the actual error is " + str(err_exc) + " higher than the threshold, retune with M2 = " + str(err_M2))
+            tft_utils.VerboseMessage("For the actual error is " + str(err_exc) + " higher than the threshold, retune with M2 = " + str(err_M2))
 
             # -- adjust the M2 -- 
             for ef in eforms: 

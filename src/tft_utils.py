@@ -9,6 +9,8 @@ from fractions import Fraction
 # ========
 FPT_CFG_FIRST   = "__first.cfg" 
 FPT_CFG_VERIFY  = "__verify.cfg" 
+FPT_CFG_VERIFY_DETAIL_GELPIA = "__verify.detail.gelpia.cfg" 
+FPT_CFG_VERIFY_DETAIL_BB     = "__verify.detail.bb.cfg" 
 
 FPTUNER_VERBOSE = False
 FPTUNER_DEBUG   = False 
@@ -44,6 +46,10 @@ def checkFPTaylorInstallation(branch):
             if (not os.path.isfile(os.environ["FPTAYLOR_BASE"] + "/" + FPT_CFG_FIRST)): 
                 return False 
             if (not os.path.isfile(os.environ["FPTAYLOR_BASE"] + "/" + FPT_CFG_VERIFY)):
+                return False 
+            if (not os.path.isfile(os.environ["FPTAYLOR_BASE"] + "/" + FPT_CFG_VERIFY_DETAIL_GELPIA)):
+                return False 
+            if (not os.path.isfile(os.environ["FPTAYLOR_BASE"] + "/" + FPT_CFG_VERIFY_DETAIL_BB)):
                 return False 
             return True 
         return False 

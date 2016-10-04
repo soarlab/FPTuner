@@ -1,4 +1,6 @@
 
-echo "==== reduction ====" 
+echo "========" 
+echo "Benchmark: reduction"
+echo "========"
 
-python ./fptuner.py -e "5e-04 1e-04 5e-05 1e-15" -b "32 64" ../examples/micro/reduction.py
+python ./fptuner.py -v -e "5e-04 1e-04 5e-05 1e-15" -b "32 64" ../examples/micro/reduction.py
