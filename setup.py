@@ -74,7 +74,7 @@ def InstallFPTaylor (branch):
         cfg_verify = tft_utils.FPT_CFG_VERIFY 
         os.system("cp " + cfg_default + " " + cfg_verify) 
 
-        f_cfg_verify = open(cfg_first, "a") 
+        f_cfg_verify = open(cfg_verify, "a") 
                 
         f_cfg_verify.write("\n") 
         f_cfg_verify.write("abs-error=true\n") 
