@@ -265,7 +265,7 @@ def SolveErrorForms (eforms = [], optimizers = {}):
             assert(err_exc > 0.0) 
 
             alloc  = None 
-            err_M2 = err_M2 + (err_exc / 10.0)
+            err_M2 = err_M2 + (err_exc / 2.0)
 
             print ("For the actual error is " + str(err_exc) + " higher than the threshold, retune with M2 = " + str(err_M2))
 

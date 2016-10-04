@@ -10,10 +10,11 @@ tft_utils = imp.load_source("tft_utils", "./src/tft_utils.py")
 # ========
 # subroutines 
 # ======== 
-def InstallGelpia (branch, set_path=True): 
+def InstallGelpia (branch, silent=True): 
     assert(type(branch) is str) 
 
-    if (not tft_utils.checkGelpiaInstallation(branch)): 
+    if (silent or 
+        not tft_utils.checkGelpiaInstallation(branch)): 
         # download Gelpia 
         d = "gelpia" 
 
@@ -23,15 +24,18 @@ def InstallGelpia (branch, set_path=True):
 
         os.chdir(d) 
         os.system("make requirements") 
-        os.system("make") 
+        os.system("make")
+        assert(os.path.isfile("./bin/gelpia"))
+        
         os.chdir("../") 
 
         # set environment variables 
-        if (set_path):
+        if (not silent): 
             os.environ["HOME_GELPIA"] = os.path.abspath(d) 
             os.environ["GELPIA"]      = os.environ["HOME_GELPIA"] + "/bin/gelpia"
 
-    assert(tft_utils.checkGelpiaInstallation(branch)) 
+    if (not silent): 
+        assert(tft_utils.checkGelpiaInstallation(branch)) 
 
 
 
@@ -51,7 +55,8 @@ def InstallFPTaylor (branch):
 
         InstallGelpia("FPTaylorCompat", False) 
 
-        os.system("make") 
+        os.system("make")
+        assert(os.path.isfile("./fptaylor"))
 
         cfg_default = "default.cfg" 
         assert(os.path.isfile(cfg_default)) 
@@ -87,8 +92,8 @@ def InstallFPTaylor (branch):
         os.chdir("../") 
 
         # set environment variables 
-        os.environ["HOME_FPTAYLOR"] = os.path.abspath(d) 
-        os.environ["FPTAYLOR"]      = os.environ["HOME_FPTAYLOR"] + "/fptaylor"
+        os.environ["FPTAYLOR_BASE"] = os.path.abspath(d) 
+        os.environ["FPTAYLOR"]      = os.environ["FPTAYLOR_BASE"] + "/fptaylor"
 
     assert(tft_utils.checkFPTaylorInstallation(branch)) 
 
@@ -141,9 +146,8 @@ if   (OPT_SETUP == "install"):
     # ---- 
     # install the required tools
     # ----
-    InstallGelpia("master") 
-    # InstallGelpia("FPTaylorCompat") 
     InstallFPTaylor("develop")
+    InstallGelpia("master") # For the setting of the environment variables, must install Gelpia after FPTaylor
 
 
     # ----
@@ -151,15 +155,20 @@ if   (OPT_SETUP == "install"):
     # ----
     print ("========")
     print ("Please set the environment variables: ")
+    print ("")
     print ("export HOME_FPTUNER=" + os.path.abspath("./")) 
     print ("export HOME_GELPIA=" + os.environ["HOME_GELPIA"]) 
     print ("export GELPIA=" + os.environ["GELPIA"]) 
-#    print ("export HOME_FPTAYLOR=" + os.environ["HOME_FPTAYLOR"]) 
-    print ("export FPTAYLOR_BASE=" + os.environ["HOME_FPTAYLOR"]) 
+    print ("export FPTAYLOR_BASE=" + os.environ["FPTAYLOR_BASE"]) 
     print ("export FPTAYLOR=" + os.environ["FPTAYLOR"]) 
+    print ("export GELPIA_PATH=" + os.environ["FPTAYLOR_BASE"] + "/gelpia")
     print ("") 
     print ("Please append the environment variables: ") 
+    print ("") 
     print ("export PYTHONPATH=" + os.path.abspath("./") + "/src:$PYTHONPATH") 
+    print ("") 
+    print ("Note that the two environment variables, HOME_GELPIA and GELPIA_PATH, point to different Gelpia branches. We will integrate them in the near future.")
+    print ("")
     print ("========") 
 
 

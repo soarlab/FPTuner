@@ -73,21 +73,21 @@ echo "========"
 echo "Benchmark: doppler 1"
 echo "========" 
 
-### python3 ./fptuner.py -v -e "5e-13 1e-13 5e-14 1e-22" -b "64 128" ../examples/primitives/doppler-1.py
+python3 ./fptuner.py -v -e "5e-13 1e-13 5e-14 1e-22" -b "64 128" ../examples/primitives/doppler-1.py
 
 
 echo "========" 
 echo "Benchmark: doppler 2"
 echo "========" 
 
-### python3 ./fptuner.py -v -e "5e-13 1e-13 5e-14 1e-22" -b "64 128" ../examples/primitives/doppler-2.py
+python3 ./fptuner.py -v -e "5e-13 1e-13 5e-14 1e-22" -b "64 128" ../examples/primitives/doppler-2.py
 
 
 echo "========" 
 echo "Benchmark: doppler 3"
 echo "========" 
 
-### python3 ./fptuner.py -v -e "5e-13 1e-13 5e-14 1e-22" -b "64 128" ../examples/primitives/doppler-3.py
+python3 ./fptuner.py -v -e "5e-13 1e-13 5e-14 1e-22" -b "64 128" ../examples/primitives/doppler-3.py
 
 
 echo "========" 

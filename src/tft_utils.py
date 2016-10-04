@@ -37,13 +37,13 @@ def checkGelpiaInstallation(branch):
 
 
 def checkFPTaylorInstallation(branch): 
-    if ("HOME_FPTAYLOR" in os.environ): 
+    if ("FPTAYLOR_BASE" in os.environ): 
         if ("FPTAYLOR" in os.environ): 
             if (not os.path.isfile(os.environ["FPTAYLOR"])): 
                 return False 
-            if (not os.path.isfile(os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_FIRST)): 
+            if (not os.path.isfile(os.environ["FPTAYLOR_BASE"] + "/" + FPT_CFG_FIRST)): 
                 return False 
-            if (not os.path.isfile(os.environ["HOME_FPTAYLOR"] + "/" + FPT_CFG_VERIFY)):
+            if (not os.path.isfile(os.environ["FPTAYLOR_BASE"] + "/" + FPT_CFG_VERIFY)):
                 return False 
             return True 
         return False 
