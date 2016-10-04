@@ -1,6 +1,7 @@
 
 import tft_ir_api as IR 
 import tft_ir_backend 
+import math
 
 alen     = 512
 vlb      = -100.0 
@@ -10,8 +11,9 @@ gid_data = 0
 
 assert(alen > 0) 
 assert(vlb < vub)
+assert(math.log(alen, 2) == int(math.log(alen, 2)))
 
-n_stages = 9 
+n_stages = int(math.log(alen, 2))
 
 arr = [IR.RealVE("v"+str(i), gid_data, vlb, vub) for i in range(0, alen)] 
 

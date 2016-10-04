@@ -193,8 +193,8 @@ def CheckM2WithFPTaylor (fname_config):
         else: 
             pass 
 
-    assert(type(err_total) is float) 
-    assert(type(err_M2)    is float) 
+    # assert(type(err_total) is float) 
+    # assert(type(err_M2)    is float) 
 
     if (tft_utils.FPTUNER_VERBOSE): 
         print ("[FPTaylor]: Check M2(" + fname_config + ")... M2: " + str(err_M2) + " Total: " + str(err_total)) 
@@ -224,7 +224,7 @@ def EnsureM2 (alloc):
         assert("FPTAYLOR_BASE" in os.environ.keys()) 
 
         if (os.path.isfile(FPTAYLOR_M2_FQUERY)): 
-            print ("Warning: rewrite the existed file : " + FPTAYLOR_M2_FQUERY) 
+            tft_utils.VerboseMessage("Warning: rewrite the existed file : " + FPTAYLOR_M2_FQUERY) 
 
         tft_ir_backend.ExportExpr4FPTaylorSanitation(texpr, alloc, FPTAYLOR_M2_FQUERY) 
 
@@ -232,9 +232,12 @@ def EnsureM2 (alloc):
         cfg_verify       = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY
         err_total, err_M2 = CheckM2WithFPTaylor(cfg_verify) 
         
-        if (err_total > error_threshold): 
+        if ((err_total is None) or (err_total > error_threshold)): 
             cfg_verify_detail = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY_DETAIL_BB
             err_total, err_M2 = CheckM2WithFPTaylor(cfg_verify_detail) 
+
+        assert(type(err_total) is float) 
+        assert(type(err_M2) is float)
         
         # -- decide the ensuring result -- 
         if (err_total > error_threshold): 

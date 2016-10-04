@@ -3,19 +3,19 @@ echo "========"
 echo "Benchmark: cone area"
 echo "========" 
 
-# python3 ./fptuner.py -v -e "5e-04 1e-04 5e-05 1e-15" -b "32 64" ../examples/math/cone-area.py
+# python3 ./fptuner.py -v -e "5e-04 1e-04 5e-05" -b "32 64" ../examples/math/cone-area.py
 
 
 echo "========"
 echo "Benchmark: gaussian"
 echo "========"
 
-# python3 ./fptuner.py -v -e "5e-07 1e-07 5e-08 1e-15" -b "32 64" ../examples/math/gaussian.py
+# python3 ./fptuner.py -v -e "5e-07 1e-07 5e-08" -b "32 64" ../examples/math/gaussian.py
 
 
 echo "========"
 echo "Benchmark: maxwell-boltzmann"
 echo "========" 
 
-python3 ./fptuner.py -v -e "1e-05 2e-06 1e-06 1e-15" -b "32 64" ../examples/math/maxwell-boltzmann.py 
+python3 ./fptuner.py -v -e "1e-05 2e-06 1e-06" -b "32 64" ../examples/math/maxwell-boltzmann.py 
 

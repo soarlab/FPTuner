@@ -101,7 +101,7 @@ module_name = module_name[0:len(module_name)-3]
 IR.LOAD_CPP_INSTS = True 
 module_in         = imp.load_source(module_name, INPUT_FILE) 
 if (IR.TARGET_EXPR is None): 
-    sys.exit("Warning: no tuning target expression was specified...") 
+    sys.exit("Error: no tuning target expression was specified...") 
 IR.LOAD_CPP_INSTS = False 
 
 
@@ -109,7 +109,7 @@ IR.LOAD_CPP_INSTS = False
 # possibly remove the .exprs file 
 EXPRS_NAME  = INPUT_FILE + ".exprs"
 if (os.path.isfile(EXPRS_NAME)): 
-    print ("Warning: rewrite existed file: " + EXPRS_NAME) 
+    tft_utils.VerboseMessage("Warning: rewrite existed file: " + EXPRS_NAME) 
     os.system("rm " + EXPRS_NAME) 
 
 # go tuning 
@@ -155,6 +155,6 @@ for i in range(0, len(tft_tuning.ERROR_BOUNDS)):
         fname_cpp = module_name.strip() + "." + str_error_bound + ".cpp" 
         
         if (os.path.isfile(fname_cpp)): 
-            print ("Warning: overwrite the existed .cpp file: " + fname_cpp) 
+            tft_utils.VerboseMessage("Warning: overwrite the existed .cpp file: " + fname_cpp) 
         
         tft_ir_backend.ExportCppInsts(alloc, fname_cpp) 
