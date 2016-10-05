@@ -172,11 +172,17 @@ def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], 
 
 # ==== ensure M2 ====
 def CheckM2WithFPTaylor (fname_config):
-    assert(type(fname_config) is str)
-    assert(os.path.isfile(fname_config))
     assert("FPTAYLOR" in os.environ.keys()) 
+    if (fname_config != ""): 
+        assert(type(fname_config) is str)
+        assert(os.path.isfile(fname_config))
 
-    command_fpt = os.environ["FPTAYLOR"] + " -c " + fname_config + " " + FPTAYLOR_M2_FQUERY 
+    command_fpt = None  
+    if (fname_config == ""): 
+        command_fpt = os.environ["FPTAYLOR"] + " " + FPTAYLOR_M2_FQUERY 
+    else:
+        command_fpt = os.environ["FPTAYLOR"] + " -c " + fname_config + " " + FPTAYLOR_M2_FQUERY 
+    assert(type(command_fpt) is str) 
     fpt_verify = subp.Popen(command_fpt, shell=True, stdout=subp.PIPE, stderr=subp.PIPE) 
 
     # -- get the result from FPTaylor -- 
@@ -231,6 +237,9 @@ def EnsureM2 (alloc):
         # -- run FPTaylor for the check -- 
         cfg_verify       = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY
         err_total, err_M2 = CheckM2WithFPTaylor(cfg_verify) 
+
+        if (err_total is None): 
+            err_total, err_M2 = CheckM2WithFPTaylor("") 
         
         if ((err_total is None) or (err_total > error_threshold)): 
             cfg_verify_detail = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_VERIFY_DETAIL_BB
