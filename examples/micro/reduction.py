@@ -4,8 +4,8 @@ import tft_ir_backend
 import math
 
 alen     = 512
-vlb      = -100.0 
-vub      = 100.0 
+vlb      = -1.0 
+vub      = 1.0 
 
 gid_data = 0 
 
