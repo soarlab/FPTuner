@@ -275,14 +275,6 @@ def SolveErrorForms (eforms = [], optimizers = {}):
         if (alloc is None): 
             break 
 
-        # wfchiang debug 
-        for ef in eforms: 
-            print (str(ef))
-            print ("^^^^^^^^^")
-            print (alloc) 
-            print ("^^^^^^^^^")
-
-    
         # -- check the effect of M2 -- 
         err_exc = EnsureM2(alloc)
     
