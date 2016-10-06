@@ -5,6 +5,8 @@ import imp
 
 tft_utils = imp.load_source("tft_utils", "./src/tft_utils.py") 
 
+USE_DUAL_GELPIAS = False
+
 
 
 # ========
@@ -53,7 +55,8 @@ def InstallFPTaylor (branch):
 
         os.chdir(d)
 
-        InstallGelpia("FPTaylorCompat", False) 
+        if (USE_DUAL_GELPIAS): 
+            InstallGelpia("FPTaylorCompat", False) 
 
         os.system("make")
         assert(os.path.isfile("./fptaylor"))
@@ -176,7 +179,10 @@ if   (OPT_SETUP == "install"):
     # install the required tools
     # ----
     InstallFPTaylor("develop")
-    InstallGelpia("master") # For the setting of the environment variables, must install Gelpia after FPTaylor
+    if (USE_DUAL_GELPIAS):
+        InstallGelpia("master") # For the setting of the environment variables, must install Gelpia after FPTaylor
+    else:
+        InstallGelpia("RustAD") 
 
 
     # ----
@@ -190,14 +196,18 @@ if   (OPT_SETUP == "install"):
     print ("export GELPIA=" + os.environ["GELPIA"]) 
     print ("export FPTAYLOR_BASE=" + os.environ["FPTAYLOR_BASE"]) 
     print ("export FPTAYLOR=" + os.environ["FPTAYLOR"]) 
-    print ("export GELPIA_PATH=" + os.environ["FPTAYLOR_BASE"] + "/gelpia")
+    if (USE_DUAL_GELPIAS):
+        print ("export GELPIA_PATH=" + os.environ["FPTAYLOR_BASE"] + "/gelpia")
+    else: 
+        print ("export GELPIA_PATH=" + os.environ["HOME_GELPIA"])
     print ("") 
     print ("Please append the environment variables: ") 
     print ("") 
     print ("export PYTHONPATH=" + os.path.abspath("./") + "/src:$PYTHONPATH") 
     print ("") 
-    print ("Note that the two environment variables, HOME_GELPIA and GELPIA_PATH, point to different Gelpia branches. We will integrate them in the near future.")
-    print ("")
+    if (USE_DUAL_GELPIAS):
+        print ("Note that the two environment variables, HOME_GELPIA and GELPIA_PATH, point to different Gelpia branches. We will integrate them in the near future.")
+        print ("")
     print ("========") 
 
 
