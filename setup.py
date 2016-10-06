@@ -192,7 +192,9 @@ if   (OPT_SETUP == "install"):
     print ("Please append the environment variables: ") 
     print ("") 
     print ("export PYTHONPATH=" + os.path.abspath("./") + "/src:$PYTHONPATH") 
-    print ("") 
+    print ("")
+    print ("Note: You must manually setup PYTHONPATH for Gurobi's python interface. Please refer to READMD.md and www.gurobi.com for more details.")
+    print ("")
     print ("========") 
 
 
