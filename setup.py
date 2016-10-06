@@ -5,8 +5,6 @@ import imp
 
 tft_utils = imp.load_source("tft_utils", "./src/tft_utils.py") 
 
-USE_DUAL_GELPIAS = False
-
 
 
 # ========
@@ -33,8 +31,8 @@ def InstallGelpia (branch, silent=False):
 
         # set environment variables 
         if (not silent): 
-            os.environ["HOME_GELPIA"] = os.path.abspath(d) 
-            os.environ["GELPIA"]      = os.environ["HOME_GELPIA"] + "/bin/gelpia"
+            os.environ["GELPIA_PATH"] = os.path.abspath(d) 
+            os.environ["GELPIA"]      = os.environ["GELPIA_PATH"] + "/bin/gelpia"
 
     if (not silent): 
         assert(tft_utils.checkGelpiaInstallation(branch)) 
@@ -54,9 +52,6 @@ def InstallFPTaylor (branch):
         assert(os.path.isdir(d))  
 
         os.chdir(d)
-
-        if (USE_DUAL_GELPIAS): 
-            InstallGelpia("FPTaylorCompat", True)
 
         os.system("make")
         assert(os.path.isfile("./fptaylor"))
@@ -179,10 +174,7 @@ if   (OPT_SETUP == "install"):
     # install the required tools
     # ----
     InstallFPTaylor("develop")
-    if (USE_DUAL_GELPIAS):
-        InstallGelpia("master") # For the setting of the environment variables, must install Gelpia after FPTaylor
-    else:
-        InstallGelpia("RustAD") 
+    InstallGelpia("RustAD") 
 
 
     # ----
@@ -192,22 +184,15 @@ if   (OPT_SETUP == "install"):
     print ("Please set the environment variables: ")
     print ("")
     print ("export HOME_FPTUNER=" + os.path.abspath("./")) 
-    print ("export HOME_GELPIA=" + os.environ["HOME_GELPIA"]) 
+    print ("export GELPIA_PATH=" + os.environ["GELPIA_PATH"]) 
     print ("export GELPIA=" + os.environ["GELPIA"]) 
     print ("export FPTAYLOR_BASE=" + os.environ["FPTAYLOR_BASE"]) 
-    print ("export FPTAYLOR=" + os.environ["FPTAYLOR"]) 
-    if (USE_DUAL_GELPIAS):
-        print ("export GELPIA_PATH=" + os.environ["FPTAYLOR_BASE"] + "/gelpia")
-    else: 
-        print ("export GELPIA_PATH=" + os.environ["HOME_GELPIA"])
+    print ("export FPTAYLOR=" + os.environ["FPTAYLOR"])    
     print ("") 
     print ("Please append the environment variables: ") 
     print ("") 
     print ("export PYTHONPATH=" + os.path.abspath("./") + "/src:$PYTHONPATH") 
     print ("") 
-    if (USE_DUAL_GELPIAS):
-        print ("Note that the two environment variables, HOME_GELPIA and GELPIA_PATH, point to different Gelpia branches. We will integrate them in the near future.")
-        print ("")
     print ("========") 
 
 

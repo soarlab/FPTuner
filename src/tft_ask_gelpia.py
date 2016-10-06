@@ -151,7 +151,7 @@ class GelpiaSolver :
         assert((0 < POLL_INTERVAL) and (POLL_INTERVAL <= TIMEOUT)) 
 
         now_dir = os.path.abspath(os.getcwd()) 
-        os.chdir(os.environ["HOME_GELPIA"]) 
+        os.chdir(os.environ["GELPIA_PATH"]) 
 
         exe_gelpia = subp.Popen([os.environ["GELPIA"], "@"+fname_query], 
                                 shell=False, 

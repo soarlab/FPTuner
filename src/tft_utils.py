@@ -35,7 +35,7 @@ def DebugMessage (mess):
 
 
 def checkGelpiaInstallation(branch): 
-    if ("HOME_GELPIA" in os.environ): 
+    if ("GELPIA_PATH" in os.environ): 
         if ("GELPIA" in os.environ): 
             return os.path.isfile(os.environ["GELPIA"]) 
         return False 
