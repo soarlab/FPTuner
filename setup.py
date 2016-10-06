@@ -12,7 +12,7 @@ USE_DUAL_GELPIAS = False
 # ========
 # subroutines 
 # ======== 
-def InstallGelpia (branch, silent=True): 
+def InstallGelpia (branch, silent=False): 
     assert(type(branch) is str) 
 
     if (silent or 
@@ -56,7 +56,7 @@ def InstallFPTaylor (branch):
         os.chdir(d)
 
         if (USE_DUAL_GELPIAS): 
-            InstallGelpia("FPTaylorCompat", False) 
+            InstallGelpia("FPTaylorCompat", True)
 
         os.system("make")
         assert(os.path.isfile("./fptaylor"))
