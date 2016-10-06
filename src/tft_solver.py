@@ -24,9 +24,6 @@ OPTIMIZATION_SKIP_PRECISE_OPTS = False
 
 SEGFAULT_PROTECTION = True 
 
-LIMIT_N_CASTINGS = False 
-N_MAX_CASTINGS   = 3 
-
 TIME_GLOBAL_OPT  = None
 TIME_ALLOCATION  = None
 
@@ -328,7 +325,10 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                     gurobi_solver.addConstraint("linear", "==", ev_1, ev_2) 
 
         # ---- generate the constraint for the number of castings ---- 
-        if (LIMIT_N_CASTINGS): 
+        if (tft_utils.N_MAX_CASTINGS is not None):
+            assert(type(tft_utils.N_MAX_CASTINGS) is int)
+            assert(tft_utils.N_MAX_CASTINGS >= 0) 
+            
             cnum_expr = UnifiedCastingNumExpr(error_forms) 
 
             if (cnum_expr is not None): 
@@ -337,10 +337,10 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                 cnum_var = tft_expr.VariableExpr(tft_expr.CNUM_PREFIX+"_var", int, -1, False) 
                 gurobi_solver.addVar(cnum_var) 
                 gurobi_solver.addConstraint("quadratic", "==", cnum_expr, cnum_var) 
-                gurobi_solver.addConstraint("linear", "<=", cnum_var, tft_expr.ConstantExpr(N_MAX_CASTINGS)) 
+                gurobi_solver.addConstraint("linear", "<=", cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS)) 
 
                 if (VERBOSE): 
-                    print ("Casting Constraint: " + cnum_expr.toCString() + " <= " + str(N_MAX_CASTINGS)) 
+                    print ("Casting Constraint: " + cnum_expr.toCString() + " <= " + str(tft_utils.N_MAX_CASTINGS)) 
         
         # ---- add optimization obj. ----
         score_sum = None 

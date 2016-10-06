@@ -10,7 +10,9 @@ from fractions import Fraction
 FPT_CFG_FIRST   = "__first.cfg" 
 FPT_CFG_VERIFY  = "__verify.cfg" 
 FPT_CFG_VERIFY_DETAIL_GELPIA = "__verify.detail.gelpia.cfg" 
-FPT_CFG_VERIFY_DETAIL_BB     = "__verify.detail.bb.cfg" 
+FPT_CFG_VERIFY_DETAIL_BB     = "__verify.detail.bb.cfg"
+
+N_MAX_CASTINGS  = None
 
 FPTUNER_VERBOSE = False
 FPTUNER_DEBUG   = False 

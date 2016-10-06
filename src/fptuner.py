@@ -45,6 +45,14 @@ while True:
     elif (arg_in == "-debug"): 
         tft_utils.FPTUNER_VERBOSE = True
         tft_utils.FPTUNER_DEBUG   = True
+        
+    elif (arg_in == "-maxc"):
+        i = i + 1
+        assert(i < len(sys.argv))
+
+        tft_utils.N_MAX_CASTINGS = int(sys.argv[i])
+        assert(type(tft_utils.N_MAX_CASTINGS) is int and
+               tft_utils.N_MAX_CASTINGS >= 0)
 
     elif (arg_in == "-e"): 
         i = i + 1 
