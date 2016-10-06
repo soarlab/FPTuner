@@ -1,5 +1,6 @@
 
 import sys
+import tft_utils
 import tft_expr 
 import math 
 import tft_alloc 
@@ -207,7 +208,8 @@ def MakeUnaryExpr (op_label, op_gid, opd0, internal=False):
                 sys.exit("ERROR: unknown Unary Operator: " + op_label) 
 
     # possibly bind the constant type 
-    if (tft_expr.isConstVar(opd0)): 
+    if ((not tft_utils.FIX_CONST_TYPE) and 
+        tft_expr.isConstVar(opd0)): 
         if   (opd0.getGid() == tft_expr.PRESERVED_CONST_GID): 
             CountGID(tft_expr.PRESERVED_CONST_GID, -1) 
             opd0.gid = op_gid 
@@ -283,14 +285,16 @@ def MakeBinaryExpr (op_label, op_gid, opd0, opd1, internal=False):
                 sys.exit("ERROR: unknown Binary Operator: " + op_label) 
 
     # possibly bind the constant type 
-    if (tft_expr.isConstVar(opd0)): 
+    if ((not tft_utils.FIX_CONST_TYPE) and 
+        tft_expr.isConstVar(opd0)): 
         if   (opd0.getGid() == tft_expr.PRESERVED_CONST_GID): 
             CountGID(tft_expr.PRESERVED_CONST_GID, -1) 
             opd0.gid = op_gid 
         else: 
             if (opd0.getGid() != op_gid): 
                 print ("Warning: conflicting constant type...") 
-    if (tft_expr.isConstVar(opd1)): 
+    if ((not tft_utils.FIX_CONST_TYPE) and 
+        tft_expr.isConstVar(opd1)): 
         if   (opd1.getGid() == tft_expr.PRESERVED_CONST_GID): 
             CountGID(tft_expr.PRESERVED_CONST_GID, -1)
             opd1.gid = op_gid 

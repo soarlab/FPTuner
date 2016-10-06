@@ -153,6 +153,9 @@ class Alloc:
         for gid in gids: 
             assert(0 <= gid) 
 
+            if (gid == tft_expr.PRESERVED_CONST_GID): 
+                continue 
+
             eps = self.gid2eps[gid] 
 
             etname = "Group " + str(gid)
