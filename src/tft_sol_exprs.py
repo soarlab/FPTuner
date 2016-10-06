@@ -30,7 +30,7 @@ CONSTRAINT_EXPRS   = []
 TARGET_EXPRS       = [] 
 
 ERROR_TYPE         = "abs"
-OPT_ERROR_FORM     = True 
+OPT_ERROR_FORM     = False 
 FPTAYLOR_M2_FQUERY = "__fptaylor_m2_check_query.txt" 
 
 TIME_PARSING       = None
@@ -72,7 +72,8 @@ def GenerateErrorTermsFromExpr (context_expr, expr, error_exprs = [], program_ex
         prog_expr  = None 
         error_expr = None 
 
-        if (tft_expr.isPreciseOperation(expr)): 
+        if (False):
+#        if (tft_expr.isPreciseOperation(expr)): 
             error_expr = tft_expr.ConstantExpr(0.0) 
         
         else:
@@ -97,7 +98,8 @@ def GenerateErrorTermsFromExpr (context_expr, expr, error_exprs = [], program_ex
         # get my ErrorTerm 
         my_et = tft_error_form.ErrorTerm(error_expr, 
                                          context_expr.getGid(), 
-                                         gid)  
+                                         gid, 
+                                         tft_expr.isPreciseOperation(expr))  
 
         # get my operands' ErrorTerms and do some more book keeping 
         if (isinstance(expr, tft_expr.VariableExpr)): 
@@ -272,6 +274,14 @@ def SolveErrorForms (eforms = [], optimizers = {}):
         
         if (alloc is None): 
             break 
+
+        # wfchiang debug 
+        for ef in eforms: 
+            print (str(ef))
+            print ("^^^^^^^^^")
+            print (alloc) 
+            print ("^^^^^^^^^")
+
     
         # -- check the effect of M2 -- 
         err_exc = EnsureM2(alloc)
@@ -358,7 +368,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
         assert(len(tokens) == 2) 
 
         if (tokens[0] == "opt-error-form"): 
-            OPT_ERROR_FORM = tft_utils.String2Bool(tokens[1]) 
+            OPT_ERROR_FORM = False # tft_utils.String2Bool(tokens[1]) # the optimization is not good... 
             
         else: 
             sys.exit("ERROR: unknown option setting: " + ilines[0]) 

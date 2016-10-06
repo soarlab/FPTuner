@@ -269,7 +269,9 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                 # ref. variable 
                 rvar       = et.refVar() 
 
-                error_expr = eform.errorExpr(et.getContextGid(), et.getGid()) 
+                error_expr = et.errorExpr(eform.scalingUpFactor(), 
+                                          eform.gid2epsilons, 
+                                          eform.casting_map) 
 
                 term_expr  = et.overApproxExpr(error_expr) 
 

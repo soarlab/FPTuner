@@ -178,17 +178,19 @@ class ErrorTerm:
     gid                    = None 
     stored_absexpr         = None 
     stored_overapprox_expr = None 
+    is_precise_opt         = False 
 
-    def __init__ (self, err_expr, context_gid, gid): 
+    def __init__ (self, err_expr, context_gid, gid, is_precise_opt=False): 
         global FRESH_ERRORTERM_INDEX 
         assert(FRESH_ERRORTERM_INDEX >= 0) 
         assert(isinstance(err_expr, tft_expr.Expr)) 
         assert((type(gid) is int) and (gid >= 0)) 
 
-        self.index       = FRESH_ERRORTERM_INDEX 
-        self.expr        = err_expr
-        self.context_gid = context_gid 
-        self.gid         = gid 
+        self.index          = FRESH_ERRORTERM_INDEX 
+        self.expr           = err_expr
+        self.context_gid    = context_gid 
+        self.gid            = gid 
+        self.is_precise_opt = is_precise_opt
         
         FRESH_ERRORTERM_INDEX = FRESH_ERRORTERM_INDEX + 1 
 
@@ -214,6 +216,81 @@ class ErrorTerm:
             self.stored_absexpr = IR.MakeUnaryExpr("abs", -1, self.expr, True)
 
         return self.stored_absexpr 
+
+
+    def errorExpr (self, scaling_expr, gid2epsilons={}, casting_map={}): 
+        assert(isinstance(scaling_expr, tft_expr.ConstantExpr))
+        assert(type(self.context_gid)   is int) 
+        assert(type(self.gid)           is int)
+        assert(self.context_gid         in gid2epsilons.keys()) 
+        assert(self.gid                 in gid2epsilons.keys()) 
+        assert((self.gid == self.context_gid) or 
+               ((self.gid, self.context_gid) in casting_map.keys()))
+
+        temp_epss         = gid2epsilons[self.gid]
+        temp_context_epss = gid2epsilons[self.context_gid]
+        epss              = [] 
+        context_epss      = []
+
+        checkValidEpsilonList(temp_epss)
+        checkValidEpsilonList(temp_context_epss)
+
+        # scaling up the epsilons 
+        for i in range(0, len(temp_epss)): 
+            epss.append( tft_expr.ConstantExpr(temp_epss[i].value() * scaling_expr.value()) )
+        for j in range(0, len(temp_context_epss)): 
+            context_epss.append( tft_expr.ConstantExpr(temp_context_epss[j].value() * scaling_expr.value()) ) 
+
+        error_expr = None
+
+        if (not self.is_precise_opt): 
+            error_expr = IR.BE("*", -1, 
+                               GroupErrorVar(self.gid, 0), 
+                               epss[0], 
+                               True) 
+
+            for i in range(1, len(epss)): 
+                error_expr = IR.BE("+", -1, 
+                                   error_expr, 
+                                   IR.BE("*", -1, 
+                                         GroupErrorVar(self.gid, i), 
+                                         epss[i], 
+                                         True), 
+                                   True) 
+
+        tc_error = None 
+        
+        if (self.gid != self.context_gid): 
+            for i in range(0, len(epss)): 
+                for j in range(0, len(context_epss)): 
+                    if (epss[i] < context_epss[j]): 
+                        temp_error = IR.BE("*", -1, 
+                                           GroupErrorVar(self.gid, i), 
+                                           GroupErrorVar(self.context_gid, j), 
+                                           True) 
+                        temp_error = IR.BE("*", -1, 
+                                           temp_error, 
+                                           context_epss[j], 
+                                           # tft_expr.ConstantExpr(context_epss[j].value() + 
+                                           #                       (context_epss[j].value() * epss[i].value())), 
+                                           True) 
+                        if (tc_error is None): 
+                            tc_error = temp_error 
+                        else:
+                            tc_error = IR.BE("+", -1, 
+                                             tc_error, 
+                                             temp_error, 
+                                             True) 
+        
+        if   (error_expr is None and tc_error is None): 
+            return tft_expr.ConstantExpr(0.0)
+        elif (tc_error is None): 
+            return error_expr 
+        elif (error_expr is None): 
+            return tc_error
+        else: 
+            return IR.BE("+", -1, error_expr, tc_error, True) 
+
 
     def overApproxExpr (self, error_expr): 
         assert(isinstance(error_expr, tft_expr.ArithmeticExpr)) 
@@ -343,6 +420,7 @@ class ErrorForm:
         return tft_expr.ConstantExpr(up_fac / 8.0 ) # It is just a heuristic to divide by 8.0 
 
     def errorExpr (self, context_gid, gid): 
+        assert(False) 
         assert(type(context_gid)   is int) 
         assert(type(gid)           is int)
         assert(context_gid         in self.gid2epsilons.keys()) 
@@ -587,6 +665,8 @@ class ErrorForm:
 # ErrorForm Optimization 
 # ========
 def OptimizeErrorFormByGroup (eform): 
+    assert(False) # not a correct function... 
+
     assert(isinstance(eform, ErrorForm))
 
     opt_eform = ErrorForm(eform.upper_bound, eform.M2) 
