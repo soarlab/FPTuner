@@ -1060,17 +1060,22 @@ class BinaryPredicate (Predicate):
 
 
 # ==== some expression judgements ====
+def isPowerOf2 (f): 
+    assert(type(f) is float) 
+
+    log2 = math.log(abs(f), 2.0)
+    return (int(log2) == log2) 
+
 def isPreciseConstantExpr (expr): 
     assert(isinstance(expr, ConstantExpr)) 
+    f = float(expr.value())
 
-    if (expr.value() == 0): 
+    if (f == 0.0): 
+        return True
+    if (int(f) == f): 
         return True 
 
-    if (int(expr.value()) == float(expr.value())): 
-        return True 
-
-    log2 = math.log(abs(float(expr.value())), 2.0)
-    return (int(log2) == log2) 
+    return False 
 
 def isPreciseOperation (expr): 
     assert(isinstance(expr, Expr)) 
@@ -1097,39 +1102,45 @@ def isPreciseOperation (expr):
 
     elif (isinstance(expr, BinaryExpr)): 
         if (expr.operator.label in ["+", "-"]): 
-            if (isinstance(expr.lhs(), ConstantExpr) and (float(expr.lhs().value()) == 0.0)): 
+            if (isinstance(expr.lhs(), ConstantExpr) and 
+                (float(expr.lhs().value()) == 0.0)): 
                 return True 
-            if (isinstance(expr.rhs(), ConstantExpr) and (float(expr.rhs().value()) == 0.0)): 
+            if (isinstance(expr.rhs(), ConstantExpr) and 
+                (float(expr.rhs().value()) == 0.0)): 
                 return True 
             if (isinstance(expr.lhs(), VariableExpr) and 
                   (expr.lhs().hasBounds() and 
-                   (float(expr.lhs().lb().value()) == 0.0) and (float(expr.lhs().ub().value()) == 0.0))): 
+                   (float(expr.lhs().lb().value()) == 0.0) and 
+                   (float(expr.lhs().ub().value()) == 0.0))): 
                 return True 
             if (isinstance(expr.rhs(), VariableExpr) and 
                   (expr.rhs().hasBounds() and 
-                   (float(expr.rhs().lb().value()) == 0.0) and (float(expr.rhs().ub().value()) == 0.0))): 
+                   (float(expr.rhs().lb().value()) == 0.0) and 
+                   (float(expr.rhs().ub().value()) == 0.0))): 
                 return True
 
         elif (expr.operator.label in ["*"]): 
-            if (isinstance(expr.lhs(), ConstantExpr) and isPreciseConstantExpr(expr.lhs())): 
+            if (isinstance(expr.lhs(), ConstantExpr) and 
+                isPowerOf2(float(expr.lhs().value()))): 
                 return True
-            if (isinstance(expr.rhs(), ConstantExpr) and isPreciseConstantExpr(expr.rhs())): 
+            if (isinstance(expr.rhs(), ConstantExpr) and 
+                isPowerOf2(float(expr.rhs().value()))): 
                 return True 
-            if (isinstance(expr.lhs(), ConstantExpr) and (float(expr.lhs().value()) in [1.0, -1.0])): 
-                return True 
-            if (isinstance(expr.rhs(), ConstantExpr) and (float(expr.rhs().value()) in [1.0, -1.0])): 
-                return True 
+#            if (isinstance(expr.lhs(), ConstantExpr) and 
+#                (float(expr.lhs().value()) in [1.0, -1.0])): 
+#                return True 
+#            if (isinstance(expr.rhs(), ConstantExpr) and 
+#                (float(expr.rhs().value()) in [1.0, -1.0])): 
+#                return True 
             if (isinstance(expr.lhs(), VariableExpr) and 
-                  (expr.lhs().hasBounds() and 
-                   (expr.lhs().lb() == expr.lhs().ub()) and 
-                   (float(expr.lhs().lb().value()) in [1.0, -1.0]) and 
-                   (float(expr.lhs().ub().value()) in [1.0, -1.0]))): 
+                (expr.lhs().hasBounds() and 
+                 (expr.lhs().lb() == expr.lhs().ub()) and 
+                 isPowerOf2(float(expr.lhs().lb().value())))): 
                 return True 
             if (isinstance(expr.rhs(), VariableExpr) and 
-                  (expr.rhs().hasBounds() and 
-                   (expr.rhs().lb() == expr.rhs().ub()) and 
-                   (float(expr.rhs().lb().value()) in [1.0, -1.0]) and 
-                   (float(expr.rhs().ub().value()) in [1.0, -1.0]))): 
+                (expr.rhs().hasBounds() and 
+                 (expr.rhs().lb() == expr.rhs().ub()) and 
+                 isPowerOf2(float(expr.rhs().lb().value())))): 
                 return True 
 
         elif (expr.operator.label in ["/"]): 

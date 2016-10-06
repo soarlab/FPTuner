@@ -250,7 +250,7 @@ def EnsureM2 (alloc):
         
         # -- decide the ensuring result -- 
         if (err_total > error_threshold): 
-            tft_utils.VerboseMessage("M2 is higher than the threshold by " + str(float(err_total - error_threshold)))
+            tft_utils.VerboseMessage("Total error is higher than the threshold by " + str(float(err_total - error_threshold)))
             return float(err_total - error_threshold) 
 
     return True 

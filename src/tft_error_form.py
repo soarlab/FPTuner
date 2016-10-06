@@ -449,7 +449,9 @@ class ErrorForm:
         str_ret = str_ret + "-- # instanes " + str(self.nInstances()) + " --\n" 
 
         str_ret = str_ret + "-- upper bound --\n"
-        str_ret = str_ret + str(self.upper_bound) + " * " + str(self.scalingUpFactor()) + "\n"
+        assert(isinstance(self.upper_bound, tft_expr.ConstantExpr) and 
+               isinstance(self.scalingUpFactor(), tft_expr.ConstantExpr)) 
+        str_ret = str_ret + str(self.upper_bound) + " * " + str(self.scalingUpFactor()) + " = " + str(float(self.upper_bound.value()) * float(self.scalingUpFactor().value())) + "\n"
 
         str_ret = str_ret + "-- casting map --\n" 
         for p,c in self.casting_map.items(): 
