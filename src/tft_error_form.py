@@ -509,7 +509,7 @@ class ErrorForm:
         str_ret = str_ret + "-- error terms --\n" 
         for et in self.terms: 
 
-            str_ret = str_ret + "ET[" + str(et.index) +"] [CONTEXT: " + str(et.context_gid) + "] [GID: " + str(et.gid) + "]\n" 
+            str_ret = str_ret + "ET[" + str(et.index) +"] [CONTEXT: " + str(et.context_gid) + "] [GID: " + str(et.gid) + "] [Precise Opt: " + str(et.is_precise_opt) + "]\n" 
             str_ret = str_ret + str(et.stored_overapprox_expr) + "\n" 
 
 #            str_ret = str_ret + "-- first derivation expr --\n" 
@@ -665,8 +665,6 @@ class ErrorForm:
 # ErrorForm Optimization 
 # ========
 def OptimizeErrorFormByGroup (eform): 
-    assert(False) # not a correct function... 
-
     assert(isinstance(eform, ErrorForm))
 
     opt_eform = ErrorForm(eform.upper_bound, eform.M2) 
@@ -683,7 +681,7 @@ def OptimizeErrorFormByGroup (eform):
     # Need to overwrite eq_gids 
     opt_eform.eq_gids = eform.eq_gids[:] 
     # Need to overwrite constraints 
-    opt_eform.constraints = eform.constraints[:] 
+    opt_eform.constraints = eform.constraints[:]
 
     handled_etids = []
 
@@ -691,8 +689,9 @@ def OptimizeErrorFormByGroup (eform):
         if (et.index in handled_etids): 
             continue 
 
-        gid         = et.getGid() 
-        context_gid = et.getContextGid() 
+        gid            = et.getGid() 
+        context_gid    = et.getContextGid()
+        is_precise_opt = et.is_precise_opt
 
         assert(0 <= gid) 
 
@@ -706,7 +705,8 @@ def OptimizeErrorFormByGroup (eform):
                 continue 
 
             if ((gid         == et_p.getGid()) and 
-                (context_gid == et_p.getContextGid())): 
+                (context_gid == et_p.getContextGid()) and
+                ((is_precise_opt and et_p.is_precise_opt) or ((not is_precise_opt) and (not et_p.is_precise_opt)))): 
                 group.append(et_p)
                 handled_etids.append(et_p.index) 
 
@@ -722,7 +722,7 @@ def OptimizeErrorFormByGroup (eform):
         combined_expr = tft_expr.UnaryExpr(tft_expr.UnaryOp(-1, "abs"), 
                                            combined_expr) 
 
-        combined_et = ErrorTerm(combined_expr, context_gid, gid) 
+        combined_et = ErrorTerm(combined_expr, context_gid, gid, is_precise_opt) 
 
         assert(gid in eform.gid_counts.keys()) 
         

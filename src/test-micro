@@ -3,11 +3,11 @@ echo "========"
 echo "Benchmark: reduction-small"
 echo "========"
 
-# python3 ./fptuner.py -v -e "5e-04 1e-04 5e-05" -b "32 64" ../examples/micro/reduction-small.py
+python3 ./fptuner.py -v -e "5e-04 1e-04 5e-05" -b "32 64" ../examples/micro/reduction-small.py
 
 
 echo "========" 
 echo "Benchmark: reduction"
 echo "========"
 
-python3 ./fptuner.py -v -e "5e-04 1e-04 5e-05" -b "32 64" ../examples/micro/reduction.py
+# python3 ./fptuner.py -v -e "5e-04 1e-04 5e-05" -b "32 64" ../examples/micro/reduction.py

@@ -360,7 +360,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
         assert(len(tokens) == 2) 
 
         if (tokens[0] == "opt-error-form"): 
-            OPT_ERROR_FORM = False # tft_utils.String2Bool(tokens[1]) # the optimization is not good... 
+            OPT_ERROR_FORM = tft_utils.String2Bool(tokens[1]) 
             
         else: 
             sys.exit("ERROR: unknown option setting: " + ilines[0]) 
