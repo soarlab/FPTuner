@@ -1144,15 +1144,13 @@ def isPreciseOperation (expr):
                 return True 
 
         elif (expr.operator.label in ["/"]): 
-            if (isinstance(expr.rhs(), ConstantExpr) and (expr.rhs().value() != 0.0) and isPreciseConstantExpr(expr.rhs())): 
-                return True
-            if (isinstance(expr.rhs(), ConstantExpr) and (float(expr.rhs().value()) in [1.0, -1.0])): 
+            if (isinstance(expr.rhs(), ConstantExpr) and 
+                (isPowerOf2(float(expr.rhs().value())))): 
                 return True 
             if (isinstance(expr.rhs(), VariableExpr) and 
                 (expr.rhs().hasBounds() and 
                  (expr.rhs().lb() == expr.rhs().ub()) and 
-                 (float(expr.rhs().lb().value()) in [1.0, -1.0]) and 
-                 (float(expr.rhs().ub().value()) in [1.0, -1.0]))): 
+                 isPowerOf2(float(expr.rhs().lb().value())))): 
                 return True 
 
         else:

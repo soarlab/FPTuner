@@ -15,7 +15,7 @@ FPT_CFG_VERIFY_DETAIL_BB     = "__verify.detail.bb.cfg"
 FPTUNER_VERBOSE = False
 FPTUNER_DEBUG   = False 
 
-FIX_CONST_TYPE  = True 
+FIX_CONST_TYPE  = False 
 
 
 # ========
