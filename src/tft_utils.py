@@ -17,7 +17,58 @@ N_MAX_CASTINGS  = None
 FPTUNER_VERBOSE = False
 FPTUNER_DEBUG   = False 
 
-FIX_CONST_TYPE  = False 
+FIX_CONST_TYPE  = False
+
+USE_COLOR_TEXT  = True 
+
+
+
+# ========
+# The following color printing code is provided by Ian Briggs.
+# Thanks to his support!
+# ========
+def color_text(color_code, text):
+    assert(type(color_code) is str and
+           type(text) is str)
+    
+    if (USE_COLOR_TEXT): 
+        return "{}{}{}".format(color_code, text, "\x1b[0m")
+    else:
+        return text
+
+def txblack(text):
+    return color_text("\x1b[30m", text)
+
+def txred(text):
+    return color_text("\x1b[31m", text)
+
+def txgreen(text):
+    return color_text("\x1b[32m", text)
+
+def txyellow(text):
+    return color_text("\x1b[33m", text)
+
+def txblue(text):
+    return color_text("\x1b[34m", text)
+
+def txmagenta(text):
+    return color_text("\x1b[35m", text)
+
+def txcyan(text):
+    return color_text("\x1b[36m", text)
+
+def txwhite(text):
+    return color_text("\x1b[37m", text)
+
+def tx32bit(text):
+    return txgreen(text)
+
+def tx64bit(text):
+    return txblue(text)
+
+def tx128bit(text):
+    return txred(text) 
+
 
 
 # ========

@@ -161,11 +161,11 @@ class Alloc:
             etname = "Group " + str(gid)
             str_eps = Eps2ReaderString(eps)
             if   (str_eps == "EPSILON_32"): 
-                str_ret = str_ret + etname + " : 32-bit\n"
+                str_ret = str_ret + etname + " : " + tft_utils.tx32bit("32-bit") + "\n"
             elif (str_eps == "EPSILON_64"): 
-                str_ret = str_ret + etname + " : 64-bit\n"
+                str_ret = str_ret + etname + " : " + tft_utils.tx64bit("64-bit") + "\n"
             elif (str_eps == "EPSILON_128"):
-                str_ret = str_ret + etname + " : 128-bit\n"
+                str_ret = str_ret + etname + " : " + tft_utils.tx128bit("128-bit") + "\n"
             else:
                 sys.exit("Error: unknown bit-width candidate " + str_eps)
 

@@ -650,11 +650,11 @@ class ErrorForm:
             
         for str_bw in IR.PREC_CANDIDATES: 
             if   (str_bw == "e32"):
-                print ("# of 32-bit operators: "  + str(count_bw[tft_alloc.EPSILON_32]))
+                print ("# of 32-bit operators: "  + tft_utils.tx32bit(str(count_bw[tft_alloc.EPSILON_32])))
             elif (str_bw == "e64"): 
-                print ("# of 64-bit operators: "  + str(count_bw[tft_alloc.EPSILON_64]))
+                print ("# of 64-bit operators: "  + tft_utils.tx64bit(str(count_bw[tft_alloc.EPSILON_64])))
             elif (str_bw == "e128"):
-                print ("# of 128-bit operators: " + str(count_bw[tft_alloc.EPSILON_128]))
+                print ("# of 128-bit operators: " + tft_utils.tx128bit(str(count_bw[tft_alloc.EPSILON_128])))
                 pass 
             else: 
                 sys.exit("Error: invalid bit-width string: " + str_bw) 
