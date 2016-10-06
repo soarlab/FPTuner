@@ -41,7 +41,7 @@ Use
 ``` 
 to tune with two candidates, 64-bit and 128-bit. 
 
-USE 
+Use 
 ```
 -b "32 64 128"
 ``` 
@@ -51,6 +51,19 @@ Again, please remember to use quotation marks to enclose the bit-widths.
 
 ### Default 
 The default of **-b** option is "32 64". 
+
+
+## -maxc : maximum number of type casts
+
+Use
+```
+-maxc C
+```
+
+to limit up to C type casts in the allocation where C must be an integer.
+
+### Default
+Unlimited number of type casts. 
 
 
 
