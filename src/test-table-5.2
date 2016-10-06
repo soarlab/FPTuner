@@ -1,0 +1,41 @@
+
+echo "========"
+echo "Benchmark: cone area"
+echo "========" 
+
+python3 ./fptuner.py -e "5e-04 1e-04 5e-05" -b "32 64" ../examples/math/cone-area.py
+
+
+echo "========" 
+echo "Benchmark: sine" 
+echo "========" 
+
+python3 ./fptuner.py -e "1e-06 2e-07 1e-07" -b "32 64" ../examples/primitives/sine.py
+
+
+echo "========"
+echo "Benchmark: maxwell-boltzmann"
+echo "========" 
+
+python3 ./fptuner.py -e "1e-05 2e-06 1e-06" -b "32 64" ../examples/math/maxwell-boltzmann.py 
+
+
+echo "========"
+echo "Benchmark: gaussian"
+echo "========"
+
+python3 ./fptuner.py -e "5e-07 1e-07 5e-08" -b "32 64" ../examples/math/gaussian.py
+
+
+echo "========" 
+echo "Benchmark: jet" 
+echo "========" 
+
+python3 ./fptuner.py -e "5e-02 1e-02 5e-03" -b "32 64" ../examples/primitives/jet.py
+
+
+echo "========" 
+echo "Benchmark: reduction"
+echo "========"
+
+python3 ./fptuner.py -e "5e-04 1e-04 5e-05" -b "32 64" ../examples/micro/reduction.py
