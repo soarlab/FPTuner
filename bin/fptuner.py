@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python3 
 
 import os 
 import sys 
@@ -22,7 +22,6 @@ import imp
 
 # ==== get parameters ====
 INPUT_FILE   = None 
-CONFIG_FILE  = "default.fptconf" 
 
 i = 1
 while True: 
@@ -31,15 +30,7 @@ while True:
 
     arg_in = sys.argv[i] 
 
-    if   (arg_in == "-c"): 
-        i = i + 1 
-        if (i >= len(sys.argv)): 
-            sys.exit("Error: missing configuration file") 
-
-        arg_in      = sys.argv[i] 
-        CONFIG_FILE = arg_in
-
-    elif (arg_in == "-v"): 
+    if   (arg_in == "-v"): 
         tft_utils.FPTUNER_VERBOSE = True 
 
     elif (arg_in == "-debug"): 
@@ -97,8 +88,6 @@ assert(INPUT_FILE.endswith(".py"))
 
 if (len(tft_tuning.ERROR_BOUNDS) == 0): 
     sys.exit("Error: no error bound is specified... Please use -e to specify error bounds.") 
-
-assert(os.path.isfile(CONFIG_FILE)) 
 
 
 # ==== load the input file as a module ====
