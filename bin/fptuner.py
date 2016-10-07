@@ -143,7 +143,8 @@ for i in range(0, len(tft_tuning.ERROR_BOUNDS)):
     print ("==== error bound : " + str(tft_tuning.ERROR_BOUNDS[i]) + " ====") 
     tft_tuning.PrintAlloc(alloc, eforms) 
     print ("") 
-
+    tft_ir_backend.ExportColorInsts(alloc)
+    
     # -- synthesize the mixed precision cpp file -- 
     if   (alloc is None): 
         print ("Warning: no allocation was generated... Thus no .cpp file will be generated...") 

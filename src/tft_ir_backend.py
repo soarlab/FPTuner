@@ -6,7 +6,7 @@ from fractions import Fraction
 import tft_expr 
 import tft_ir_api 
 import tft_alloc 
-
+import tft_utils
 
 
 # ========
@@ -288,6 +288,49 @@ def FPTaylorExpr (expr, alloc):
 
     sys.exit("Error: not supported expr 4 FPTaylorExpr...") 
 
+def color(plain, my_bw, exp):
+    if plain:
+        return exp
+    if   (my_bw == tft_alloc.EPSILON_32):
+        return tft_utils.tx32bit(exp)
+    elif (my_bw == tft_alloc.EPSILON_64):
+        return tft_utils.tx64bit(exp)
+    elif (my_bw == tft_alloc.EPSILON_128):
+        return tft_utils.tx128bit(exp)
+    else:
+        sys.exit("Error: unsupported bit-width: " + str(my_bw))
+
+def ColorExpr(expr, alloc, plain=False):
+    def _ColorExpr(expr, alloc):
+        assert(isinstance(expr, tft_expr.Expr))
+        assert(isinstance(alloc, tft_alloc.Alloc))
+
+        if (isinstance(expr, tft_expr.ConstantExpr)):
+            return color(plain, tft_alloc.EPSILON_128, str(float(expr.value())))
+
+        bw_mine = alloc[expr.getGid()]
+        if (isinstance(expr, tft_expr.VariableExpr)):
+            if (tft_expr.isConstVar(expr)):
+                assert(expr.lb() == expr.ub())
+                return color(plain, bw_mine, expr.ub().toCString())
+            else:
+                return color(plain, bw_mine, expr.label())
+
+        if (isinstance(expr, tft_expr.UnaryExpr)):
+            str_opd = _ColorExpr(expr.opd(), alloc)
+            str_opd = color(plain, bw_mine, "(") + str_opd + color(plain, bw_mine, ")")
+            return color(plain, bw_mine, expr.operator.label+" ") + str_opd
+
+        if (isinstance(expr, tft_expr.BinaryExpr)):
+            str_lhs = _ColorExpr(expr.lhs(), alloc)
+            str_rhs = _ColorExpr(expr.rhs(), alloc)
+            str_lhs = color(plain, bw_mine, "(") + str_lhs + color(plain, bw_mine, ")")
+            str_rhs = color(plain, bw_mine, "(") + str_rhs + color(plain, bw_mine, ")")
+            return color(plain, bw_mine, expr.operator.label+" ") + str_lhs + " \n" + str_rhs
+
+        sys.exit("Error: not supported expr 4 ColorExpr...")
+    bw_mine = alloc[expr.getGid()]
+    return color(plain, bw_mine, "(") + _ColorExpr(expr, alloc) +color(plain, bw_mine, ")")
 
 
 # ==== to FPTaylor query ====
@@ -319,6 +362,35 @@ def ExportExpr4FPTaylorSanitation (expr, alloc, qfname):
 
     qfile.close() 
 
+
+# ==== to colored s-expression ====
+def ExportColorInsts(alloc):
+    assert((type(N_CPP_REPEATS) is int) and (1 <= N_CPP_REPEATS))
+    assert(isinstance(alloc, tft_alloc.Alloc))
+    assert(all([isinstance(expr, tft_expr.Expr) for expr in tft_ir_api.CPP_INSTS]))
+
+    print("Expression:")
+    # colored version for printing
+    s = ColorExpr(tft_ir_api.CPP_INSTS[-1], alloc)
+    color_s = s.splitlines()
+    # uncolored version for calculating indentation
+    # (ansi escape code mess up len(str))
+    s = ColorExpr(tft_ir_api.CPP_INSTS[-1], alloc, True)
+    plain_s = s.splitlines()
+    indent = 0
+    cline = ""
+    line = ""
+    for s,cs in zip(plain_s, color_s):
+        if len(line) + len(s) > 80-indent:
+            print(' '*indent + cline)
+            indent += line.count("(") - line.count(")")
+            cline = cs
+            line = s
+        else:
+            cline += cs
+            line += s
+
+    print(" "*indent + cline)
 
 
 # ==== to .cpp file ==== 
