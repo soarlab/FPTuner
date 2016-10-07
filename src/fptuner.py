@@ -45,6 +45,9 @@ while True:
     elif (arg_in == "-debug"): 
         tft_utils.FPTUNER_VERBOSE = True
         tft_utils.FPTUNER_DEBUG   = True
+
+    elif (arg_in == "-no-m2-check"): 
+        tft_utils.NO_M2_CHECK     = True  
         
     elif (arg_in == "-maxc"):
         i = i + 1

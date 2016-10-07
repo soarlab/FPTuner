@@ -273,6 +273,9 @@ def SolveErrorForms (eforms = [], optimizers = {}):
         alloc = tft_solver.FirstLevelAllocSolver(optimizers, eforms) 
         
         if (alloc is None): 
+            break
+
+        if (tft_utils.NO_M2_CHECK): 
             break 
 
         # -- check the effect of M2 -- 

@@ -21,6 +21,8 @@ FIX_CONST_TYPE  = False
 
 USE_COLOR_TEXT  = True 
 
+NO_M2_CHECK     = False 
+
 
 
 # ========
