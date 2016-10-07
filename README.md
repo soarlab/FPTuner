@@ -121,7 +121,7 @@ For example, the following option results in two allocations generated for the t
 
 # To POPL Artifact Evaluation Reviewers
 ## Reproduce the tuning results of Table 5.1 and Table 5.2
-The tuning results of Table 5.1 are shown under collumn "# of double-ops forced by Es" and the results of Table 5.2 are shown under collumn "# of single-ops forced by Es." 
+The tuning results of Table 5.1 are shown under column "# of double-ops forced by Es" and the results of Table 5.2 are shown under column "# of single-ops forced by Es." 
 With a correct installation of FPTuner (e.g., the above hello-world example works), the fastest way to reproduce the two tables is using the scripts under directory **bin**. 
 
 For Table 5.1, please run (under directory **bin**) 
@@ -148,7 +148,7 @@ In addition, FPTuner's performance is currently dominated by global optimization
 Consequently, there may be few tuning results don't exactly match with what they are shown in the paper. 
 
 
-## Idividually running the Benchmarks 
+## Individually running the Benchmarks 
 Similar to the hello-world example, we can run each of the benchmarks with the following command (under directory **bin**): 
 ```
 python3 ./fptuner.py -e "0.001 0.0001" -b "32 64" path-to-the-benchmark
