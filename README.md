@@ -4,7 +4,7 @@
 
 # Installation 
 
-## Reguired applications 
+## Required applications 
 
 - git 
 
@@ -48,7 +48,7 @@ Please follow the instruction for the setup.
 # Using FPTuner 
 To test the installation, please try out the hello-world example through the following steps: 
 
-1. Go to directory **src** under the root of FPTuner. 
+1. Go to directory **bin** under the root of FPTuner. 
 
 2. Run command 
     ```
@@ -81,7 +81,7 @@ The later section "**Example of Expression Specification**" describes how to spe
 
 
 ## Output
-FPTuner prints the allocation on console. 
+FPTuner prints the allocation on the console. 
 In the example output, for example, 
 ```
 Group 0 : 32-bit
@@ -119,9 +119,37 @@ For example, the following option results in two allocations generated for the t
 
 
 
-# Running the Benchmarks 
-FPTuner is evaluated with a set of benchmarks. 
-Similar to the hello-world example, we can run each of the benchmarks with the following command (under directory **src**): 
+# To POPL Artifact Evaluation Reviewers
+## Reproduce the tuning results of Table 5.1 and Table 5.2
+The tuning results of Table 5.1 are shown under collumn "# of double-ops forced by Es" and the results of Table 5.2 are shown under collumn "# of single-ops forced by Es." 
+With a correct installation of FPTuner (e.g., the above hello-world example works), the fastest way to reproduce the two tables is using the scripts under directory **bin**. 
+
+For Table 5.1, please run (under directory **bin**) 
+```
+source test-table-5.1
+```
+
+For Table 5.2, please run (under directory **bin**)
+```
+source test-table-5.2
+```
+
+
+## Performance and energy measurements
+We currently don't offer the scripts to automatically measure performance and energy. 
+However, as demonstrated through the hello-world example, the .cpp files of the corresponding mixed precision allocations are offered. 
+You can freely do performance and energy measurements with those .cpp files on your platforms. 
+
+
+## Tuning results and tuning performance may be affected by global optimization
+The tuning results and the tuning performance of FPTuner are affected by the underlying global optimization. 
+The global optimization may calculate tight bounds (resp., loose bounds) of the first derivatives that result in more (resp., fewer) low-precision operators. 
+In addition, FPTuner's performance is currently dominated by global optimization. 
+Consequently, there may be few tuning results don't exactly match with what they are shown in the paper. 
+
+
+## Idividually running the Benchmarks 
+Similar to the hello-world example, we can run each of the benchmarks with the following command (under directory **bin**): 
 ```
 python3 ./fptuner.py -e "0.001 0.0001" -b "32 64" path-to-the-benchmark
 ```
@@ -218,7 +246,7 @@ Expressions having the same group ID will be assigned with the same bit-width.
 3. The third argument is the left-hand-side operand. 
 In this case, it is variable A. 
 
-4. The forth argument is the right-hand-side operand. 
+4. The fourth argument is the right-hand-side operand. 
 In this case, it is variable B. 
 
 Similarly, 

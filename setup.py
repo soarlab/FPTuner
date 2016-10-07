@@ -156,6 +156,11 @@ def MakeClean ():
                        "rm gurobi.log",
                        "rm -rf saved-gelpia-queries"])
 
+    CleanDir("./bin", ["rm __fptaylor_m2_check_query.txt", 
+                       "rm __fpt_query", 
+                       "rm gurobi.log",
+                       "rm -rf saved-gelpia-queries"])
+
     CleanDir("./examples", ["rm *.cpp"]) 
 
     CleanDir("./examples/primitives", ["rm *.cpp"]) 
