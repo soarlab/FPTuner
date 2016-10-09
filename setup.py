@@ -179,7 +179,8 @@ if   (OPT_SETUP == "install"):
     # install the required tools
     # ----
     InstallFPTaylor("develop")
-    InstallGelpia("RustAD") 
+    # InstallGelpia("RustAD") 
+    InstallGelpia("ArtifactEvaluation") 
 
 
     # ----
