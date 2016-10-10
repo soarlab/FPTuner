@@ -60,7 +60,7 @@ sudo apt-get install -y git python3-ply bison flex ocaml g++ make
 	    - **Note**: the version of Gurobi is assumed to be 6.5.2; your Gurobi path may be different.
         - There should be a directory similar to **$GUROBI_HOME/lib/python3.4_utf32**.
 	    - **Note**: type ```python3 --version``` to find the version on your system. If it is Python 3.5, use 
-	    ***$GUROBI_HOME/lib/python3.5_utf32*** instead.
+	    **$GUROBI_HOME/lib/python3.5_utf32** instead.
         - Add this to your environment (under bash) with
 	
 	      ```
