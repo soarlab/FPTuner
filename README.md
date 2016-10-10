@@ -47,7 +47,12 @@
     ```
 4. Set up the required environment variables. 
 The installation script used in the previous step will print out the instruction of setting up the related environment variables. 
-Please follow the instruction for the setup. 
+Please follow the instruction for the setup.
+
+### To uninstall, run
+```
+python3 setup.py uninstall 
+```
 
 
 
@@ -129,7 +134,7 @@ For example, the following option results in two allocations generated for the t
 ## Reproduce the tuning results of Table 5.1 and Table 5.2
 The tuning results of Table 5.1 are shown under column "# of double-ops forced by Es" and the results of Table 5.2 are shown under column "# of single-ops forced by Es." 
 With a correct installation of FPTuner (e.g., the above hello-world example works), the fastest way to reproduce the two tables is using the scripts under directory **bin**. 
-
+f
 For Table 5.1, please run (under directory **bin**) 
 ```
 source test-table-5.1
