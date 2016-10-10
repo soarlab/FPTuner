@@ -106,7 +106,7 @@ class GurobiSolver:
                         tasks.append(["left", this_task[2].operator.label, this_task[2].lhs(), this_task[2].rhs()]) 
 
                     else:
-                        assert("ERROR: not supported expr. type...") 
+                        assert(False), "Not supported expr. type for Gurobi..."
                 
                 elif (this_task[0] == "right"): 
                     if (isinstance(this_task[3], tft_expr.ConstantExpr) or isinstance(this_task[3], tft_expr.VariableExpr)):                 

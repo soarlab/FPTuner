@@ -180,9 +180,9 @@ def GetFirstDerivations (expr):
         WriteGetFirstDerivationQueryFile(expr, vs) 
 
         # -- run fptaylor -- 
-        tft_utils.checkFPTaylorInstallation("master") 
+        assert(tft_utils.checkFPTaylorInstallation("develop")), "FPTaylor is not installed or the environment variables FPTAYLOR_BASE and FPTAYLOR are not set." 
         cfg_first = os.environ["FPTAYLOR_BASE"] + "/" + tft_utils.FPT_CFG_FIRST 
-        assert(os.path.isfile(cfg_first)) 
+        assert(os.path.isfile(cfg_first)), "Missing FPTaylor configuration file: " + cfg_first
 
         command_fpt = os.environ["FPTAYLOR"] + " -c " + cfg_first + " " + FNAME_FPT_QUERY 
 

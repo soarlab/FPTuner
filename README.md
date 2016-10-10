@@ -21,7 +21,21 @@ sudo apt-get isntall -y git python3-ply bison flex ocaml g++
 ```
 
 
-- Gurobi v6.5. Note that FPTuner's installation script **does not** automatically install Gurobi. Please go to <a href=http://www.gurobi.com/>Gurobi website</a> and follow the installation instructions. It is free for academic use (the academic license is free).
+- Gurobi v6.5. Note that FPTuner's installation script **does not** automatically install Gurobi. Please follow the following stpes to install Gurobi and acquire a free academic license. 
+    - Installation. 
+        - On <a href="www.gurobi.com">www.gurobi.com</a> tab "DOWNLOADS," select "Download Center." 
+        - Select "Gurobi Optimizer." You need to register an account for the academic licenses also. 
+        - Download "gurobi6.5.2_linux64.tar.gz" and untar with ``tar -xvf gurobi6.5.2_linux64.tar.gz``
+        - ``cd gurobi652/linux64`` and ``./setup.py build``
+    - Set environment variables as the following example commands work under bash: 
+        - export GUROBI_HOME=your-path/gurobi652/linux64
+        - export PATH=$GUROBI_HOME/bin:$PATH
+        - export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
+    - Acquire an academic license. 
+        - Go to <a href="https://user.gurobi.com/download/licenses/free-academic">https://user.gurobi.com/download/licenses/free-academic</a>
+        - Read the User License Agreement and the conditions, then click "Request License."  
+        - Copy the command "grbgetkey your-activation-code" shown on the screen.
+        - Under the **bin** directory of your Gurobi installation, run the grbgetkey command which you just copied. This command will require you to enter a path to store the license key file. The grbgetkey command will indicate you to setup environment variable **GRB_LICENSE_FILE** to a path to the license file.
     - After the installation, add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
         - Assuming Gurobi is installed under **/home/myname/gurobi652/linux64**.  
 	    - **Note**: the version of Gurobi is assumed to be 6.5.2; your Gurobi path may be different.
@@ -34,9 +48,10 @@ sudo apt-get isntall -y git python3-ply bison flex ocaml g++
 	      export PYTHONPATH=/home/myname/gurobi652/linux64/lib/python3.4_utf32:$PYTHONPATH
 	      export LD_LIBRARY_PATH=/home/myname/gurobi652/linux64/lib/:$LD_LIBRARY_PATH
 	      ```
+    - For more installation details, please refer to the <a href="http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf">user menu</a>. 
 
 
-## How to install? 
+## How to install FPTuner? 
 
 1. Download FPTuner from our github repository: 
     ```

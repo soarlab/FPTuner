@@ -42,11 +42,11 @@ while True:
         
     elif (arg_in == "-maxc"):
         i = i + 1
-        assert(i < len(sys.argv))
+        assert(i < len(sys.argv)), "No maximum number of type casts is given." 
 
         tft_utils.N_MAX_CASTINGS = int(sys.argv[i])
         assert(type(tft_utils.N_MAX_CASTINGS) is int and
-               tft_utils.N_MAX_CASTINGS >= 0)
+               tft_utils.N_MAX_CASTINGS >= 0), "The number of maximum type casts must be a non-negative integer."
 
     elif (arg_in == "-e"): 
         i = i + 1 
@@ -54,7 +54,7 @@ while True:
         tokens                  = tft_utils.String2Tokens(sys.argv[i], " ") 
         tft_tuning.ERROR_BOUNDS = [float(tokens[ii]) for ii in range(0, len(tokens))] 
         
-        assert(all([tft_tuning.ERROR_BOUNDS[ii] > 0.0 for ii in range(0, len(tft_tuning.ERROR_BOUNDS))]))
+        assert(all([tft_tuning.ERROR_BOUNDS[ii] > 0.0 for ii in range(0, len(tft_tuning.ERROR_BOUNDS))])),"Invalid form of error threshold list. Please refer to the reference for the accepted form." 
 
     elif (arg_in == "-b"): 
         i = i + 1 
@@ -73,7 +73,7 @@ while True:
             sys.exit("Error: not supported bit-width candidates: " + str(bwidths)) 
 
     else: 
-        assert(INPUT_FILE is None) 
+        assert(INPUT_FILE is None), "No expression specification is given." 
         INPUT_FILE = arg_in 
 
     i = i + 1
@@ -84,7 +84,7 @@ if (INPUT_FILE is None):
     sys.exit("Error: no input file is specified...") 
 if (not os.path.isfile(INPUT_FILE)): 
     sys.exit("Error: input expression file doesn't exist: " + INPUT_FILE)
-assert(INPUT_FILE.endswith(".py")) 
+assert(INPUT_FILE.endswith(".py")), "Non-python expression specification is given." 
 
 if (len(tft_tuning.ERROR_BOUNDS) == 0): 
     sys.exit("Error: no error bound is specified... Please use -e to specify error bounds.") 
