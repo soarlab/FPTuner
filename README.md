@@ -3,7 +3,7 @@
 
 
 # Installation 
-- FPTuner has been tested on Ubuntu 12.04+ on x86_64
+- FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64
 ## Requirements
 
 - git 
