@@ -4,6 +4,8 @@
 
 # Installation 
 - FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64
+
+
 ## Requirements
 
 - git 
@@ -28,9 +30,11 @@ sudo apt-get isntall -y git python3-ply bison flex ocaml g++
         - Download "gurobi6.5.2_linux64.tar.gz" and untar with ``tar -xvf gurobi6.5.2_linux64.tar.gz``
         - ``cd gurobi652/linux64`` and ``./setup.py build``
     - Set environment variables as the following example commands work under bash: 
-        - export GUROBI_HOME=your-path/gurobi652/linux64
-        - export PATH=$GUROBI_HOME/bin:$PATH
-        - export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
+        ```
+        export GUROBI_HOME=your-path/gurobi652/linux64
+        export PATH=$GUROBI_HOME/bin:$PATH
+        export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
+        ```
     - Acquire an academic license. 
         - Go to <a href="https://user.gurobi.com/download/licenses/free-academic">https://user.gurobi.com/download/licenses/free-academic</a>
         - Read the User License Agreement and the conditions, then click "Request License."  
