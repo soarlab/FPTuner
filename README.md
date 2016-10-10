@@ -9,22 +9,23 @@
 - git 
 
 - Python3 
-    - FPTuner currently supports python3 only. We strongly recommend setting **python** command to be an alias of **python3**. 
+    - FPTuner currently supports python3 only. We strongly recommend setting the **python** command to be an
+     alias for **python3**. 
 
-- <a href=https://github.com/soarlab/FPTaylor>FPTaylor</a>. FPTuner's installation script (described later) automatically installs FPTaylor. However, you need to manually install the following required packages:
+- <a href=https://github.com/soarlab/FPTaylor>FPTaylor</a>. FPTuner's installation script (described later)
+  automatically installs FPTaylor. However, you need to manually install the following required packages:
     - OCaml 4.0 or later
 
 - <a href=https://github.com/soarlab/gelpia>Gelpia</a>. FPTuner's installation script automatically installs Gelpia. However, you need to manually install the following required packages: 
     - bison
     - flex
-    - ply for Pthon3
+    - ply for Python3
 
 - Gurobi v6.5. Note that FPTuner's installation script **does not** automatically install Gurobi. Please go to <a href=http://www.gurobi.com/>Gurobi website</a> and follow the installation instructions. It is free for academic use (the academic license is free). 
     - After the installation, add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
         - Assume that Gurobi is install under **/home/myname/gurobi650/linux64**.  
         - There should be a directory similar to **/home/myname/gurobi650/linux64/lib/python3.4_utf32**. 
         - Add path (under bash) with
-	
 	      ```
 	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPAH
 	      ```
@@ -32,7 +33,7 @@
 
 ## How to install? 
 
-1. Acquire FPTuner from our github repository: 
+1. Download FPTuner from our github repository: 
     ```
     git clone https://github.com/soarlab/FPTuner
     ```
