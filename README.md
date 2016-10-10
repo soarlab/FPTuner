@@ -1,5 +1,8 @@
 <h1> FPTuner: Rigorous Floating-point Mixed Precision Tuner </h1> 
-<img src="misc/logo.png" width=300 alt="Logo" >
+
+<img src="misc/logo.png" width=300 alt="Logo" align="right">
+FPTuner is a rigorous tool for automatic precision-tuning of real valued expressions. FPTuner generates a mixed-precision allocation (single, double or quadruple precision) on a given input domain that is guaranteed to have error below a given threshold. Users can group expressions, forcing these expressions to be allocated at the same precision, enabling vectorization. FPTuner also allows for controlling the maximum number of type-casts in an expression.
+
 # Table of Contents
 - [Installation](#installation)
     - [Requirements](#installation-requirements)
