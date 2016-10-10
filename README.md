@@ -3,7 +3,7 @@
 
 
 # Installation 
-- FPTuner has been tested on Ubuntu 12.04+ on x86_64
+- FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64
 ## Requirements
 
 - git 
@@ -146,12 +146,12 @@ With a correct installation of FPTuner (e.g., the above hello-world example work
 
 For Table 5.1, please run (under directory **bin**) 
 ```
-source test-table-5.1
+./test-table-5.1
 ```
 
 For Table 5.2, please run (under directory **bin**)
 ```
-source test-table-5.2
+./test-table-5.2
 ```
 
 
