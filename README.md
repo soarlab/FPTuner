@@ -39,7 +39,7 @@ sudo apt-get install -y git python3-ply bison flex ocaml g++ make
 
 - Gurobi v6.5. Note that FPTuner's installation script **does not** automatically install Gurobi. Please follow the following stpes to install Gurobi and acquire a free academic license. 
     - Installation. 
-        - On <a href="www.gurobi.com">www.gurobi.com</a> tab "DOWNLOADS," select "Download Center." 
+        - On <a href="http://www.gurobi.com">Gurobi website</a> tab "DOWNLOADS," select "Download Center." 
         - Select "Gurobi Optimizer." You need to register an account for the academic licenses also. 
         - Download "gurobi6.5.2_linux64.tar.gz" and untar with ``tar -xvf gurobi6.5.2_linux64.tar.gz``
         - ``cd gurobi652/linux64`` and ``./setup.py build``
