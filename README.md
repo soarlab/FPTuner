@@ -17,7 +17,7 @@
 
 
 # <a name="installation"></a>Installation 
-- FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64
+- FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64 (16.04 recommended)
 
 
 ## <a name="installation-requirements"></a>Requirements
