@@ -1,7 +1,7 @@
 <h1> FPTuner: Rigorous Floating-point Mixed Precision Tuner </h1> 
 
 # Table of Contents
-- [Installation](installation)
+- [Installation](#installation)
     - [Requirements](installation-requirements)
     - [How to install FPTuner?](installation-fptuner) 
     - [Test installation](installation-test) 
