@@ -24,6 +24,7 @@
         - Assume that Gurobi is install under **/home/myname/gurobi650/linux64**.  
         - There should be a directory similar to **/home/myname/gurobi650/linux64/lib/python3.4_utf32**. 
         - Add path (under bash) with
+	
 	      ```
 	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPAH
 	      ```
