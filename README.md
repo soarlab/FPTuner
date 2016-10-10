@@ -42,7 +42,7 @@ sudo apt-get install git
 	    ***/home/myname/gurobi650/linux64/lib/python3.5_utf32*** instead
         - Add path (under bash) with
 	      ```
-	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPAH
+	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPATH
 	      ```
 
 
