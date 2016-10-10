@@ -8,7 +8,11 @@
 - [To POPL Artifact Evaluation Reviewers](#to-popl-ae)
     - [Reproduce the tuning results of Table 5.1 and Table 5.2](#to-popl-ae-tables)
     - [Performance and energy measurements](#to-popl-ae-perf-energy) 
-    
+    - [Tuning results and tuning performance may be affected by global optimization](#to-popl-ae-global-opt)
+    - [Individually running the Benchmarks](#to-popl-ae-run-others)
+    - [Reference](#to-popl-ae-reference)     
+- [Example of Expression Specification](#expr-specification) 
+- [Acknowledgements](#acknowledgements)
 
 
 
@@ -177,7 +181,7 @@ In addition, FPTuner's performance is currently dominated by global optimization
 Consequently, there may be tuning results which don't exactly match results shown in the paper. 
 
 
-## Individually running the Benchmarks 
+## <a name="to-popl-ae-run-others"></a>Individually running the Benchmarks 
 Similar to the hello-world example, we can run each of the benchmarks with the following command (under directory **bin**): 
 ```
 python3 ./fptuner.py -e "0.001 0.0001" -b "32 64" path-to-the-benchmark
@@ -208,11 +212,9 @@ The following table offers the benchmark names and their relative paths to the r
 | reduction    | examples/micro/reduction.py |
 
 
-## Reference
+## <a name="to-popl-ae-reference"></a>Reference
 The complete reference of FPTuner is given in <a href="https://github.com/soarlab/FPTuner/blob/master/Reference.md">Reference.md</a>. 
 
-
-## Advance usages
 Here we introduce some more tuning options provided by FPTuner.
  
 ### Candidate bit-widths
@@ -235,7 +237,7 @@ For example, the following option results in two allocations generated for the t
 
 
 
-# Example of Expression Specification
+# <a name="expr-specification"></a>Example of Expression Specification
 FPTuner decides the optimal bit-widths of the operators in the floating-point implementations of real-number computations.
 
 At this point, FPTuner provides a Python interface that allows the users to specify their the real-number computations. 
@@ -324,5 +326,5 @@ Function **IR.TuneExpr** specifies the expression to tune.
 
 
 
-# Acknowledgements 
+# <a name="acknowledgements"></a>Acknowledgements 
 Supported in part by NSF grants 1643056, 1421726, and 1642958. 
