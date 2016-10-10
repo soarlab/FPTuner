@@ -39,8 +39,8 @@ sudo apt-get install git
         - Assume that Gurobi is install under **/home/myname/gurobi650/linux64**.  
         - There should be a directory similar to **/home/myname/gurobi650/linux64/lib/python3.4_utf32**.
 	    - Note: type ```python3 --version``` to find the version on your system. If it is Python 3.5, use 
-	    ***/home/myname/gurobi650/linux64/lib/python3.5_utf32*** instead
-        - Add this to your python path (under bash) with
+	    ***/home/myname/gurobi650/linux64/lib/python3.5_utf32*** instead.
+        - Add this to your Python path (under bash) with
 	
 	      ```
 	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPATH
