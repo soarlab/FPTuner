@@ -32,7 +32,7 @@ sudo apt-get isntall -y git python3-ply bison flex ocaml g++
 	
 	      ```
 	      export PYTHONPATH=/home/myname/gurobi652/linux64/lib/python3.4_utf32:$PYTHONPATH
-     	      export LD_LIBRARY_PATH=/home/myname/gurobi652/linux64/lib/:$LD_LIBRARY_PATH
+	      export LD_LIBRARY_PATH=/home/myname/gurobi652/linux64/lib/:$LD_LIBRARY_PATH
 	      ```
 
 
