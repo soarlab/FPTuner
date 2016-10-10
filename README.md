@@ -1,5 +1,8 @@
 <h1> FPTuner: Rigorous Floating-point Mixed Precision Tuner </h1> 
 
+# Table of Contents
+## [To POPL Artifact Evaluation Reviewers](to-popl-ae)
+
 
 
 # Installation 
@@ -118,14 +121,14 @@ In addition, a .cpp file **helloworld0.0.001.cpp** will be generated.
 Now we describe how to use FPTuner with this hello-world example. 
 
 
-## Input 
+### Input 
 FPTuner takes an expression specification and an user-specified error threshold for generating the optimal allocation. 
 In the command ```python3 ./fptuner.py -e 0.001 ../examples/helloworld0.py```, file **helloworld0.py** is the expression specification and **-e 0.001** specifies 1e-03 as the error threshold. 
 
 The later section "**Example of Expression Specification**" describes how to specify the expression through the python-based interface. 
 
 
-## Output
+### Output
 FPTuner summarizes the number of 32- and 64-bit operators, prints the allocation on the console. 
 In the example output, for example, 
 ```
@@ -138,7 +141,7 @@ In addition to the console output, a .cpp file is synthesized by FPTuner which i
 
 
 
-# To POPL Artifact Evaluation Reviewers
+# <a name="to-popl-ae"></a>To POPL Artifact Evaluation Reviewers
 ## Reproduce the tuning results of Table 5.1 and Table 5.2
 The tuning results of Table 5.1 are shown under column "# of double-ops forced by Es" and the results of Table 5.2 are shown under column "# of single-ops forced by Es." 
 With a correct installation of FPTuner (e.g., the above hello-world example works), the fastest way to reproduce the two tables is using the scripts under directory **bin**. 
