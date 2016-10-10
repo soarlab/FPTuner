@@ -33,7 +33,7 @@
 
 On Ubuntu these can all be installed with
 ```
-sudo apt-get isntall -y git python3-ply bison flex ocaml g++
+sudo apt-get install -y git python3-ply bison flex ocaml g++ make
 ```
 
 
