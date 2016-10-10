@@ -83,8 +83,7 @@ python3 setup.py uninstall
 ```
 
 
-
-# Using FPTuner 
+## Test installation
 To test the installation, please try out the hello-world example through the following steps: 
 
 1. Go to directory **bin** under the root of FPTuner. 
@@ -96,6 +95,10 @@ To test the installation, please try out the hello-world example through the fol
 The console output of FPTuner should be the following: 
 ```
 ==== error bound : 0.001 ====
+Total # of operators: 5
+# of 32-bit operators: 2
+# of 64-bit operators: 3
+
 ---- alloc. ----
 Group 0 : 32-bit
 Group 1 : 32-bit
@@ -107,6 +110,9 @@ Group 4 : 64-bit
 # L2H castings: 2
 # H2L castings: 0
 # Castings: 2
+
+Expression:
+(* (+ (A) (B)) (C))
 ```
 In addition, a .cpp file **helloworld0.0.001.cpp** will be generated. 
 Now we describe how to use FPTuner with this hello-world example. 
@@ -120,7 +126,7 @@ The later section "**Example of Expression Specification**" describes how to spe
 
 
 ## Output
-FPTuner prints the allocation on the console. 
+FPTuner summarizes the number of 32- and 64-bit operators, prints the allocation on the console. 
 In the example output, for example, 
 ```
 Group 0 : 32-bit
@@ -129,32 +135,6 @@ denotes that the group 0 (gang 0) operators are assigned 32-bit precision.
 **# L2H castings** (resp., **# H2L castings**) indicates the number of low-to-high (resp., high-to-low) type casts in this allocation. 
 **# Castings** is the summation of **# L2H castings** and **# H2L castings**. 
 In addition to the console output, a .cpp file is synthesized by FPTuner which implements the allocation. 
-
-
-## Reference
-The complete reference of FPTuner is given in <a href="https://github.com/soarlab/FPTuner/blob/master/Reference.md">Reference.md</a>. 
-
-
-## Advance usages
-Based on this hello-world example, we introduce some more tuning options provided by FPTuner.
- 
-### Candidate bit-widths
-FPTuner tunes for mixed 32- and 64-bit by default. 
-Tuning for mixed 64- and 128-bit can be done with option 
-```
--b "64 128"
-```
-FPTuner currently supports tuning for the following three bit-width candidate sets: 
-- 32- and 64-bit (specified with ```-b "32 64"```)
-- 64- and 128-bit (specified with ```-b "64 128"```)
-- 32-, 64-, and 128-bit (specified with ```-b "32 64 128"```) 
-
-### Multiple error thresholds
-FPTuner can take multiple error thresholds and generate the optimal allocation of each threshold. 
-For example, the following option results in two allocations generated for the two error thresholds (0.001 and 0.0001): 
-```
--e "0.001 0.0001"
-```
 
 
 
@@ -217,6 +197,31 @@ The following table offers the benchmark names and their relative paths to the r
 | Maxwell-Boltzmann | examples/math/maxwell-boltzmann.py |
 | reduction    | examples/micro/reduction.py |
 
+
+## Reference
+The complete reference of FPTuner is given in <a href="https://github.com/soarlab/FPTuner/blob/master/Reference.md">Reference.md</a>. 
+
+
+## Advance usages
+Here we introduce some more tuning options provided by FPTuner.
+ 
+### Candidate bit-widths
+FPTuner tunes for mixed 32- and 64-bit by default. 
+Tuning for mixed 64- and 128-bit can be done with option 
+```
+-b "64 128"
+```
+FPTuner currently supports tuning for the following three bit-width candidate sets: 
+- 32- and 64-bit (specified with ```-b "32 64"```)
+- 64- and 128-bit (specified with ```-b "64 128"```)
+- 32-, 64-, and 128-bit (specified with ```-b "32 64 128"```) 
+
+### Multiple error thresholds
+FPTuner can take multiple error thresholds and generate the optimal allocation of each threshold. 
+For example, the following option results in two allocations generated for the two error thresholds (0.001 and 0.0001): 
+```
+-e "0.001 0.0001"
+```
 
 
 
