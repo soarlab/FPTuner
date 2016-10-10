@@ -171,7 +171,9 @@ def MakeClean ():
 # ========
 # main 
 # ========
-assert(len(sys.argv) == 2) 
+if len(sys.argv) != 2:
+    print("Usage: python3 {} <install|clean|uninstall>".format(sys.argv[0]))
+    sys.exit(-1)
 OPT_SETUP = sys.argv[1] 
 
 
