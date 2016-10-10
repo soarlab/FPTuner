@@ -151,6 +151,7 @@ denotes that the group 0 (gang 0) operators are assigned 32-bit precision.
 In addition to the console output, a .cpp file is synthesized by FPTuner which implements the allocation.
 
 When outputting to a terminal a colorized s-expression will be emitted indicating the allocations of variables and operations. For example:
+
 <img src="misc/readme_image.png" width="240" alt="Colorized output">
 
 Variables *A* and *B* are allocated at 32-bit precision as indicated by the green text. Blue text indicates that each operation and variable *C* are allocated at 64-bit precision. Notably, the blue parenteses around *A* and *B* mean that they are both cast to 64-bit.
