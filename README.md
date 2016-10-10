@@ -42,16 +42,15 @@ sudo apt-get isntall -y git python3-ply bison flex ocaml g++
         - Copy the command "grbgetkey your-activation-code" shown on the screen.
         - Under the **bin** directory of your Gurobi installation, run the grbgetkey command which you just copied. This command will require you to enter a path to store the license key file. The grbgetkey command will indicate you to setup environment variable **GRB_LICENSE_FILE** to a path to the license file.
     - After the installation, add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
-        - Assuming Gurobi is installed under **/home/myname/gurobi652/linux64**.  
+        - Assuming Gurobi is installed under **GUROBI_HOME**.  
 	    - **Note**: the version of Gurobi is assumed to be 6.5.2; your Gurobi path may be different.
-        - There should be a directory similar to **/home/myname/gurobi652/linux64/lib/python3.4_utf32**.
+        - There should be a directory similar to **$GUROBI_HOME/lib/python3.4_utf32**.
 	    - **Note**: type ```python3 --version``` to find the version on your system. If it is Python 3.5, use 
-	    ***/home/myname/gurobi652/linux64/lib/python3.5_utf32*** instead.
+	    ***$GUROBI_HOME/lib/python3.5_utf32*** instead.
         - Add this to your environment (under bash) with
 	
 	      ```
-	      export PYTHONPATH=/home/myname/gurobi652/linux64/lib/python3.4_utf32:$PYTHONPATH
-	      export LD_LIBRARY_PATH=/home/myname/gurobi652/linux64/lib/:$LD_LIBRARY_PATH
+	      export PYTHONPATH=$GUROBI_HOME/lib/python3.4_utf32:$PYTHONPATH
 	      ```
     - For more installation details, please refer to the <a href="http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf">user menu</a>. 
 
