@@ -2,12 +2,12 @@
 
 # Table of Contents
 - [Installation](#installation)
-    - [Requirements](installation-requirements)
-    - [How to install FPTuner?](installation-fptuner) 
-    - [Test installation](installation-test) 
-- [To POPL Artifact Evaluation Reviewers](to-popl-ae)
-    - [Reproduce the tuning results of Table 5.1 and Table 5.2](to-popl-ae-tables)
-    - [Performance and energy measurements](to-popl-ae-perf-energy) 
+    - [Requirements](#installation-requirements)
+    - [How to install FPTuner?](#installation-fptuner) 
+    - [Test installation](#installation-test) 
+- [To POPL Artifact Evaluation Reviewers](#to-popl-ae)
+    - [Reproduce the tuning results of Table 5.1 and Table 5.2](#to-popl-ae-tables)
+    - [Performance and energy measurements](#to-popl-ae-perf-energy) 
     
 
 
