@@ -5,6 +5,7 @@ import imp
 
 tft_utils = imp.load_source("tft_utils", "./src/tft_utils.py") 
 
+vars_file = "fptuner_vars"
 
 
 # ========
@@ -186,22 +187,32 @@ if   (OPT_SETUP == "install"):
     # ----
     # message 
     # ----
+    exports = []
     print ("========")
     print ("Please set the environment variables: ")
     print ("")
-    print ("export HOME_FPTUNER=" + os.path.abspath("./")) 
-    print ("export GELPIA_PATH=" + os.environ["GELPIA_PATH"]) 
-    print ("export GELPIA=" + os.environ["GELPIA"]) 
-    print ("export FPTAYLOR_BASE=" + os.environ["FPTAYLOR_BASE"]) 
-    print ("export FPTAYLOR=" + os.environ["FPTAYLOR"])    
+    exports.append ("export HOME_FPTUNER=" + os.path.abspath("./")) 
+    exports.append ("export GELPIA_PATH=" + os.environ["GELPIA_PATH"]) 
+    exports.append ("export GELPIA=" + os.environ["GELPIA"]) 
+    exports.append ("export FPTAYLOR_BASE=" + os.environ["FPTAYLOR_BASE"]) 
+    exports.append ("export FPTAYLOR=" + os.environ["FPTAYLOR"])
+    print("\n".join(exports))
     print ("") 
     print ("Please append the environment variables: ") 
     print ("") 
-    print ("export PYTHONPATH=" + os.path.abspath("./") + "/src:$PYTHONPATH") 
+    ppath = "export PYTHONPATH=" + os.path.abspath("./") + "/src:$PYTHONPATH"
+    exports.append(ppath)
+    print(ppath)
     print ("")
     print ("Note: You must manually setup PYTHONPATH for Gurobi's python interface. Please refer to READMD.md and www.gurobi.com for more details.")
+    print("")
+    print ("The file {} has been written which includes these variables. You may type\n\t source {}\nto set them."
+           .format(vars_file, vars_file))
     print ("")
-    print ("========") 
+    print ("========")
+
+    with open(vars_file, 'w') as f:
+        f.write('\n'.join(exports))
 
 
 elif (OPT_SETUP == "clean"): 
@@ -209,7 +220,8 @@ elif (OPT_SETUP == "clean"):
 
 
 elif (OPT_SETUP == "uninstall"): 
-    MakeClean() 
+    MakeClean()
+    os.system("rm -f " + vars_file)
     os.system("rm -rf gelpia") 
     os.system("rm -rf FPTaylor") 
 
