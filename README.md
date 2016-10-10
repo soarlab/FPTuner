@@ -1,15 +1,22 @@
 <h1> FPTuner: Rigorous Floating-point Mixed Precision Tuner </h1> 
 
 # Table of Contents
-## [To POPL Artifact Evaluation Reviewers](to-popl-ae)
+- [Installation](installation)
+    - [Requirements](installation-requirements)
+    - [How to install FPTuner?](installation-fptuner) 
+    - [Test installation](installation-test) 
+- [To POPL Artifact Evaluation Reviewers](to-popl-ae)
+    - [Reproduce the tuning results of Table 5.1 and Table 5.2](to-popl-ae-tables)
+    - [Performance and energy measurements](to-popl-ae-perf-energy) 
+    
 
 
 
-# Installation 
+# <a name="installation"></a>Installation 
 - FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64
 
 
-## Requirements
+## <a name="installation-requirements"></a>Requirements
 
 - git 
 - python3 
@@ -58,7 +65,7 @@ sudo apt-get isntall -y git python3-ply bison flex ocaml g++
     - For more installation details, please refer to the <a href="http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf">user menu</a>. 
 
 
-## How to install FPTuner? 
+## <a name="installation-fptuner"></a>How to install FPTuner? 
 
 1. Download FPTuner from our github repository: 
     ```
@@ -86,7 +93,7 @@ python3 setup.py uninstall
 ```
 
 
-## Test installation
+## <a name="installation-test"></a>Test installation
 To test the installation, please try out the hello-world example through the following steps: 
 
 1. Go to directory **bin** under the root of FPTuner. 
@@ -142,7 +149,7 @@ In addition to the console output, a .cpp file is synthesized by FPTuner which i
 
 
 # <a name="to-popl-ae"></a>To POPL Artifact Evaluation Reviewers
-## Reproduce the tuning results of Table 5.1 and Table 5.2
+## <a name="to-popl-ae-tables"></a>Reproduce the tuning results of Table 5.1 and Table 5.2
 The tuning results of Table 5.1 are shown under column "# of double-ops forced by Es" and the results of Table 5.2 are shown under column "# of single-ops forced by Es." 
 With a correct installation of FPTuner (e.g., the above hello-world example works), the fastest way to reproduce the two tables is using the scripts under directory **bin**. 
 
@@ -157,13 +164,13 @@ For Table 5.2, please run (under directory **bin**)
 ```
 
 
-## Performance and energy measurements
+## <a name="to-popl-ae-perf-energy"></a>Performance and energy measurements
 We currently don't offer the scripts to automatically measure performance and energy. 
 However, as demonstrated through the hello-world example, the .cpp files of the corresponding mixed precision allocations are offered. 
 You can freely do performance and energy measurements with those .cpp files on your platforms. 
 
 
-## Tuning results and tuning performance may be affected by global optimization
+## <a name="to-popl-ae-global-opt"></a>Tuning results and tuning performance may be affected by global optimization
 The tuning results and the tuning performance of FPTuner are affected by the underlying global optimization. 
 The global optimization may calculate tight bounds (resp., loose bounds) of the first derivatives that result in more (resp., fewer) low-precision operators. 
 In addition, FPTuner's performance is currently dominated by global optimization. 
