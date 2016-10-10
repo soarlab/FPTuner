@@ -171,7 +171,7 @@ You can freely do performance and energy measurements with those .cpp files on y
 The tuning results and the tuning performance of FPTuner are affected by the underlying global optimization. 
 The global optimization may calculate tight bounds (resp., loose bounds) of the first derivatives that result in more (resp., fewer) low-precision operators. 
 In addition, FPTuner's performance is currently dominated by global optimization. 
-Consequently, there may be few tuning results don't exactly match with what they are shown in the paper. 
+Consequently, there may be tuning results which don't exactly match results shown in the paper. 
 
 
 ## Individually running the Benchmarks 
