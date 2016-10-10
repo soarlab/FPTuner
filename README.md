@@ -41,6 +41,7 @@ sudo apt-get install git
 	    - Note: type ```python3 --version``` to find the version on your system. If it is Python 3.5, use 
 	    ***/home/myname/gurobi650/linux64/lib/python3.5_utf32*** instead
         - Add path (under bash) with
+	
 	      ```
 	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPATH
 	      ```
