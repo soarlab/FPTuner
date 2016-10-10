@@ -1,5 +1,5 @@
 <h1> FPTuner: Rigorous Floating-point Mixed Precision Tuner </h1> 
-<img src="misc/logo.png" width=300 alt="Logo">
+<img src="misc/logo.png" width=300 alt="Logo" >
 # Table of Contents
 - [Installation](#installation)
     - [Requirements](#installation-requirements)
