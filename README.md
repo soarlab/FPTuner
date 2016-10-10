@@ -4,46 +4,35 @@
 
 # Installation 
 - FPTuner has been tested on Ubuntu 12.04+ on x86_64
-## Required applications 
+## Requirements
 
 - git 
-```
-sudo apt-get install git
-```
-- Python3 
-    - FPTuner currently supports python3 only. We strongly recommend setting the **python** command to be an
-     alias for **python3**. 
+- python3 
+    - FPTuner currently supports python3 only.
+- PLY for python3
+- bison
+- flex
+- ocaml
+- g++
 
-- <a href=https://github.com/soarlab/FPTaylor>FPTaylor</a>. FPTuner's installation script (described later)
-  automatically installs FPTaylor. However, you need to manually install the following required packages:
-    - OCaml 4.0 or later
-    ```
-    sudo apt-get install ocaml
-    ```
-- <a href=https://github.com/soarlab/gelpia>Gelpia</a>. FPTuner's installation script automatically installs Gelpia. However, you need to manually install the following required packages: 
-    - bison
-    ```
-    sudo apt-get install bison
-    ```
-    - flex
-    ```
-    sudo apt-get install flex
-    ```
-    - ply for Python3
-    ```
-    sudo apt-get install python3-ply
-    ```
+On Ubuntu these can all be installed with
+```
+sudo apt-get isntall -y git python3-ply bison flex ocaml g++
+```
+
 
 - Gurobi v6.5. Note that FPTuner's installation script **does not** automatically install Gurobi. Please go to <a href=http://www.gurobi.com/>Gurobi website</a> and follow the installation instructions. It is free for academic use (the academic license is free).
     - After the installation, add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
-        - Assume that Gurobi is install under **/home/myname/gurobi650/linux64**.  
-        - There should be a directory similar to **/home/myname/gurobi650/linux64/lib/python3.4_utf32**.
-	    - Note: type ```python3 --version``` to find the version on your system. If it is Python 3.5, use 
-	    ***/home/myname/gurobi650/linux64/lib/python3.5_utf32*** instead.
-        - Add this to your Python path (under bash) with
+        - Assuming Gurobi is installed under **/home/myname/gurobi652/linux64**.  
+	    - **Note**: the version of Gurobi will 6.5.x your Gurobi path may be different.
+        - There should be a directory similar to **/home/myname/gurobi652/linux64/lib/python3.4_utf32**.
+	    - **Note**: type ```python3 --version``` to find the version on your system. If it is Python 3.5, use 
+	    ***/home/myname/gurobi652/linux64/lib/python3.5_utf32*** instead.
+        - Add this to your environment (under bash) with
 	
 	      ```
-	      export PYTHONPATH=/home/myname/gurobi650/linux64/lib/python3.4_utf32:$PYTHONPATH
+	      export PYTHONPATH=/home/myname/gurobi652/linux64/lib/python3.4_utf32:$PYTHONPATH
+     	      export LD_LIBRARY_PATH=/home/myname/gurobi652/linux64/lib/:$LD_LIBRARY_PATH
 	      ```
 
 
@@ -62,7 +51,11 @@ sudo apt-get install git
     python3 setup.py install 
     ```
 4. Set up the required environment variables. 
-The installation script used in the previous step will print out the instruction of setting up the related environment variables. 
+The installation script used in the previous step will create a file ```fptuner_vars``` for setting up the related environment variables under bash. To do so, run
+```
+source fptuner_vars
+```
+
 Please follow the instruction for the setup.
 
 ### To uninstall, run
@@ -150,7 +143,7 @@ For example, the following option results in two allocations generated for the t
 ## Reproduce the tuning results of Table 5.1 and Table 5.2
 The tuning results of Table 5.1 are shown under column "# of double-ops forced by Es" and the results of Table 5.2 are shown under column "# of single-ops forced by Es." 
 With a correct installation of FPTuner (e.g., the above hello-world example works), the fastest way to reproduce the two tables is using the scripts under directory **bin**. 
-f
+
 For Table 5.1, please run (under directory **bin**) 
 ```
 source test-table-5.1
