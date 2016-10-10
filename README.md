@@ -30,6 +30,7 @@ sudo apt-get isntall -y git python3-ply bison flex ocaml g++
         - Download "gurobi6.5.2_linux64.tar.gz" and untar with ``tar -xvf gurobi6.5.2_linux64.tar.gz``
         - ``cd gurobi652/linux64`` and ``./setup.py build``
     - Set environment variables as the following example commands work under bash: 
+
         ```
         export GUROBI_HOME=your-path/gurobi652/linux64
         export PATH=$GUROBI_HOME/bin:$PATH
