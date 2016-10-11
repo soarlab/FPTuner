@@ -10,8 +10,7 @@ also allows for controlling the maximum number of type-casts in an expression.
 # Table of Contents
 - [Requirements](#requirements)
 - [Installation](#installation)
-    - [How to install FPTuner?](#installation-fptuner) 
-    - [Test installation](#installation-test) 
+- [Running FPTuner](#running) 
 - [To POPL Artifact Evaluation Reviewers](#to-popl-ae)
     - [Reproduce the tuning results of Table 5.1 and Table 5.2](#to-popl-ae-tables)
     - [Performance and energy measurements](#to-popl-ae-perf-energy) 
@@ -85,8 +84,6 @@ menu](http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf).
 
 # <a name="installation"></a>Installation 
 
-## <a name="installation-fptuner"></a>How to install FPTuner? 
-
 1. Download FPTuner from our github repository: 
     ```
     git clone https://github.com/soarlab/FPTuner
@@ -105,18 +102,20 @@ The installation script used in the previous step will create a file ```fptuner_
 source fptuner_vars
 ```
 
-Please follow the instruction for the setup.
+Please follow the instructions for the setup.
 
-### To uninstall, run
+To uninstall, run
 ```
 python3 setup.py uninstall 
 ```
 
 
-## <a name="installation-test"></a>Test installation
-To test the installation, please try out the hello-world example through the following steps: 
+# <a name="running"></a>Running FPTuner
 
-1. Go to directory **bin** under the root of FPTuner. 
+To test the installation, please try out the hello-world example through the
+following steps: 
+
+1. Go to directory `bin` under the root of FPTuner. 
 
 2. Run command 
     ```
