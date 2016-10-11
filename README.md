@@ -111,11 +111,11 @@ menu](http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf).
 3. Run the setup script **at the root directory of FPTuner**: `python3 setup.py install`
 
 4. Set up the required environment variables. 
-The installation script used in the previous step will create a file
-`fptuner_vars` for setting up the related environment variables. To do so, run
-`source fptuner_vars`.
+The installation script will create a file `fptuner_vars` for setting the related
+environment variables. To do so, run `source fptuner_vars`.
 
-Please follow the instructions for the setup.
+[//]: # (The following seems redundant now.)
+[//]: # (Please follow the instructions for the setup.)
 
 To uninstall, run `python3 setup.py uninstall`.
 
