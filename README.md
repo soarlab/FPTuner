@@ -84,30 +84,20 @@ menu](http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf).
 
 # <a name="installation"></a>Installation 
 
-1. Download FPTuner from our github repository: 
-    ```
-    git clone https://github.com/soarlab/FPTuner
-    ```
-2. Go to the root directory of FPTuner. E.g., 
-    ```
-    cd ./FPTuner
-    ```
-3. Run the setup script **at the root directory of FPTuner**: 
-    ```
-    python3 setup.py install 
-    ```
+1. Download FPTuner from our GitHub repository: `git clone https://github.com/soarlab/FPTuner`
+
+2. Go to the root directory of FPTuner, for example: `cd ./FPTuner`
+
+3. Run the installation script in the root directory of FPTuner: `python3 setup.py install`
+
 4. Set up the required environment variables. 
-The installation script used in the previous step will create a file ```fptuner_vars``` for setting up the related environment variables under bash. To do so, run
-```
-source fptuner_vars
-```
+The installation script used in the previous step will create a file
+`fptuner_vars` for setting up the related environment variables. To do so, run
+`source fptuner_vars`.
 
 Please follow the instructions for the setup.
 
-To uninstall, run
-```
-python3 setup.py uninstall 
-```
+To uninstall, run `python3 setup.py uninstall`.
 
 
 # <a name="running"></a>Running FPTuner
@@ -117,10 +107,8 @@ following steps:
 
 1. Go to directory `bin` under the root of FPTuner. 
 
-2. Run command 
-    ```
-    python3 ./fptuner.py -e 0.001 ../examples/helloworld0.py
-    ```
+2. Run command `python3 ./fptuner.py -e 0.001 ../examples/helloworld0.py`
+
 The console output of FPTuner should be the following: 
 ```
 ==== error bound : 0.001 ====
@@ -143,18 +131,18 @@ Group 4 : 64-bit
 Expression:
 (* (+ (A) (B)) (C))
 ```
-In addition, a .cpp file **helloworld0.0.001.cpp** will be generated. 
+In addition, a .cpp file `helloworld0.0.001.cpp` will be generated. 
 Now we describe how to use FPTuner with this hello-world example. 
 
 
-### Input 
+## Input 
 FPTuner takes an expression specification and an user-specified error threshold for generating the optimal allocation. 
 In the command ```python3 ./fptuner.py -e 0.001 ../examples/helloworld0.py```, file **helloworld0.py** is the expression specification and **-e 0.001** specifies 1e-03 as the error threshold. 
 
 The later section "**Example of Expression Specification**" describes how to specify the expression through the python-based interface. 
 
 
-### Output
+## Output
 FPTuner summarizes the number of 32- and 64-bit operators, prints the allocation on the console. 
 In the example output, for example, 
 ```
