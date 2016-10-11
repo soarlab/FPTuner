@@ -25,10 +25,10 @@ also allows for controlling the maximum number of type-casts in an expression.
 
 
 
-## <a name="requirements"></a>Requirements
+# <a name="requirements"></a>Requirements
 
-FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64 (16.04 is
-recommended).
+FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64;
+we recommend version 16.04.
 It depends on the following free projects:
 - git 
 - python3 (FPTuner currently supports python3 only)
@@ -45,19 +45,19 @@ sudo apt-get install -y git python3-ply bison flex ocaml g++ make
 
 Apart from these, FPTuner also depends on Gurobi v6.5. Note that FPTuner's
 installation script **does not** automatically install Gurobi. Please follow
-the following steps to install Gurobi and acquire a free academic license.
+these steps to install Gurobi and acquire a free academic license.
 
 1. Installation. 
   - On [Gurobi website](http://www.gurobi.com) (tab "DOWNLOADS") select "Download Center." 
-  - Select "Gurobi Optimizer." You need to register an account for the academic licenses also. 
-  - Download "gurobi6.5.2_linux64.tar.gz" and untar with ``tar -xvf gurobi6.5.2_linux64.tar.gz``
-  - ``cd gurobi652/linux64`` and ``./setup.py build``
+  - Select "Gurobi Optimizer." You need to register for an account to obtain the academic licenses. 
+  - Download `gurobi6.5.2_linux64.tar.gz` and unpack with `tar -xvf gurobi6.5.2_linux64.tar.gz`.
+  - Execute `cd gurobi652/linux64` and `./setup.py build`.
 2. Set environment variables as the following example commands work under bash: 
-   ```
-   export GUROBI_HOME=your-path/gurobi652/linux64
-   export PATH=$GUROBI_HOME/bin:$PATH
-   export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
-   ```
+```
+export GUROBI_HOME=your-path/gurobi652/linux64
+export PATH=$GUROBI_HOME/bin:$PATH
+export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
+```
 3. Acquire an academic license. 
   - Go to [https://user.gurobi.com/download/licenses/free-academic](https://user.gurobi.com/download/licenses/free-academic).
   - Read the User License Agreement and the conditions, then click "Request License."  
