@@ -1,4 +1,12 @@
-# Command Line Arguments of FPTuner 
+# Command Line Arguments of FPTuner
+
+The basic flags are listed as follows: 
+- `-e`: for specifying one or multiple error thresholds. 
+- `-b`: for specifying the candidate bit-widths of the operators.
+
+The allocation controlling flags are listed as follows:
+- `-maxc` : for specifying the maximum number of type casts.  
+
 
 ## -e : error thresholds 
 
@@ -139,6 +147,6 @@ This function is for assigning a higher/lower weight to an operator group that a
 No return value. 
 
 ### Arguments 
-1. The group ID. Type: iteger
+1. The group ID. Type: integer
 
 2. The desired weight. Type: floating-point
