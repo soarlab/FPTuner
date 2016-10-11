@@ -15,7 +15,7 @@
 - [Example of Expression Specification](#expr-specification) 
 - [Acknowledgements](#acknowledgements)
 
-## <a name="overview"></a>Overview
+# <a name="overview"></a>Overview
 
 FPTuner is a rigorous tool for automatic precision-tuning of real
 valued expressions. FPTuner generates a mixed-precision allocation
@@ -44,7 +44,7 @@ The flags include basic flags (error threshold allowed, precision choices availa
 and allocation-controlling flags (fix the number of type-casts, gang expressions, etc.)
 
 
-## <a name="requirements"></a>Requirements
+# <a name="requirements"></a>Requirements
 
 FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64;
 we recommend version 16.04.
