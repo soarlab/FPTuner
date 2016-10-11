@@ -1,4 +1,4 @@
-
+<meta name="robots" content="noindex" />
 <img src="misc/logo.png" width=300 alt="Logo" align="right">
 
 # Table of Contents
