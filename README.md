@@ -52,12 +52,12 @@ these steps to install Gurobi and acquire a free academic license.
   - Select "Gurobi Optimizer." You need to register for an account to obtain the academic licenses. 
   - Download `gurobi6.5.2_linux64.tar.gz` and unpack with `tar -xvf gurobi6.5.2_linux64.tar.gz`.
   - Execute `cd gurobi652/linux64` and `./setup.py build`.
-2. Set environment variables as the following example commands work under bash: 
-```
-export GUROBI_HOME=your-path/gurobi652/linux64
-export PATH=$GUROBI_HOME/bin:$PATH
-export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
-```
+2. Set the required environment variables as follows: 
+	```
+	export GUROBI_HOME=your-path/gurobi652/linux64
+	export PATH=$GUROBI_HOME/bin:$PATH
+	export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
+	```
 3. Acquire an academic license. 
   - Go to [https://user.gurobi.com/download/licenses/free-academic](https://user.gurobi.com/download/licenses/free-academic).
   - Read the User License Agreement and the conditions, then click "Request License."  
