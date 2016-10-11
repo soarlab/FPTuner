@@ -1,11 +1,15 @@
-<h1> FPTuner: Rigorous Floating-point Mixed Precision Tuner </h1> 
 
 <img src="misc/logo.png" width=300 alt="Logo" align="right">
-FPTuner is a rigorous tool for automatic precision-tuning of real valued expressions. FPTuner generates a mixed-precision allocation (single, double or quadruple precision) on a given input domain that is guaranteed to have error below a given threshold. Users can group expressions, forcing these expressions to be allocated at the same precision, enabling vectorization. FPTuner also allows for controlling the maximum number of type-casts in an expression.
+FPTuner is a rigorous tool for automatic precision-tuning of real valued
+expressions. FPTuner generates a mixed-precision allocation (single, double, or
+quadruple precision) on a given input domain that is guaranteed to have error
+below a given threshold. Users can group expressions, forcing these expressions
+to be allocated at the same precision, thereby enabling vectorization. FPTuner
+also allows for controlling the maximum number of type-casts in an expression.
 
 # Table of Contents
+- [Requirements](#requirements)
 - [Installation](#installation)
-    - [Requirements](#installation-requirements)
     - [How to install FPTuner?](#installation-fptuner) 
     - [Test installation](#installation-test) 
 - [To POPL Artifact Evaluation Reviewers](#to-popl-ae)
@@ -19,15 +23,15 @@ FPTuner is a rigorous tool for automatic precision-tuning of real valued express
 
 
 
-# <a name="installation"></a>Installation 
-- FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64 (16.04 recommended)
 
 
-## <a name="installation-requirements"></a>Requirements
+## <a name="requirements"></a>Requirements
 
+FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64 (16.04 is
+recommended).
+It depends on the following free projects:
 - git 
-- python3 
-    - FPTuner currently supports python3 only.
+- python3 (FPTuner currently supports python3 only)
 - PLY for python3
 - bison
 - flex
@@ -39,38 +43,41 @@ On Ubuntu these can all be installed with
 sudo apt-get install -y git python3-ply bison flex ocaml g++ make
 ```
 
+Apart from these, FPTuner also depends on Gurobi v6.5. Note that FPTuner's
+installation script **does not** automatically install Gurobi. Please follow
+the following steps to install Gurobi and acquire a free academic license.
 
-- Gurobi v6.5. Note that FPTuner's installation script **does not** automatically install Gurobi. Please follow the following stpes to install Gurobi and acquire a free academic license. 
-    - Installation. 
-        - On <a href="http://www.gurobi.com">Gurobi website</a> tab "DOWNLOADS," select "Download Center." 
-        - Select "Gurobi Optimizer." You need to register an account for the academic licenses also. 
-        - Download "gurobi6.5.2_linux64.tar.gz" and untar with ``tar -xvf gurobi6.5.2_linux64.tar.gz``
-        - ``cd gurobi652/linux64`` and ``./setup.py build``
-    - Set environment variables as the following example commands work under bash: 
+1. Installation. 
+  - On [Gurobi website](http://www.gurobi.com) (tab "DOWNLOADS") select "Download Center." 
+  - Select "Gurobi Optimizer." You need to register an account for the academic licenses also. 
+  - Download "gurobi6.5.2_linux64.tar.gz" and untar with ``tar -xvf gurobi6.5.2_linux64.tar.gz``
+  - ``cd gurobi652/linux64`` and ``./setup.py build``
+2. Set environment variables as the following example commands work under bash: 
+   ```
+   export GUROBI_HOME=your-path/gurobi652/linux64
+   export PATH=$GUROBI_HOME/bin:$PATH
+   export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
+   ```
+3. Acquire an academic license. 
+  - Go to [https://user.gurobi.com/download/licenses/free-academic](https://user.gurobi.com/download/licenses/free-academic).
+  - Read the User License Agreement and the conditions, then click "Request License."  
+  - Copy the command "grbgetkey your-activation-code" shown on the screen.
+  - Under the `bin` directory of your Gurobi installation, run the grbgetkey command which you just copied. This command will require you to enter a path to store the license key file. The grbgetkey command will indicate you to setup environment variable `GRB_LICENSE_FILE` to a path to the license file.
+4. After the installation, add the path of Gurobi's python module to environment variable `PYTHONPATH`. For example, 
+  - Assuming Gurobi is installed under `GUROBI_HOME`.  
+  - **Note**: the version of Gurobi is assumed to be 6.5.2; your Gurobi path may be different.
+  - There should be a directory similar to `$GUROBI_HOME/lib/python3.4_utf32`.
+  - **Note**: type `python3 --version` to find the version on your system. If it is Python 3.5, use `$GUROBI_HOME/lib/python3.5_utf32` instead.
+  - Add this to your environment (under bash) with
+    ```
+    export PYTHONPATH=$GUROBI_HOME/lib/python3.4_utf32:$PYTHONPATH
+    ```
 
-        ```
-        export GUROBI_HOME=your-path/gurobi652/linux64
-        export PATH=$GUROBI_HOME/bin:$PATH
-        export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
-        ```
-    - Acquire an academic license. 
-        - Go to <a href="https://user.gurobi.com/download/licenses/free-academic">https://user.gurobi.com/download/licenses/free-academic</a>
-        - Read the User License Agreement and the conditions, then click "Request License."  
-        - Copy the command "grbgetkey your-activation-code" shown on the screen.
-        - Under the **bin** directory of your Gurobi installation, run the grbgetkey command which you just copied. This command will require you to enter a path to store the license key file. The grbgetkey command will indicate you to setup environment variable **GRB_LICENSE_FILE** to a path to the license file.
-    - After the installation, add the path of Gurobi's python module to environment variable **PYTHONPATH**. For example, 
-        - Assuming Gurobi is installed under **GUROBI_HOME**.  
-	    - **Note**: the version of Gurobi is assumed to be 6.5.2; your Gurobi path may be different.
-        - There should be a directory similar to **$GUROBI_HOME/lib/python3.4_utf32**.
-	    - **Note**: type ```python3 --version``` to find the version on your system. If it is Python 3.5, use 
-	    **$GUROBI_HOME/lib/python3.5_utf32** instead.
-        - Add this to your environment (under bash) with
-	
-	      ```
-	      export PYTHONPATH=$GUROBI_HOME/lib/python3.4_utf32:$PYTHONPATH
-	      ```
-    - For more installation details, please refer to the <a href="http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf">user menu</a>. 
+For more installation details, please refer to the [user
+menu](http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf). 
 
+
+# <a name="installation"></a>Installation 
 
 ## <a name="installation-fptuner"></a>How to install FPTuner? 
 
