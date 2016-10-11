@@ -1,13 +1,8 @@
 
 <img src="misc/logo.png" width=300 alt="Logo" align="right">
-FPTuner is a rigorous tool for automatic precision-tuning of real valued
-expressions. FPTuner generates a mixed-precision allocation (single, double, or
-quadruple precision) on a given input domain that is guaranteed to have error
-below a given threshold. Users can group expressions, forcing these expressions
-to be allocated at the same precision, thereby enabling vectorization. FPTuner
-also allows for controlling the maximum number of type-casts in an expression.
 
 # Table of Contents
+- [Overview](#overview)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Running FPTuner](#running) 
@@ -20,11 +15,36 @@ also allows for controlling the maximum number of type-casts in an expression.
 - [Example of Expression Specification](#expr-specification) 
 - [Acknowledgements](#acknowledgements)
 
+## <a name="overview"></a>Overview
+
+FPTuner is a rigorous tool for automatic precision-tuning of real
+valued expressions. FPTuner generates a mixed-precision allocation
+(single, double, or quadruple precision) on a given input domain that
+is guaranteed to have error below a given threshold.
+
+In addition to precision-tuning, FPTuner also allows users to control
+precision allocation in ways that helps optimize code. As two examples,
+
+- it allows users to control the maximum number of type-casts
+introduced during precision allocation. Capping the number of type-casts
+can help reduce the associated overheads.
+
+- FPTuner allows users to group ("gang") expressions (typically similar
+expression) and force the principal operators of these expressions to
+share the same precision allocation. Doing so encourages
+the compiler to do vectorization.
 
 
+For further details of FPTuner, please consult our paper. The rest
+of this file will guide you through FPTuner's installations.
+A more comprehensive reference manual of FPTuner is 
+situated at <a href="https://github.com/soarlab/FPTuner/blob/master/Reference.md">Reference.md</a>.
+This reference manual describes FPTuner's flags in detail.
+The flags include basic flags (error threshold allowed, precision choices available)
+and allocation-controlling flags (fix the number of type-casts, gang expressions, etc.)
 
 
-# <a name="requirements"></a>Requirements
+## <a name="requirements"></a>Requirements
 
 FPTuner has been tested on Ubuntu 12.04, 14.04, 16.04 on x86_64;
 we recommend version 16.04.
@@ -44,7 +64,7 @@ sudo apt-get install -y git python3-ply bison flex ocaml g++ make
 
 Apart from these, FPTuner also depends on Gurobi v6.5. Note that FPTuner's
 installation script **does not** automatically install Gurobi. Please follow
-these steps to install Gurobi and acquire a free academic license.
+the following steps to install Gurobi and obtain a free academic license.
 
 1. Installation. 
   - On [Gurobi website](http://www.gurobi.com) (tab "DOWNLOADS") select "Download Center." 
@@ -59,7 +79,7 @@ these steps to install Gurobi and acquire a free academic license.
     export LD_LIBRARY_PATH=$GUROBI_HOME/lib:$LD_LIBRARY_PATH
     ```
 
-3. Acquire an academic license. 
+3. Obtain an academic license. 
   - Go to [https://user.gurobi.com/download/licenses/free-academic](https://user.gurobi.com/download/licenses/free-academic).
   - Read the User License Agreement and the conditions, then click "Request License."  
   - Copy command `grbgetkey your-activation-code` shown on the screen.
@@ -88,7 +108,7 @@ menu](http://www.gurobi.com/documentation/6.5/quickstart_linux.pdf).
 
 2. Go to the root directory of FPTuner, for example: `cd ./FPTuner`
 
-3. Run the installation script in the root directory of FPTuner: `python3 setup.py install`
+3. Run the setup script **at the root directory of FPTuner**: `python3 setup.py install`
 
 4. Set up the required environment variables. 
 The installation script used in the previous step will create a file
