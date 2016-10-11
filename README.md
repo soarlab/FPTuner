@@ -144,10 +144,7 @@ The later section "**Example of Expression Specification**" describes how to spe
 
 ## Output
 FPTuner summarizes the number of 32- and 64-bit operators, prints the allocation on the console. 
-In the example output, for example, 
-```
-Group 0 : 32-bit
-```
+In the example output, for example, `Group 0 : 32-bit`
 denotes that the group 0 (gang 0) operators are assigned 32-bit precision. 
 **# L2H castings** (resp., **# H2L castings**) indicates the number of low-to-high (resp., high-to-low) type casts in this allocation. 
 **# Castings** is the summation of **# L2H castings** and **# H2L castings**. 
