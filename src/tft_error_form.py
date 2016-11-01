@@ -637,7 +637,6 @@ class ErrorForm:
                     assert(0 <= weight) 
 
                     if (weight > 0.0):
-                        print (">>>> " + str(group_evar) + " : " + str(weight))
                         expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(weight), True) 
 
                         if (ret_se is None): 
