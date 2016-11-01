@@ -662,9 +662,11 @@ class ErrorForm:
         count_bw[tft_alloc.EPSILON_64]  = 0
         count_bw[tft_alloc.EPSILON_128] = 0
         
-        for gid,eps in alloc.gid2eps.items(): 
+        for gid,eps in alloc.gid2eps.items():
             assert(gid in self.gid_counts.keys())
             assert(eps in count_bw.keys())
+            if (gid == tft_expr.PRESERVED_CONST_GID): 
+                continue 
             count_bw[eps] = count_bw[eps] + self.gid_counts[gid] 
 
         print ("Total # of operators: " + str(sum(count_bw.values())))
