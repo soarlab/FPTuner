@@ -24,7 +24,11 @@ if sys.stdout.isatty():
 else:
     USE_COLOR_TEXT  = False
 
-NO_M2_CHECK     = False 
+NO_M2_CHECK     = False
+
+
+OPT_METHODS = ["max-benefit", "min-penalty"]
+OPT_METHOD  = "max-benefit"
 
 
 

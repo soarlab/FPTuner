@@ -11,9 +11,6 @@ from fractions import Fraction
 
 # ==== global variables ==== 
 EPS_SCORE = {}
-EPS_SCORE[tft_alloc.EPSILON_32]  = 100.0
-EPS_SCORE[tft_alloc.EPSILON_64]  = 1.0
-EPS_SCORE[tft_alloc.EPSILON_128] = 0.0
 
 
 # ==== sub-routines ==== 
@@ -559,7 +556,9 @@ class ErrorForm:
         str_ret = str_ret + "====================\n"
         return str_ret 
 
-    def scoreExpr (self): 
+    def scoreExpr (self):
+        global EPS_SCORE
+        
         ret_se = None 
 
         if   (len(IR.PREC_CANDIDATES) == 2): 
@@ -568,8 +567,17 @@ class ErrorForm:
                     continue 
 
                 checkValidEpsilonList(self.gid2epsilons[gid]) 
-            
-                group_evar = GroupErrorVar(gid, 0)
+
+                group_evar = None 
+                assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
+                if   (tft_utils.OPT_METHOD == "max-benefit"):
+                    group_evar = GroupErrorVar(gid, 0)
+                elif (tft_utils.OPT_METHOD == "min-penalty"):
+                    group_evar = GroupErrorVar(gid, 1)
+                else:
+                    assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
+                assert(group_evar is not None)
+                
                 expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(int(c)), True) 
 
                 assert(group_evar.hasBounds()) 
@@ -588,7 +596,19 @@ class ErrorForm:
             assert(ret_se is not None)
             return ret_se
 
-        elif (len(IR.PREC_CANDIDATES) >= 3): 
+        elif (len(IR.PREC_CANDIDATES) >= 3):
+            assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
+            if   (tft_utils.OPT_METHOD == "max-benefit"):
+                EPS_SCORE[tft_alloc.EPSILON_32]  = 100.0
+                EPS_SCORE[tft_alloc.EPSILON_64]  = 1.0
+                EPS_SCORE[tft_alloc.EPSILON_128] = 0.0
+            elif (tft_utils.OPT_METHOD == "min-penalty"):
+                EPS_SCORE[tft_alloc.EPSILON_32]  = 0.0 
+                EPS_SCORE[tft_alloc.EPSILON_64]  = 1.0
+                EPS_SCORE[tft_alloc.EPSILON_128] = 100.0                
+            else:
+                assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
+            
             for gid,c in self.gid_counts.items(): 
                 if (gid == tft_expr.PRESERVED_CONST_GID): 
                     continue 
@@ -616,7 +636,8 @@ class ErrorForm:
 
                     assert(0 <= weight) 
 
-                    if (weight > 0.0): 
+                    if (weight > 0.0):
+                        print (">>>> " + str(group_evar) + " : " + str(weight))
                         expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(weight), True) 
 
                         if (ret_se is None): 

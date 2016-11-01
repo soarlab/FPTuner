@@ -48,6 +48,12 @@ while True:
         assert(type(tft_utils.N_MAX_CASTINGS) is int and
                tft_utils.N_MAX_CASTINGS >= 0), "The number of maximum type casts must be a non-negative integer."
 
+    elif (arg_in == "-optm"):
+        i = i + 1
+
+        tft_utils.OPT_METHOD = sys.argv[i].strip()
+        assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS), "Invalid optimization method: " + str(tft_utils.OPT_METHOD)
+
     elif (arg_in == "-e"): 
         i = i + 1 
 
@@ -70,7 +76,10 @@ while True:
         elif (bwidths == [32, 64, 128]): 
             IR.PREC_CANDIDATES = ["e32", "e64", "e128"]
         else: 
-            sys.exit("Error: not supported bit-width candidates: " + str(bwidths)) 
+            sys.exit("Error: not supported bit-width candidates: " + str(bwidths))
+
+    elif (arg_in == "-fix-const-type"):
+        tft_utils.FIX_CONST_TYPE = True 
 
     else: 
         assert(INPUT_FILE is None), "No expression specification is given." 

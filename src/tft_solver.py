@@ -349,8 +349,15 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                 score_sum = eform.scoreExpr() 
             else: 
                 assert(score_sum == eform.scoreExpr()) 
-                # score_sum = IR.BE("+", -1, score_sum, eform.scoreExpr(), True) 
-        gurobi_solver.setOptObj(score_sum, "max") 
+                # score_sum = IR.BE("+", -1, score_sum, eform.scoreExpr(), True)
+
+        assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
+        if   (tft_utils.OPT_METHOD == "max-benefit"):
+            gurobi_solver.setOptObj(score_sum, "max")
+        elif (tft_utils.OPT_METHOD == "min-penalty"):
+            gurobi_solver.setOptObj(score_sum, "min")
+        else:
+            assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
 
         if (VERBOSE): 
             print ("Tuning Objective: ") 
