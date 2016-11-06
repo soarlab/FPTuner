@@ -30,6 +30,12 @@ NO_M2_CHECK     = False
 OPT_METHODS = ["max-benefit", "min-penalty"]
 OPT_METHOD  = "max-benefit"
 
+TIME_PARSING           = None
+TIME_FIRST_DERIVATIVES = None
+TIME_GLOBAL_OPT        = None
+TIME_ALLOCATION        = None
+TIME_CHECK_M2          = None 
+
 
 
 # ========

@@ -114,7 +114,14 @@ if (IR.TARGET_EXPR is None):
 IR.LOAD_CPP_INSTS = False 
 
 
-# ==== tune the targeted expression ==== 
+# ==== tune the targeted expression ====
+# reset the timers
+tft_utils.TIME_PARSING           = 0
+tft_utils.TIME_FIRST_DERIVATIVES = 0
+tft_utils.TIME_GLOBAL_OPT        = 0
+tft_utils.TIME_ALLOCATION        = 0
+tft_utils.TIME_CHECK_M2          = 0
+
 # possibly remove the .exprs file 
 EXPRS_NAME  = INPUT_FILE + ".exprs"
 if (os.path.isfile(EXPRS_NAME)): 
@@ -169,3 +176,10 @@ for i in range(0, len(tft_tuning.ERROR_BOUNDS)):
             tft_utils.VerboseMessage("Warning: overwrite the existed .cpp file: " + fname_cpp) 
         
         tft_ir_backend.ExportCppInsts(alloc, fname_cpp) 
+
+# show the timers
+tft_utils.VerboseMessage("Total Parsing time          : " + str(float(tft_utils.TIME_PARSING)))
+tft_utils.VerboseMessage("    First Dev.              : " + str(float(tft_utils.TIME_FIRST_DERIVATIVES)))
+tft_utils.VerboseMessage("Time for global optimization: " + str(float(tft_utils.TIME_GLOBAL_OPT)))
+tft_utils.VerboseMessage("Time for solving QCQP       : " + str(float(tft_utils.TIME_ALLOCATION)))
+tft_utils.VerboseMessage("Time for checking M2        : " + str(float(tft_utils.TIME_CHECK_M2)))

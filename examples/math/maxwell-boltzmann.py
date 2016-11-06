@@ -25,6 +25,6 @@ rel  = IR.BE("*", 10,
              IR.FConst(math.sqrt(2.0 / math.pi)), 
              d) 
 
-IR.SetGroupWeight(7, 16.0) 
+IR.SetGroupWeight(7, 100.0) 
 
 IR.TuneExpr(rel) 

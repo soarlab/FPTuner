@@ -24,8 +24,6 @@ OPTIMIZATION_SKIP_PRECISE_OPTS = False
 
 SEGFAULT_PROTECTION = True 
 
-TIME_GLOBAL_OPT  = None
-TIME_ALLOCATION  = None
 
 
 # ========
@@ -115,16 +113,14 @@ def FindExprBound (optimizer, obj_expr, direction, constraints = []):
 # ========
 # ---- return an alloc. ----
 def FirstLevelAllocSolver (optimizers, error_forms = []): 
-    global TIME_GLOBAL_OPT
-    global TIME_ALLOCATION
-
     assert(len(error_forms) > 0) 
     assert(("vrange" in optimizers.keys()) and ("alloc" in optimizers.keys())) 
     assert(optimizers["vrange"] in ALL_OPTIMIZERS) 
     assert(optimizers["alloc"] in ALL_OPTIMIZERS)
     assert(all([isinstance(error_forms[i], tft_error_form.ErrorForm) for i in range(0, len(error_forms))]))
 
-    TIME_GLOBAL_OPT = time.time()
+    time_global_opt = time.time() 
+
     tft_utils.VerboseMessage("invoking global optimization to bound first derivatives...") 
 
 
@@ -214,9 +210,9 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                 if (VERBOSE): 
                     print ("--------------------------------------------------")
 
-    TIME_GLOBAL_OPT = time.time() - TIME_GLOBAL_OPT 
-    TIME_ALLOCATION = time.time()
-    tft_utils.VerboseMessage("first derivatives bounded in " + str(TIME_GLOBAL_OPT) + " sec.") 
+    tft_utils.TIME_GLOBAL_OPT = tft_utils.TIME_GLOBAL_OPT + (time.time() - time_global_opt)
+    time_allocation           = time.time()  
+
     tft_utils.VerboseMessage("allocating bit-widths...") 
         
 
@@ -404,9 +400,8 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                         alloc[gid] = eps.value() 
                         break 
 
-        TIME_ALLOCATION = time.time() - TIME_ALLOCATION
-        if (tft_utils.FPTUNER_VERBOSE): 
-            print ("[FPTuner]: allocation completed in " + str(TIME_ALLOCATION) + " sec.")
+        tft_utils.TIME_ALLOCATION = tft_utils.TIME_ALLOCATION + (time.time() - time_allocation) 
+
         return alloc
 
     else: 

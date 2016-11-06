@@ -31,9 +31,8 @@ TARGET_EXPRS       = []
 
 ERROR_TYPE         = "abs"
 OPT_ERROR_FORM     = False 
-FPTAYLOR_M2_FQUERY = "__fptaylor_m2_check_query.txt" 
+FPTAYLOR_M2_FQUERY = "__fptaylor_m2_check_query.txt"
 
-TIME_PARSING       = None
 
 
 # ---- saving the ErrorForms and the relative data ---- 
@@ -125,11 +124,17 @@ def GenerateErrorTermsFromExpr (context_expr, expr, error_exprs = [], program_ex
         sys.exit("ERROR: invlaid expr. type...") 
 
 
-def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], constraint_exprs = []): 
+def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], constraint_exprs = []):
     # -- call FPTaylor for first derivation -- 
     tft_utils.DebugMessage("calling FPTaylor for the first derivatives...") 
 
-    text_terms = tft_get_first_derivations.GetFirstDerivations(expr) 
+    time_fd = time.time()
+    
+    text_terms = tft_get_first_derivations.GetFirstDerivations(expr)
+
+    time_fd = time.time() - time_fd
+
+    tft_utils.TIME_FIRST_DERIVATIVES = tft_utils.TIME_FIRST_DERIVATIVES + time_fd 
 
     tft_utils.DebugMessage("first derivatives acquired") 
 
@@ -277,9 +282,12 @@ def SolveErrorForms (eforms = [], optimizers = {}):
 
         if (tft_utils.NO_M2_CHECK): 
             break 
-
-        # -- check the effect of M2 -- 
+        
+        # -- check the effect of M2 --
+        time_m2 = time.time() 
         err_exc = EnsureM2(alloc)
+
+        tft_utils.TIME_CHECK_M2 = tft_utils.TIME_CHECK_M2 + (time.time() - time_m2) 
     
         if   (type(err_exc) is bool): 
             if (err_exc): 
@@ -322,13 +330,12 @@ def SolveExprs (fname_exprs, optimizers = {}):
     global OPT_ERROR_FORM 
     global TARGET_EXPRS 
 
-    global TIME_PARSING
-
-    EFORMS = None 
+    EFORMS        = None 
     E_UPPER_BOUND = None
-    M2 = None 
+    M2            = None
 
-    TIME_PARSING = time.time() 
+    time_parsing  = time.time() 
+    
     tft_utils.VerboseMessage("parsing input expression...")
     tft_utils.DebugMessage("reading .exprs file...")
 
@@ -585,8 +592,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
     # ---- solve from the ErrorForms ---- 
     tft_utils.DebugMessage("ErrorForms generated")
 
-    TIME_PARSING = time.time() - TIME_PARSING 
-    tft_utils.VerboseMessage("parsing completed in " + str(TIME_PARSING) + " sec.")
+    tft_utils.TIME_PARSING = tft_utils.TIME_PARSING + (time.time() - time_parsing)
 
     EFORMS, target_alloc = SolveErrorForms(EFORMS, optimizers) 
 
