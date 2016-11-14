@@ -5,7 +5,11 @@ The basic flags are listed as follows:
 - `-b`: for specifying the candidate bit-widths of the operators.
 
 The allocation controlling flags are listed as follows:
-- `-maxc` : for specifying the maximum number of type casts.  
+- `-maxc` : for specifying the maximum number of type casts.
+
+The options for the global optimization are listed as follows:
+- `-gopt_timeout` : for specifying the timeout of the global optimization
+- `-gopt_tolerance` : for specifying the tolerance of the global optimization 
 
 
 ## -e : error thresholds 
@@ -71,7 +75,31 @@ Use
 to limit up to C type casts in the allocation where C must be an integer.
 
 ### Default
-Unlimited number of type casts. 
+Unlimited number of type casts.
+
+
+## -gopt_timeout : timeout of the global optimization
+
+Use
+```
+-gopt_timeout T
+```
+to set the positive integer T as the timeout.
+
+### Default
+120
+
+
+## -gopt_tolerance : tolerance of the global optimization
+
+Use
+```
+-gopt_tolerance T
+```
+to set the positive floating-point number T as the tolerance.
+
+### Default
+5e-02 
 
 
 

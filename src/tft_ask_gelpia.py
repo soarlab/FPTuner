@@ -15,26 +15,10 @@ NAME_QUERY         = "__tft_gelpia_query"
 FNAME_GELPIA_QUERY = os.path.abspath(NAME_QUERY) 
 FNAME_GELPIA_LOG   = os.path.abspath("__tft_gelpia_log") 
 
-
 SAVE_QUERY        = False 
 DIR_SAVED_QUERIES = "saved-gelpia-queries" 
 
-
-# TIMEOUT = 10
-# TIMEOUT = 60  
-TIMEOUT = 120 
-# TIMEOUT = 300
-# TIMEOUT = 600 
 POLL_INTERVAL = 0.01 
-
-# DEFAULT_TOLERANCE=1e0
-# DEFAULT_TOLERANCE=1e-01 
-DEFAULT_TOLERANCE=5e-02
-# DEFAULT_TOLERANCE=1e-02
-# DEFAULT_TOLERANCE=1e-04 
-# DEFAULT_TOLERANCE=1e-14
-
-VERBOSE = False 
 
 MAX_RETRIES = 10 
 
@@ -46,7 +30,7 @@ class GelpiaSolver :
     tolerance = None 
     cached_result = None 
 
-    def __init__ (self, tolerance=DEFAULT_TOLERANCE): 
+    def __init__ (self, tolerance=tft_utils.GOPT_TOLERANCE): 
         self.tolerance = tolerance 
         self.cached_result = None 
 
@@ -68,8 +52,9 @@ class GelpiaSolver :
         fname_log   = os.path.abspath(FNAME_GELPIA_LOG) 
         if (id_query is not None): 
             fname_query = fname_query + "." + str(id_query) 
-            fname_log   = fname_log   + "." + str(id_query) 
-        if (VERBOSE): 
+            fname_log   = fname_log   + "." + str(id_query)
+            
+        if (tft_utils.FPTUNER_DEBUG): 
             if (os.path.isfile(fname_query)): 
                 print ("WARNING: automatically overwrite Gelpia's query file: " + fname_query) 
             if (os.path.isfile(fname_log)):
@@ -87,7 +72,7 @@ class GelpiaSolver :
         qfile.write("-f \"" + expr_optobj.toCString(True) + "\"\n") 
 
         # specify the timeout
-        qfile.write("-t " + str(TIMEOUT) + "\n") 
+        qfile.write("-t " + str(tft_utils.GOPT_TIMEOUT) + "\n") 
 
         # turn off divide-by-zero analysis
         qfile.write("-z\n") 
@@ -148,8 +133,9 @@ class GelpiaSolver :
                     qi = qi + 1 
 
         # ---- run gelpia ---- 
-        assert(TIMEOUT > 0) 
-        assert((0 < POLL_INTERVAL) and (POLL_INTERVAL <= TIMEOUT)) 
+        assert(tft_utils.GOPT_TIMEOUT > 0) 
+        assert((0 < POLL_INTERVAL) and
+               (POLL_INTERVAL <= tft_utils.GOPT_TIMEOUT)) 
 
         now_dir = os.path.abspath(os.getcwd()) 
         os.chdir(os.environ["GELPIA_PATH"]) 
@@ -169,7 +155,7 @@ class GelpiaSolver :
                 finished = True 
                 break 
 
-            if (wait_time >= (TIMEOUT + 15)): 
+            if (wait_time >= (tft_utils.GOPT_TIMEOUT + 15)): 
                 break 
 
         os.chdir(now_dir)
@@ -184,9 +170,6 @@ class GelpiaSolver :
         if (finished): # Gelpia terminated itself 
             for aline in exe_gelpia.stdout: 
                 aline = aline.decode(encoding='UTF-8').strip() 
-
-                if (VERBOSE): 
-                    print ("Gelpia: " + aline) 
 
                 if (aline == "error"): 
                     print ("WARNING: Gelpia returned \"error\"") 

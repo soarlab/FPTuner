@@ -42,6 +42,14 @@ parser.add_argument("-maxc",
                     type=int, default=-1,  
                     help="Maximum number of type casts")
 
+parser.add_argument("-gopt_timeout",
+                    type=int, default=120,
+                    help="Timeout of the global optimization")
+
+parser.add_argument("-gopt_tolerance",
+                    type=float, default=5e-02,
+                    help="Tolerance of the global optimization") 
+
 parser.add_argument("-optm",
                     type=str, default="max-benefit",
                     help="Optimization method")
@@ -64,6 +72,8 @@ INPUT_FILE                = args.expr_spec
 tft_utils.FPTUNER_VERBOSE = (args.v or args.debug) 
 tft_utils.FPTUNER_DEBUG   = args.debug
 tft_utils.NO_M2_CHECK     = args.no_m2_check
+tft_utils.GOPT_TIMEOUT    = int(args.gopt_timeout)
+tft_utils.GOPT_TOLERANCE  = float(args.gopt_tolerance)
 tft_utils.OPT_METHOD      = str(args.optm) 
 tft_tuning.ERROR_BOUNDS   = [float(s.strip()) for s in args.e.strip().split(" ") if (s.strip() != "")]
 tft_utils.FIX_CONST_TYPE  = args.fix_const_type
@@ -80,6 +90,9 @@ elif (bwidths == [32, 64, 128]):
     IR.PREC_CANDIDATES = ["e32", "e64", "e128"]
 else: 
     sys.exit("Error: not supported bit-width candidates: " + str(bwidths))
+
+assert(tft_utils.GOPT_TIMEOUT > 0), "Error: the timeout of the global optimization must be > 0"
+assert(tft_utils.GOPT_TOLERANCE > 0), "Error: the tolerance of the global optimization must be > 0" 
 
 
 

@@ -15,9 +15,13 @@ FPT_CFG_VERIFY_DETAIL_BB     = "__verify.detail.bb.cfg"
 N_MAX_CASTINGS  = None
 
 FPTUNER_VERBOSE = False
-FPTUNER_DEBUG   = False 
+FPTUNER_DEBUG   = False
 
 FIX_CONST_TYPE  = False
+
+GOPT_TIMEOUT    = 120 
+GOPT_TOLERANCE  = 5e-02 
+
 
 if sys.stdout.isatty():
     USE_COLOR_TEXT  = True
