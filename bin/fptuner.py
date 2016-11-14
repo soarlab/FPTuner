@@ -10,8 +10,9 @@ import tft_error_form
 import tft_ir_api as IR 
 import tft_ir_backend 
 import tft_tuning 
-import tft_alloc 
+import tft_alloc
 
+import argparse 
 import imp 
 
 
@@ -21,71 +22,65 @@ import imp
 # ========
 
 # ==== get parameters ====
-INPUT_FILE   = None 
+parser = argparse.ArgumentParser()
+parser.add_argument("expr_spec",
+                    help="Expression Specification")
 
-i = 1
-while True: 
-    if (i >= len(sys.argv)): 
-        break 
+parser.add_argument("-v",
+                    action="store_true", default=False, 
+                    help="Verbose mode")
 
-    arg_in = sys.argv[i] 
+parser.add_argument("-debug",
+                    action="store_true", default=False, 
+                    help="Debug mode")
 
-    if   (arg_in == "-v"): 
-        tft_utils.FPTUNER_VERBOSE = True 
+parser.add_argument("-no_m2_check",
+                    action="store_true", default=False, 
+                    help="Skip m2 check") 
 
-    elif (arg_in == "-debug"): 
-        tft_utils.FPTUNER_VERBOSE = True
-        tft_utils.FPTUNER_DEBUG   = True
+parser.add_argument("-maxc",
+                    type=int, default=-1,  
+                    help="Maximum number of type casts")
 
-    elif (arg_in == "-no-m2-check"): 
-        tft_utils.NO_M2_CHECK     = True  
-        
-    elif (arg_in == "-maxc"):
-        i = i + 1
-        assert(i < len(sys.argv)), "No maximum number of type casts is given." 
+parser.add_argument("-optm",
+                    type=str, default="max-benefit",
+                    help="Optimization method")
 
-        tft_utils.N_MAX_CASTINGS = int(sys.argv[i])
-        assert(type(tft_utils.N_MAX_CASTINGS) is int and
-               tft_utils.N_MAX_CASTINGS >= 0), "The number of maximum type casts must be a non-negative integer."
+parser.add_argument("-e",
+                    type=str, 
+                    help="Error bounds")
 
-    elif (arg_in == "-optm"):
-        i = i + 1
+parser.add_argument("-b",
+                    type=str, default="32 64", 
+                    help="Bit-width candidates")
 
-        tft_utils.OPT_METHOD = sys.argv[i].strip()
-        assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS), "Invalid optimization method: " + str(tft_utils.OPT_METHOD)
+parser.add_argument("-fix_const_type",
+                    action="store_true", default=False, 
+                    help="Fix the constant type to the highest bit-width")
 
-    elif (arg_in == "-e"): 
-        i = i + 1 
+args = parser.parse_args()
 
-        tokens                  = tft_utils.String2Tokens(sys.argv[i], " ") 
-        tft_tuning.ERROR_BOUNDS = [float(tokens[ii]) for ii in range(0, len(tokens))] 
-        
-        assert(all([tft_tuning.ERROR_BOUNDS[ii] > 0.0 for ii in range(0, len(tft_tuning.ERROR_BOUNDS))])),"Invalid form of error threshold list. Please refer to the reference for the accepted form." 
+INPUT_FILE                = args.expr_spec
+tft_utils.FPTUNER_VERBOSE = (args.v or args.debug) 
+tft_utils.FPTUNER_DEBUG   = args.debug
+tft_utils.NO_M2_CHECK     = args.no_m2_check
+tft_utils.OPT_METHOD      = str(args.optm) 
+tft_tuning.ERROR_BOUNDS   = [float(s.strip()) for s in args.e.strip().split(" ") if (s.strip() != "")]
+tft_utils.FIX_CONST_TYPE  = args.fix_const_type
 
-    elif (arg_in == "-b"): 
-        i = i + 1 
-        
-        tokens = tft_utils.String2Tokens(sys.argv[i], " ") 
-        bwidths = [int(tokens[ii]) for ii in range(0, len(tokens))] 
-        bwidths.sort()
+if (args.maxc >= 0): 
+    tft_utils.N_MAX_CASTINGS  = int(args.maxc)
 
-        if   (bwidths == [32, 64]): 
-            IR.PREC_CANDIDATES = ["e32", "e64"] 
-        elif (bwidths == [64, 128]): 
-            IR.PREC_CANDIDATES = ["e64", "e128"]
-        elif (bwidths == [32, 64, 128]): 
-            IR.PREC_CANDIDATES = ["e32", "e64", "e128"]
-        else: 
-            sys.exit("Error: not supported bit-width candidates: " + str(bwidths))
+bwidths                   = [int(s.strip()) for s in args.b.strip().split(" ") if (s.strip() != "")] 
+if   (bwidths == [32, 64]): 
+    IR.PREC_CANDIDATES = ["e32", "e64"] 
+elif (bwidths == [64, 128]): 
+    IR.PREC_CANDIDATES = ["e64", "e128"]
+elif (bwidths == [32, 64, 128]): 
+    IR.PREC_CANDIDATES = ["e32", "e64", "e128"]
+else: 
+    sys.exit("Error: not supported bit-width candidates: " + str(bwidths))
 
-    elif (arg_in == "-fix-const-type"):
-        tft_utils.FIX_CONST_TYPE = True 
-
-    else: 
-        assert(INPUT_FILE is None), "No expression specification is given." 
-        INPUT_FILE = arg_in 
-
-    i = i + 1
 
 
 # ==== check parameters ====
@@ -178,8 +173,23 @@ for i in range(0, len(tft_tuning.ERROR_BOUNDS)):
         tft_ir_backend.ExportCppInsts(alloc, fname_cpp) 
 
 # show the timers
+timer_fname  = module_name + ".timers.csv"
+write_header = (not os.path.isfile(timer_fname))
+
+timer_file  = None 
+
+if (write_header):
+    timer_file = open(timer_fname, "w") 
+    timer_file.write("Total Parsing Time,First Derivatives,Global Optimization,QCQP,Check Higher-order Errors\n")
+else:
+    timer_file = open(timer_fname, "a")
+
+timer_file.write(str(float(tft_utils.TIME_PARSING))+","+str(float(tft_utils.TIME_FIRST_DERIVATIVES))+","+str(float(tft_utils.TIME_GLOBAL_OPT))+","+str(float(tft_utils.TIME_ALLOCATION))+","+str(float(tft_utils.TIME_CHECK_M2))+"\n")
+
 tft_utils.VerboseMessage("Total Parsing time          : " + str(float(tft_utils.TIME_PARSING)))
 tft_utils.VerboseMessage("    First Dev.              : " + str(float(tft_utils.TIME_FIRST_DERIVATIVES)))
 tft_utils.VerboseMessage("Time for global optimization: " + str(float(tft_utils.TIME_GLOBAL_OPT)))
 tft_utils.VerboseMessage("Time for solving QCQP       : " + str(float(tft_utils.TIME_ALLOCATION)))
 tft_utils.VerboseMessage("Time for checking M2        : " + str(float(tft_utils.TIME_CHECK_M2)))
+
+timer_file.close() 
