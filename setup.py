@@ -203,7 +203,9 @@ if   (OPT_SETUP == "install"):
     print ("") 
     print ("Please append the environment variables: ") 
     print ("") 
-    ppath = "export PYTHONPATH=" + os.path.abspath("./") + "/src:$PYTHONPATH"
+    ppath = ("export PYTHONPATH="
+             + os.path.abspath("./") + "/src:"
+             + os.path.abspath("./") + "/src/parser:$PYTHONPATH")
     exports.append(ppath)
     print(ppath)
     print ("")

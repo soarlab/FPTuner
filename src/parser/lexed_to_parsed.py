@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+
+import sys
+
+try:
+  import ply.yacc as yacc
+except:
+  print("PLY must be installed for python3")
+
+from function_to_lexed import *
+# underscore names are not imported by default
+from function_to_lexed import _function_lexer
+
+
+strip_arc_dict = {"arccos"  : "acos",
+                  "arcsin"  : "asin",
+                  "arctan"  : "atan",
+                  "arccosh" : "acosh",
+                  "argcosh" : "acosh",
+                  "arcosh"  : "acosh",
+                  "arcsinh" : "asinh",
+                  "argsinh" : "asinh",
+                  "arsinh"  : "asinh",
+                  "arctanh" : "atanh",
+                  "argtanh" : "atanh",
+                  "artanh"  : "atanh"}
+def strip_arc(f):
+  """Normalizes the names of inverse trig functions"""
+  return strip_arc_dict.get(f, f)
+
+
+
+
+precedence = (
+  ("left", "PLUS", "MINUS"),
+  ("left", "TIMES", "DIVIDE"),
+  ("right", "UMINUS"),
+  ("right", "INFIX_POW"),
+)
+
+
+def p_function(t):
+  ''' function : variable EQUALS augment    expression SEMICOLON function
+               | variable EQUALS augment    interval SEMICOLON function
+               | variable EQUALS expression SEMICOLON  function
+               | variable EQUALS interval   SEMICOLON  function
+               | expression
+               | expression SEMICOLON '''
+  if len(t) == 7:
+    t[0] = (("Assign", t[3], t[1], t[4]), t[6])
+  elif len(t) == 6:
+    t[0] = (("Assign", None, t[1], t[3]), t[5])
+  elif len(t) == 2 or len(t) == 3:
+    t[0] = ("Return", t[1])
+  else:
+    print("Internal parse error in p_function")
+    sys.exit(-1)
+
+
+def p_expression(t):
+  ''' expression : expression PLUS       augment    expression
+                 | expression MINUS      augment    expression
+                 | expression TIMES      augment    expression
+                 | expression DIVIDE     augment    expression
+                 | expression INFIX_POW  augment    expression
+                 | MINUS      augment    expression                  %prec UMINUS
+                 | expression PLUS       expression
+                 | expression MINUS      expression
+                 | expression TIMES      expression
+                 | expression DIVIDE     expression
+                 | expression INFIX_POW  expression
+                 | MINUS      expression                             %prec UMINUS
+                 | base '''
+  if len(t) == 5:
+    t[2] = t[2].replace("^", "powi")
+    t[0] = (t[2], t[3], t[1], t[4])
+  elif len(t) == 4 and t[1] == '-':
+    t[0] = ("neg", t[2], t[3])
+  elif len(t) == 4:
+    t[2] = t[2].replace("^", "powi")
+    t[0] = (t[2], None, t[1], t[3])
+  elif len(t) == 3:
+    t[0] = ("neg", None, t[2])
+  elif len(t) == 2:
+    t[0] = t[1]
+  else:
+        print("Internal parse error in p_expression")
+        sys.exit(-1)
+
+
+def p_augment(t):
+  ''' augment : PRECISION
+              | GANGING
+              | WEIGHT '''
+  t[0] = t[1]
+
+
+def p_base(t):
+  ''' base : symbolic_const
+           | variable
+           | const
+           | group
+           | func '''
+  t[0] = t[1]
+
+
+def p_variable(t):
+  ''' variable : NAME '''
+  t[0] = ("Name", t[1])
+
+
+def p_interval(t):
+  ''' interval : INTERVAL LPAREN   negconst COMMA    negconst RPAREN
+               | LBRACE   negconst COMMA    negconst RBRACE
+               | INTERVAL LPAREN   negconst RPAREN
+               | LBRACE   negconst RBRACE '''
+  if len(t) == 7:
+    left  = t[3]
+    right = t[5]
+  elif len(t) == 6:
+    left  = t[2]
+    right = t[4]
+  elif len(t) == 5:
+    left  = t[3]
+    right = left
+  elif len(t) == 4:
+    left  = t[2]
+    right = left
+  else:
+    print("Internal parse error in p_interval")
+    sys.exit(-1)
+
+  if left == right:
+    t[0] = ("Float", left)
+  else:
+    if float(left[1]) > float(right[1]):
+      print("Upside down intervals not allowed: [{}, {}]".format(left[1], right[1]))
+      sys.exit(-1)
+    t[0] = ("InputInterval", None, left, right)
+
+
+def p_negconst(t):
+  ''' negconst : MINUS negconst
+               | const '''
+  if len(t) == 3:
+    typ = t[2][0]
+    val = t[2][1]
+    if val[0] == '-':
+      t[0] = (typ, val[1:])
+    else:
+      t[0] = (typ, '-'+val)
+  elif len(t) == 2:
+    t[0] = t[1]
+  else:
+    print("Internal parse error in p_negconst")
+    sys.exit(-1)
+
+
+def p_const(t):
+  ''' const : integer
+            | float '''
+  t[0] = t[1]
+
+
+def p_integer(t):
+  ''' integer : INTEGER '''
+  t[0] = ("Integer", t[1])
+
+
+def p_float(t):
+  ''' float : FLOAT '''
+  t[0] = ("Float", t[1])
+
+
+def p_group(t):
+  ''' group : LPAREN expression RPAREN '''
+  t[0] = t[2]
+
+
+def p_func(t):
+  ''' func : BINOP LPAREN augment    COMMA expression COMMA expression RPAREN
+           | BINOP LPAREN expression COMMA expression RPAREN
+           | UNOP  LPAREN augment    COMMA expression RPAREN
+           | UNOP  LPAREN expression RPAREN '''
+  if len(t) == 9:
+    t[1] = t[1].replace("pow", "powi")
+    t[0] = (t[1], t[3], t[4], t[7])
+  elif len(t) == 7 and t[1] in BINOPS:
+    t[1] = t[1].replace("pow", "powi")
+    t[0] = (t[1], None, t[3], t[5])
+  elif len(t) == 7 and t[1] in UNOPS:
+    t[0] = (strip_arc(t[1]), t[3], t[5])
+  elif len(t) == 5:
+    t[0] = (strip_arc(t[1]), None, t[3])
+  else:
+    print("Internal parse error in p_func")
+    sys.exit(-1)
+
+
+def p_symbolic_const(t):
+  ''' symbolic_const : SYMBOLIC_CONST '''
+  if t[1] in SYMBOLIC_CONSTS:
+    t[0] = SYMBOLIC_CONSTS[t[1]]
+  else:
+    print("Internal parse error in p_symbolic_const")
+    sys.exit(-1)
+
+
+def p_error(t):
+  if t:
+    print("Syntax error at '{}'".format(t.value))
+    sys.exit(-1)
+  else:
+    print("Unexpected end of function")
+    sys.exit(-1)
+
+
+
+
+
+
+
+_function_parser = yacc.yacc(debug=False, write_tables=False,
+                             outputdir="./__pycache__")
+
+
+def parse_function(text):
+  return _function_parser.parse(text, lexer=_function_lexer)
+
+
+def runmain():
+  data = get_runmain_input()
+  exp = parse_function(data)
+
+  print_exp(exp)
+
+if __name__ == "__main__":
+  try:
+    from pass_utils import *
+    runmain()
+  except KeyboardInterrupt:
+    print("\nGoodbye")

@@ -14,6 +14,8 @@ import tft_ir_backend
 import tft_tuning
 import tft_alloc
 
+from input_to_tft import translate
+from pass_utils import get_runmain_input
 
 def error(*objs):
     print("ERROR:", *objs, file=sys.stderr)
@@ -75,8 +77,6 @@ def main():
     INPUT_FILE = args.expr_spec
     if not os.path.isfile(INPUT_FILE):
         error("Input expression file doesn't exist: {}".format(INPUT_FILE))
-    if not INPUT_FILE.endswith(".py"):
-        error("Non-python expression specification is given, use .py extension")
 
     tft_utils.FPTUNER_VERBOSE = args.verbose or args.debug
 
@@ -125,18 +125,34 @@ def main():
 
 
     # ==== load the input file as a module ====
-    tokens      = tft_utils.String2Tokens(INPUT_FILE, "/")
-    assert(len(tokens) >= 1)
+    if INPUT_FILE.endswith(".py"):
+        tokens      = tft_utils.String2Tokens(INPUT_FILE, "/")
+        assert(len(tokens) >= 1)
 
-    module_name = tokens[-1]
-    assert(module_name.endswith(".py"))
-    module_name = module_name[0:len(module_name)-3]
+        module_name = tokens[-1]
+        assert(module_name.endswith(".py"))
+        module_name = module_name[0:len(module_name)-3]
 
-    IR.LOAD_CPP_INSTS = True
-    module_in         = imp.load_source(module_name, INPUT_FILE)
-    if (IR.TARGET_EXPR is None):
-        error("no tuning target expression was specified.")
-    IR.LOAD_CPP_INSTS = False
+        IR.LOAD_CPP_INSTS = True
+        module_in         = imp.load_source(module_name, INPUT_FILE)
+        if (IR.TARGET_EXPR is None):
+            error("no tuning target expression was specified.")
+        IR.LOAD_CPP_INSTS = False
+
+    else: # New frontend
+        with open(INPUT_FILE, 'r') as f:
+            data = f.read()
+        processed_data = get_runmain_input(data)
+        py_source = translate(processed_data)
+
+        code_obj = compile(py_source, '<string>', 'exec')
+
+        IR.LOAD_CPP_INSTS = True
+        exec(code_obj)
+        if (IR.TARGET_EXPR is None):
+            error("No tuning target expression was specified.")
+        IR.LOAD_CPP_INSTS = False
+
 
 
     # ==== tune the targeted expression ====
@@ -195,7 +211,9 @@ def main():
             assert(eforms is not None)
 
             str_error_bound = str(float(tft_tuning.ERROR_BOUNDS[i]))
-            fname_cpp = module_name.strip() + "." + str_error_bound + ".cpp"
+            base = os.path.basename(INPUT_FILE)
+            base = os.path.splitext(base)[0]
+            fname_cpp = base + "." + str_error_bound + ".cpp"
 
             if (os.path.isfile(fname_cpp)):
                 tft_utils.VerboseMessage("Warning: overwrite the existed .cpp file: " + fname_cpp)
@@ -203,7 +221,7 @@ def main():
             tft_ir_backend.ExportCppInsts(alloc, fname_cpp)
 
     # show the timers
-    timer_fname  = module_name + ".timers.csv"
+    timer_fname  = base + ".timers.csv"
     write_header = (not os.path.isfile(timer_fname))
 
     timer_file  = None
