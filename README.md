@@ -1,9 +1,4 @@
-#fptunermain
-{
-    float:right;
-}
-
-<div class="fptunermain">
+<div style="float: right">
 <div>
 <img src="misc/logo.png" width=300 alt="Logo" style="float: right"\>
 <br>
