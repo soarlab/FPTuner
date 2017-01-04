@@ -1,6 +1,9 @@
 <meta name="robots" content="noindex" />
-<img src="misc/logo.png" width=300 alt="Logo" align="right">
-<img src="misc/aec-badge-popl.png" width=300 alt="Artifact Evaluated" align="right">
+<div style="float: right">
+<img src="misc/logo.png" width=300 alt="Logo" style="float: right"\>
+<br>
+<img src="misc/aec-badge-popl.png" width=100 alt="Artifact Evaluated" style="margin:10px 0px 0px 0px; float:right"\>
+</div>
 
 # Table of Contents
 - [Overview](#overview)
