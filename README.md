@@ -1,5 +1,6 @@
 <meta name="robots" content="noindex" />
 <img src="misc/logo.png" width=300 alt="Logo" align="right">
+<img src="misc/aec-badge-popl.png" width=300 alt="Artifact Evaluated" align="right">
 
 # Table of Contents
 - [Overview](#overview)
