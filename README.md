@@ -1,4 +1,4 @@
-<img src="misc/logo.png" width=300 alt="Logo" style="float: right"\>
+<img src="misc/logo.png" width=300 alt="Logo" align="right"\>
 
 # Table of Contents
 - [Overview](#overview)
