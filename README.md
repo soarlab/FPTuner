@@ -1,12 +1,4 @@
-<div style="float: right">
-<div>
 <img src="misc/logo.png" width=300 alt="Logo" style="float: right"\>
-<br>
-<img src="misc/aec-badge-popl.png" width=100 alt="Artifact Evaluated" style="margin:10px 0px 0px 0px; float:right"\>
-</div>
-</div>
-
-
 
 # Table of Contents
 - [Overview](#overview)
