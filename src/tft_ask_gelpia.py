@@ -42,9 +42,8 @@ class GelpiaSolver :
         
         tft_utils.checkGelpiaInstallation("master") 
 
-        if ((id_retry is not None) and (id_retry >= MAX_RETRIES)): 
-            print("WARNING: Gelpia reached the max. # of retries...") 
-            return None 
+        if ((id_retry is not None) and (id_retry >= MAX_RETRIES)):
+            print ("WARNING: Gelpia reached the max. # of retries...")
 
         self.cached_result = None 
  
@@ -56,9 +55,12 @@ class GelpiaSolver :
             
         if (tft_utils.FPTUNER_DEBUG): 
             if (os.path.isfile(fname_query)): 
-                print ("WARNING: automatically overwrite Gelpia's query file: " + fname_query) 
+                print ("WARNING: automatically overwrite Gelpia's query file: " + fname_query)
+                return None
+            
             if (os.path.isfile(fname_log)):
-                print ("WARNING: automatically overwrite Gelpia's log file: " + fname_log) 
+                print ("WARNING: automatically overwrite Gelpia's log file: " + fname_log)
+                return None 
 
         # ---- write query file ----
         qfile = open(fname_query, "w") 
@@ -161,7 +163,8 @@ class GelpiaSolver :
         os.chdir(now_dir)
 
         if (not finished) : 
-            print ("WARNING: Manually timeout Gelpia... Gelpia's timeout facility may failed...") 
+            print ("WARNING: Manually timeout Gelpia... Gelpia's timeout facility may failed...")
+            return None 
 
         # ---- read result ----
         not_certain = False 
@@ -172,12 +175,10 @@ class GelpiaSolver :
                 aline = aline.decode(encoding='UTF-8').strip() 
 
                 if (aline == "error"): 
-                    print ("WARNING: Gelpia returned \"error\"") 
-                    return None
+                    print ("Warning : Gelpia returned \"error\"") 
 
                 if (aline == "ERROR: Division by zero"): 
-                    print ("ERROR: Encounter division by zero") 
-                    assert(False) 
+                    print ("Warning : Gelpia encounter division by zero") 
 
                 str_val = None 
 
@@ -211,9 +212,12 @@ class GelpiaSolver :
                             return self.maxObj(expr_optobj, id_query, 1) 
                         else: 
                             assert(type(id_retry) is int) 
-                            return self.maxObj(expr_optobj, id_query, (id_retry + 1)) 
+                            return self.maxObj(expr_optobj, id_query, (id_retry + 1))
 
-                    try: 
+                    if (str_val == "inf"):
+                        raise InfValueException()
+
+                    try:
                         value_bound = Fraction(float(str_val)) 
                     except: 
                         print ("WARNING: cannot convert " + str_val + " to float...") 

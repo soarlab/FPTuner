@@ -276,6 +276,13 @@ def isSameMap (map1 = {}, map2 = {}):
             return False 
         if (not (v == map1[k])): 
             return False 
-    return True 
+    return True
+
+
+
+# ==== inf value exception (class)
+class InfValueException (Exception):
+    pass
+
 
 

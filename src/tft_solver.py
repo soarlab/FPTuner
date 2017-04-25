@@ -126,9 +126,11 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
     # ==== solve expressions' ranges ====
     if (VERBOSE): 
-        print ("---- val. range opt. in FirstLevelAllocSolver [" + optimizers["vrange"] + "] ----") 
+        print ("---- val. range opt. in FirstLevelAllocSolver [" + optimizers["vrange"] + "] ----")
 
-    for eform in error_forms: 
+   #  unbounded_range = False 
+
+    for eform in error_forms: # len(error_forms) == 1 
         for et in eform.terms: 
             assert(isinstance(et, tft_error_form.ErrorTerm)) 
             value_max = None 
@@ -159,13 +161,14 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                     print (str(obj_expr) + "  IN...")
 
                 if (obj_expr.hasUB()):
-                    value_max = obj_expr.ub().value() 
+                    value_max = obj_expr.ub().value()
+                        
                 else:
-                    value_max = FindExprBound(optimizers["vrange"], obj_expr, "max", eform.constraints) 
+                    value_max = FindExprBound(optimizers["vrange"], obj_expr, "max", eform.constraints)
                     if (value_max is None): 
                         return None 
                     obj_expr.setUB(tft_expr.ConstantExpr(value_max)) 
-                    assert(value_max is not None)
+                assert(value_max is not None)
                 if (VERBOSE): 
                     print ("    UB: " + str(float(value_max))) 
 
@@ -211,7 +214,11 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                     print ("--------------------------------------------------")
 
     tft_utils.TIME_GLOBAL_OPT = tft_utils.TIME_GLOBAL_OPT + (time.time() - time_global_opt)
-    time_allocation           = time.time()  
+    time_allocation           = time.time()
+
+    # ==== dump the bounds of the first derivative expressions ====
+    for et in eform.terms:
+        print ("GID: " + str(et.gid) + " (context: " + str(et.context_gid) + " ) : [" + str(et.absexpr().lb().value()) + ", " + str(float(et.absexpr().ub().value())) + "]")
 
     tft_utils.VerboseMessage("allocating bit-widths...") 
         
