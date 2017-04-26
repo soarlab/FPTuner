@@ -55,6 +55,8 @@ def InstallFPTaylor (branch):
 
         os.chdir(d)
 
+        os.system("git checkout bb773cb0e9e1b13db8845623e80186e1a343bb11")
+        
         os.system("make")
         assert(os.path.isfile("./fptaylor"))
 
