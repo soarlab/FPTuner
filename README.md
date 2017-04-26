@@ -1,4 +1,4 @@
-<img src="misc/logo.png" width=300 alt="Logo" align="right"\>
+<img src="misc/logo.png" width=400 alt="FPTuner Logo" align="right">
 
 # Table of Contents
 - [Overview](#overview)
