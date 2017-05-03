@@ -189,7 +189,7 @@ def main(argv):
         # ----
         # install the required tools
         # ----
-        InstallFPTaylor("develop", "aaaf17b6c70860eeaa20aa434a62c92278aa7b4a")
+        InstallFPTaylor("develop", "bb773cb0e9e1b13db8845623e80186e1a343bb11")
         InstallGelpia("ArtifactEvaluation")
 
         # ----
