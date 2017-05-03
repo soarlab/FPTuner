@@ -1,239 +1,251 @@
 #! /usr/bin/env python3
 
-import os 
-import sys 
-import imp 
+import os
+import sys
+import imp
 
-tft_utils = imp.load_source("tft_utils", "./src/tft_utils.py") 
+tft_utils = imp.load_source("tft_utils", "./src/tft_utils.py")
 
 vars_file = "fptuner_vars"
 
 
 # ========
-# subroutines 
-# ======== 
-def InstallGelpia (branch, silent=False): 
-    assert(type(branch) is str) 
+# subroutines
+# ========
+def InstallGelpia(branch, commit=None):
+    assert(type(branch) is str)
 
-    if (silent or 
-        not tft_utils.checkGelpiaInstallation(branch)): 
-        # download Gelpia 
-        d = "gelpia" 
+    if tft_utils.checkGelpiaInstallation(branch):
+        print("Gelpia seems to already be installed. Skipping instillation.")
+        return
 
-        assert(not os.path.isdir("gelpia")) 
-        os.system("git clone -b " + branch + " https://github.com/soarlab/gelpia.git " + d)
-        assert(os.path.isdir(d)) 
+    # download Gelpia
+    d = "gelpia"
 
-        os.chdir(d) 
-        os.system("make requirements") 
-        os.system("make")
-        assert(os.path.isfile("./bin/gelpia"))
-        
-        os.chdir("../") 
+    if os.path.isdir(d):
+        print("Removing old Gelpia directory")
+        os.system("rm -rf {}".format(d))
 
-        # set environment variables 
-        if (not silent): 
-            os.environ["GELPIA_PATH"] = os.path.abspath(d) 
-            os.environ["GELPIA"]      = os.environ["GELPIA_PATH"] + "/bin/gelpia"
+    print("Downloading Gelpia git repository at branch {}".format(branch))
+    os.system("git clone --quiet -b {} https://github.com/soarlab/gelpia.git {}"
+              .format(branch, d))
+    assert(os.path.isdir(d))
 
-    if (not silent): 
-        assert(tft_utils.checkGelpiaInstallation(branch)) 
+    os.chdir(d)
+    if commit != None:
+        print("Checking out Gelpia at commit {}".format(commit))
+        os.system("git checkout --quiet {}".format(commit))
+    print("Building Gelpia requirements")
+    os.system("make requirements")
+    print("Building Gelpia")
+    os.system("make")
+    assert(os.path.isfile("./bin/gelpia"))
+
+    os.chdir("../")
+
+    # set environment variables
+    os.environ["GELPIA_PATH"] = os.path.abspath(d)
+    os.environ["GELPIA"]      = os.environ["GELPIA_PATH"] + "/bin/gelpia"
+    assert(tft_utils.checkGelpiaInstallation(branch))
 
 
+def InstallFPTaylor(branch, commit=None):
+    assert(type(branch) is str)
 
-def InstallFPTaylor (branch): 
-    assert(type(branch) is str) 
+    if tft_utils.checkFPTaylorInstallation(branch):
+        print("FPTaylor seems to already be installed. Skipping instillation.")
+        return
 
-    if (not tft_utils.checkFPTaylorInstallation(branch)): 
-        # download FPTaylor 
-        d = "FPTaylor" 
-        # d = "FPTaylor-" + branch 
+    # download FPTaylor
+    d = "FPTaylor"
 
-        assert(not os.path.isdir(d)) 
-        os.system("git clone -b " + branch + " https://github.com/soarlab/FPTaylor.git " + d) 
-        assert(os.path.isdir(d))  
+    if os.path.isdir(d):
+        print("Removing old FPTaylor")
+        os.system("rm -rf {}".format(d))
 
-        os.chdir(d)
+    print("Downloading FPTaylor git repository at branch {}".format(branch))
+    os.system("git clone --quiet -b {} https://github.com/soarlab/FPTaylor.git {}"
+              .format(branch, d))
+    assert(os.path.isdir(d))
 
-        os.system("make")
-        assert(os.path.isfile("./fptaylor"))
+    os.chdir(d)
+    if commit != None:
+        print("Checking out FPTaylor at commit {}".format(commit))
+        os.system("git checkout --quiet {}".format(commit))
+    print("Building FPTaylor")
+    os.system("make --quiet")
+    assert(os.path.isfile("./fptaylor"))
 
-        cfg_orig = "default.cfg"
-        cfg_default = "fptuner_default.cfg"
-        os.system("cp " + cfg_orig + " " + cfg_default)
-        os.system('sed -i "s|fp-power2-model = true|fp-power2-model = false|g" ' + cfg_default)
-        os.system('sed -i "s|\[short:|#[short:|g" ' + cfg_default)
-        assert(os.path.isfile(cfg_default)) 
+    cfg_orig = "default.cfg"
+    cfg_default = "fptuner_default.cfg"
+    os.system("cp {} {}".format(cfg_orig, cfg_default))
+    os.system('sed -i "s|fp-power2-model = true|fp-power2-model = false|g" {}'
+              .format(cfg_default))
+    os.system('sed -i "s|\[short:|#[short:|g" {}'.format(cfg_default))
+    assert(os.path.isfile(cfg_default))
 
-        # write FPT_CFG_FIRST  
-        cfg_first  = tft_utils.FPT_CFG_FIRST 
-        os.system("cp " + cfg_default + " " + cfg_first) 
+    # write FPT_CFG_FIRST
+    cfg_first  = tft_utils.FPT_CFG_FIRST
+    os.system("cp {} {}".format(cfg_default, cfg_first))
 
-        f_cfg_first = open(cfg_first, "a") 
-            
-        f_cfg_first.write("\n") 
-        f_cfg_first.write("abs-error=false\n") 
-        f_cfg_first.write("rel-error=false\n")
-        f_cfg_first.write("fail-on-exception=false\n") 
-        f_cfg_first.write("find-bounds=false\n")
-            
-        f_cfg_first.close() 
-        
-        # write FPT_CFG_VERIFY 
-        cfg_verify = tft_utils.FPT_CFG_VERIFY 
-        os.system("cp " + cfg_default + " " + cfg_verify) 
+    with open(cfg_first, "a") as f_cfg_first:
+        f_cfg_first.write("\n")
+        f_cfg_first.write("abs-error = false\n")
+        f_cfg_first.write("rel-error = false\n")
+        f_cfg_first.write("fail-on-exception = false\n")
+        f_cfg_first.write("find-bounds = false\n")
 
-        f_cfg_verify = open(cfg_verify, "a") 
-                
-        f_cfg_verify.write("\n") 
-        f_cfg_verify.write("abs-error=true\n") 
+    # write FPT_CFG_VERIFY
+    cfg_verify = tft_utils.FPT_CFG_VERIFY
+    os.system("cp {} {}".format(cfg_default, cfg_verify))
+
+    with open(cfg_verify, "a") as f_cfg_verify:
+        f_cfg_verify.write("\n")
+        f_cfg_verify.write("abs-error=true\n")
         f_cfg_verify.write("rel-error=false\n")
-        f_cfg_verify.write("opt = gelpia\n") 
-            
-        f_cfg_verify.close() 
+        f_cfg_verify.write("opt = gelpia\n")
 
-        # write FPT_CFG_VERIFY_DETAIL_GELPIA
-        cfg_verify_dg = tft_utils.FPT_CFG_VERIFY_DETAIL_GELPIA
-        os.system("cp " + cfg_default + " " + cfg_verify_dg) 
+    # write FPT_CFG_VERIFY_DETAIL_GELPIA
+    cfg_verify_dg = tft_utils.FPT_CFG_VERIFY_DETAIL_GELPIA
+    os.system("cp {} {}".format(cfg_default, cfg_verify_dg))
 
-        f_cfg_verify_dg = open(cfg_verify_dg, "a") 
-
+    with open(cfg_verify_dg, "a") as f_cfg_verify_dg:
         f_cfg_verify_dg.write("\n")
         f_cfg_verify_dg.write("abs-error=true\n")
         f_cfg_verify_dg.write("rel-error=false\n")
-        f_cfg_verify_dg.write("intermediate-opt = true\n") 
-        f_cfg_verify_dg.write("opt = gelpia\n") 
+        f_cfg_verify_dg.write("intermediate-opt = true\n")
+        f_cfg_verify_dg.write("opt = gelpia\n")
 
-        f_cfg_verify_dg.close()
+    # write FPT_CFG_VERIFY_DETAIL_BB
+    cfg_verify_bb = tft_utils.FPT_CFG_VERIFY_DETAIL_BB
+    os.system("cp {} {}".format(cfg_default, cfg_verify_bb))
 
-        # write FPT_CFG_VERIFY_DETAIL_BB 
-        cfg_verify_bb = tft_utils.FPT_CFG_VERIFY_DETAIL_BB 
-        os.system("cp " + cfg_default + " " + cfg_verify_bb)
-
-        f_cfg_verify_bb = open(cfg_verify_bb, "a")
-
-        f_cfg_verify_bb.write("\n") 
+    with open(cfg_verify_bb, "a") as f_cfg_verify_bb:
+        f_cfg_verify_bb.write("\n")
         f_cfg_verify_bb.write("abs-error=true\n")
         f_cfg_verify_bb.write("rel-error=false\n")
-        f_cfg_verify_bb.write("fp-power2-model=true\n") 
+        f_cfg_verify_bb.write("fp-power2-model=true\n")
         f_cfg_verify_bb.write("intermediate-opt = true\n")
-        f_cfg_verify_bb.write("opt = bb\n") 
-        
-        f_cfg_verify_bb.close()
+        f_cfg_verify_bb.write("opt = bb\n")
 
-        # end of the installation 
-        os.chdir("../") 
+    # end of the installation
+    os.chdir("../")
 
-        # set environment variables 
-        os.environ["FPTAYLOR_BASE"] = os.path.abspath(d) 
-        os.environ["FPTAYLOR"]      = os.environ["FPTAYLOR_BASE"] + "/fptaylor"
-
-    assert(tft_utils.checkFPTaylorInstallation(branch)) 
+    # set environment variables
+    os.environ["FPTAYLOR_BASE"] = os.path.abspath(d)
+    os.environ["FPTAYLOR"]      = os.environ["FPTAYLOR_BASE"] + "/fptaylor"
+    assert(tft_utils.checkFPTaylorInstallation(branch))
 
 
-
-def CleanDir (d, more_commands = []): 
-    assert(os.path.isdir(d)) 
+def CleanDir (d, more_commands = []):
+    assert(os.path.isdir(d))
 
     d_curr = os.getcwd()
 
-    os.chdir(d) 
-
-    os.system("rm *~")
-    os.system("rm *.exprs") 
-    os.system("rm *.pyc")
-
-    os.system("rm -rf log") 
-    os.system("rm -rf tmp")     
+    os.chdir(d)
+    os.system("rm -f *~")
+    os.system("rm -f *.exprs")
+    os.system("rm -f *.pyc")
+    os.system("rm -rf log")
+    os.system("rm -rf tmp")
     os.system("rm -rf __pycache__")
-    
-    for c in more_commands: 
-        os.system(c) 
+
+    for c in more_commands:
+        os.system(c)
 
     os.chdir(d_curr)
 
 
-
-def MakeClean (): 
-    CleanDir("./") 
-
-    CleanDir("./src", ["rm __fptaylor_m2_check_query.txt", 
-                       "rm __fpt_query", 
-                       "rm gurobi.log",
+def MakeClean ():
+    CleanDir("./")
+    CleanDir("./src", ["rm -f __fptaylor_m2_check_query.txt",
+                       "rm -f __fpt_query",
+                       "rm -f gurobi.log",
+                       "rm -f -rf saved-gelpia-queries"])
+    CleanDir("./bin", ["rm -f __fptaylor_m2_check_query.txt",
+                       "rm -f __fpt_query",
+                       "rm -f gurobi.log",
                        "rm -rf saved-gelpia-queries"])
-
-    CleanDir("./bin", ["rm __fptaylor_m2_check_query.txt", 
-                       "rm __fpt_query", 
-                       "rm gurobi.log",
-                       "rm -rf saved-gelpia-queries"])
-
-    CleanDir("./examples", ["rm *.cpp"]) 
-
-    CleanDir("./examples/primitives", ["rm *.cpp"]) 
+    CleanDir("./examples", ["rm -f *.cpp"])
+    CleanDir("./examples/primitives", ["rm -f *.cpp"])
 
 
-
-# ========
-# main 
-# ========
-if len(sys.argv) != 2:
-    print("Usage: python3 {} <install|clean|uninstall>".format(sys.argv[0]))
+def usage(argv):
+    print("Usage: python3 {} <install|clean|uninstall>".format(argv[0]))
     sys.exit(-1)
-OPT_SETUP = sys.argv[1] 
 
 
-if   (OPT_SETUP == "install"): 
-    # ---- 
-    # install the required tools
-    # ----
-    InstallFPTaylor("develop")
-    # InstallGelpia("RustAD") 
-    InstallGelpia("ArtifactEvaluation") 
 
 
-    # ----
-    # message 
-    # ----
-    exports = []
-    print ("========")
-    print ("Please set the environment variables: ")
-    print ("")
-    exports.append ("export HOME_FPTUNER=" + os.path.abspath("./")) 
-    exports.append ("export GELPIA_PATH=" + os.environ["GELPIA_PATH"]) 
-    exports.append ("export GELPIA=" + os.environ["GELPIA"]) 
-    exports.append ("export FPTAYLOR_BASE=" + os.environ["FPTAYLOR_BASE"]) 
-    exports.append ("export FPTAYLOR=" + os.environ["FPTAYLOR"])
-    print("\n".join(exports))
-    print ("") 
-    print ("Please append the environment variables: ") 
-    print ("") 
-    ppath = ("export PYTHONPATH="
-             + os.path.abspath("./") + "/src:"
-             + os.path.abspath("./") + "/src/parser:$PYTHONPATH")
-    exports.append(ppath)
-    print(ppath)
-    print ("")
-    print ("Note: You must manually setup PYTHONPATH for Gurobi's python interface. Please refer to READMD.md and www.gurobi.com for more details.")
-    print("")
-    print ("The file {} has been written which includes these variables. You may type\n\t source {}\nto set them."
-           .format(vars_file, vars_file))
-    print ("")
-    print ("========")
+# ========
+# main
+# ========
+def main(argv):
+    if len(argv) != 2:
+        usage(argv)
 
-    with open(vars_file, 'w') as f:
-        f.write('\n'.join(exports))
+    OPT_SETUP = sys.argv[1]
+    if OPT_SETUP == "install":
+        # ----
+        # install the required tools
+        # ----
+        InstallFPTaylor("develop", "aaaf17b6c70860eeaa20aa434a62c92278aa7b4a")
+        InstallGelpia("ArtifactEvaluation")
+
+        # ----
+        # message
+        # ----
+        exports = []
+        print("="*80)
+        print("Please set the environment variables: ")
+        print("")
+        exports.append("export HOME_FPTUNER={}".format(os.path.abspath("./")))
+        exports.append("export GELPIA_PATH={}".format(os.environ["GELPIA_PATH"]))
+        exports.append("export GELPIA={}".format(os.environ["GELPIA"]))
+        exports.append("export FPTAYLOR_BASE={}"
+                       .format(os.environ["FPTAYLOR_BASE"]))
+        exports.append("export FPTAYLOR={}".format(os.environ["FPTAYLOR"]))
+        print("\n".join(exports))
+        print("")
+        print("Please append the environment variables: ")
+        print("")
+        ppath = ("export PYTHONPATH={0}/src:{0}/src/parser:$PYTHONPATH"
+                 .format(os.path.abspath("./")))
+        exports.append(ppath)
+        print(ppath)
+        print("")
+        print("Note: You must manually setup PYTHONPATH for Gurobi's python " +
+              "interface.")
+        print("      Please refer to READMD.md and www.gurobi.com for " +
+              "more details.")
+        print("")
+        print("The file {0} has been written which includes these variables. "
+              "You may type\n\t source {0}\nto set them."
+               .format(vars_file))
+        print("")
+        print("="*80)
+
+        with open(vars_file, 'w') as f:
+            f.write('\n'.join(exports))
 
 
-elif (OPT_SETUP == "clean"): 
-    MakeClean() 
+    elif (OPT_SETUP == "clean"):
+        MakeClean()
 
 
-elif (OPT_SETUP == "uninstall"): 
-    MakeClean()
-    os.system("rm -f " + vars_file)
-    os.system("rm -rf gelpia") 
-    os.system("rm -rf FPTaylor") 
+    elif (OPT_SETUP == "uninstall"):
+        MakeClean()
+        os.system("rm -f {}".format(vars_file))
+        os.system("rm -rf gelpia")
+        os.system("rm -rf FPTaylor")
 
 
-else: 
-    sys.exit("ERROR: invalid option : " + OPT_SETUP) 
+    else:
+        print("ERROR: invalid option: {}".format(OPT_SETUP))
+        usage(argv)
+
+
+
+
+if __name__ == "__main__":
+    main(sys.argv)
