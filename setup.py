@@ -55,12 +55,14 @@ def InstallFPTaylor (branch):
 
         os.chdir(d)
 
-        os.system("git checkout bb773cb0e9e1b13db8845623e80186e1a343bb11")
-        
         os.system("make")
         assert(os.path.isfile("./fptaylor"))
 
-        cfg_default = "default.cfg" 
+        cfg_orig = "default.cfg"
+        cfg_default = "fptuner_default.cfg"
+        os.system("cp " + cfg_orig + " " + cfg_default)
+        os.system('sed -i "s|fp-power2-model = true|fp-power2-model = false|g" ' + cfg_default)
+        os.system('sed -i "s|\[short:|#[short:|g" ' + cfg_default)
         assert(os.path.isfile(cfg_default)) 
 
         # write FPT_CFG_FIRST  

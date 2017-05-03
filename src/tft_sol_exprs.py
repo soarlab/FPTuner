@@ -200,7 +200,7 @@ def CheckM2WithFPTaylor (fname_config):
         aline = tft_utils.Bytes2String(aline) 
 
         if   (aline.startswith("total2:")): 
-            err_M2    = float(aline[7:].strip())
+            err_M2    = float(aline[7:].split()[0])
         elif (aline.startswith("Absolute error (exact):")): 
             err_total = float(aline[23:].strip()) 
         else: 
