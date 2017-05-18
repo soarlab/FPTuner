@@ -217,8 +217,8 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
     time_allocation           = time.time()
 
     # ==== dump the bounds of the first derivative expressions ====
-    for et in eform.terms:
-        print ("GID: " + str(et.gid) + " (context: " + str(et.context_gid) + " ) : [" + str(et.absexpr().lb().value()) + ", " + str(float(et.absexpr().ub().value())) + "]")
+#    for et in eform.terms:
+#        print ("GID: " + str(et.gid) + " (context: " + str(et.context_gid) + " ) : [" + str(et.absexpr().lb().value()) + ", " + str(float(et.absexpr().ub().value())) + "]")
 
     tft_utils.VerboseMessage("allocating bit-widths...") 
         

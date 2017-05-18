@@ -14,3 +14,5 @@ rel_2 = IR.BE("*", 21, IR.FConst(0.12900613773279798), x3)
 rel = IR.BE("-", 22, rel_1, rel_2)
 
 IR.TuneExpr(rel) 
+
+IR.ToFPCore(rel, "sineOrder3.fpcore")

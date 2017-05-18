@@ -28,3 +28,5 @@ rel_temp1 = IR.BE("*", 25, IR.FConst(3.0), sub2)
 rel = IR.BE("+", 26, var_x1, IR.BE("+", 27, rel_temp0, rel_temp1))
 
 IR.TuneExpr(rel) 
+
+IR.ToFPCore(rel, "jet.fpcore")

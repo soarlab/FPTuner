@@ -232,7 +232,10 @@ class ConstantExpr (ArithmeticExpr):
         return "(" + self.toCString() + ")"
 
     def toASTString (self): 
-        return self.toIRString() 
+        return self.toIRString()
+
+    def toFPCoreString (self):
+        return self.toCString()
 
     def __eq__ (self, rhs): 
         if (not isinstance(rhs, ConstantExpr)): 
@@ -387,6 +390,13 @@ class VariableExpr (ArithmeticExpr):
 
     def toASTString (self): 
         return self.idLabel()
+
+    def toFPCoreString (self):
+        if (isConstVar(self)):
+            assert(self.hasLB() and self.hasUB() and self.lb().value() == self.ub().value())
+            return str(float(self.lb().value()))
+        
+        return self.label() 
 
     def __eq__ (self, rhs): 
         if (not isinstance(rhs, VariableExpr)): 
@@ -565,7 +575,10 @@ class UnaryExpr (ArithmeticExpr):
         return "(" + self.operator.toIRString() + "$" + str(self.getGid()) + "(" + self.opd().toIRString() + "))" 
 
     def toASTString (self): 
-        return "(" + self.operator.toASTString() + "(" + self.opd().toASTString() + "))" 
+        return "(" + self.operator.toASTString() + "(" + self.opd().toASTString() + "))"
+
+    def toFPCoreString (self):
+        assert(False), "Error: toFPCoreString doesn't support for Unary Expression"
 
     def __eq__ (self, rhs): 
         if (not isinstance(rhs, UnaryExpr)): 
@@ -772,7 +785,13 @@ class BinaryExpr (ArithmeticExpr):
         return "(" + self.lhs().toIRString() + " " + self.operator.toIRString() + "$" + str(self.getGid()) + " " + self.rhs().toIRString() + ")" 
 
     def toASTString (self): 
-        return "(" + self.lhs().toASTString() + " " + self.operator.toASTString() + " " + self.rhs().toASTString() + ")" 
+        return "(" + self.lhs().toASTString() + " " + self.operator.toASTString() + " " + self.rhs().toASTString() + ")"
+
+    def toFPCoreString (self):
+        str_opt = self.operator.toCString()
+        assert(str_opt in ['+', '-', '*', '/']), "Error: toFPCoreString doesn't support operator : " + str_opt 
+
+        return "(" + str_opt + " " + self.lhs().toFPCoreString() + " " + self.rhs().toFPCoreString() + ")"
     
     def __eq__ (self, rhs): 
         if (not isinstance(rhs, BinaryExpr)): 

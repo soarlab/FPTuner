@@ -19,4 +19,4 @@ rel = IR.BE("-", 10, IR.BE("+", 9, IR.BE("-", 8, x, rel_1), rel_2), rel_3)
 
 IR.TuneExpr(rel) 
     
-
+IR.ToFPCore(rel, "sine.fpcore")

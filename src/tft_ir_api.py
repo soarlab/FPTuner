@@ -399,7 +399,34 @@ def TuneExpr (expr):
     
     assert(isinstance(expr, tft_expr.ArithmeticExpr)) 
 
-    TARGET_EXPR = expr 
+    TARGET_EXPR = expr
+
+
+def ToFPCore (expr, ofname="fpcore.fpcore"):
+    vs = expr.vars()
+    vs = [v for v in vs if (not tft_expr.isConstVar(v))]
+
+    assert(all([(v.hasLB() and v.hasUB()) for v in vs]))
+    
+    ofile = open(ofname, "w")
+
+    str_paras = "("
+    for v in vs:
+        str_paras += v.label() + " "
+    str_paras = str_paras.strip()
+    str_paras += ")"
+
+    str_pre = ":pre (and"
+    for v in vs:
+        str_pre += " (>= " + v.label() + " " + str(float(v.lb().value())) + ")"
+        str_pre += " (>= " + str(float(v.ub().value())) + " " + v.label() + ")"
+    str_pre += ")"
+
+    ofile.write("(FPCore " + str_paras + "\n")
+    ofile.write("  " + str_pre + "\n")
+    ofile.write("  " + expr.toFPCoreString() + ")")
+
+    ofile.close() 
     
 
 

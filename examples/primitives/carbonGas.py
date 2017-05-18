@@ -19,3 +19,5 @@ sub3 = IR.BE("*", 12, IR.BE("*", 13, const_k, var_N), var_T)
 rel = IR.BE("-", 14, sub2, sub3) 
 
 IR.TuneExpr(rel) 
+
+IR.ToFPCore(rel, "carbonGas.fpcore")

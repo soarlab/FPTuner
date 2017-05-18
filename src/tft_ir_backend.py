@@ -424,12 +424,26 @@ def ExportCppInsts (alloc, ifname):
     for tr,tv in type_def_map.items(): 
         ifile.write("#define " + tr + " " + tv + "\n")
 
-    ifile.write("\n") 
+    ifile.write("\n")
+
+#    ifile.write("void computation () {\n")
+#
+#    for expr in tft_ir_api.CPP_INSTS: 
+#        if (isinstance(expr, tft_expr.VariableExpr) and 
+#            tft_expr.isConstVar(expr)): 
+#            continue 
+#
+#        ifile.write("\t" + Expr2CStatement(expr, alloc) + "\n")
+#        
+#    ifile.write("}\n")
+#
+#    ifile.write("\n")
 
     ifile.write("int main (int argc, char **argv) {\n") 
     
     ifile.write("\n\tfor(int __r = 0 ; __r < " + str(N_CPP_REPEATS) + " ; __r++) {\n") 
 
+#    ifile.write("\t\tcomputation();\n")
     for expr in tft_ir_api.CPP_INSTS: 
         if (isinstance(expr, tft_expr.VariableExpr) and 
             tft_expr.isConstVar(expr)): 

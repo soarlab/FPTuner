@@ -34,3 +34,5 @@ r1 = IR.BE("-", 15,
 rs = r1 
 
 IR.TuneExpr(rs) 
+
+IR.ToFPCore(rs, "turbine-1.fpcore")

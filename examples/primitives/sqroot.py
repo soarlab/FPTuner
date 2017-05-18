@@ -19,5 +19,5 @@ rel = IR.BE("-", 19, IR.BE("+", 18, IR.BE("-", 17, IR.BE("+", 16, IR.FConst(1.0)
 
 IR.TuneExpr(rel) 
 
-    
+IR.ToFPCore(rel, "sqroot.fpcore")    
 
