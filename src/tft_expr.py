@@ -498,7 +498,7 @@ class VariableExpr (ArithmeticExpr):
 
 
 # ==== unary operator ==== 
-UnaryOpLabels = ["sqrt", "abs", "-", "sin", "cos", "exp"] 
+UnaryOpLabels = ["sqrt", "abs", "-", "sin", "cos", "exp", "log"] 
 class UnaryOp: 
     gid   = None 
     label = None 

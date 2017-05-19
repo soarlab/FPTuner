@@ -3,7 +3,7 @@ import tft_ir_api as IR
 
 gid = 0
 
-x = IR.VE('x', gid, -1.0 1.0)
+x = IR.RealVE('x', gid, -1.0, 1.0)
 gid += 1
 
 temp0 = IR.UE('log', gid+1, IR.BE('-', gid  , IR.FConst(1.0), x))
