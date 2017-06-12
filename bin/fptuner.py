@@ -47,6 +47,10 @@ def main():
                         type=int,
                         help="Maximum number of type casts")
 
+    parser.add_argument("--linear-tc",
+                        action="store_true", default=False,
+                        help="Use linear type casting constraints") 
+
     parser.add_argument("--gopt-timeout",
                         type=int, default=120,
                         help="Timeout of the global optimization")
@@ -121,7 +125,7 @@ def main():
 
     tft_utils.FIX_CONST_TYPE  = args.fix_const_type
 
-
+    tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS = args.linear_tc
 
 
     # ==== load the input file as a module ====

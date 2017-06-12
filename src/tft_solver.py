@@ -239,19 +239,32 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
             for gid,epss in eform.gid2epsilons.items(): 
                 for ei in range(0, len(epss)): 
-                    evar = tft_error_form.GroupErrorVar(gid, ei) 
-                    assert(evar.hasBounds()) 
-                    assert(evar.lb() == tft_expr.ConstantExpr(0) and evar.ub() == tft_expr.ConstantExpr(1)) 
+                    evar = tft_error_form.GroupErrorVar(gid, ei)
                     gurobi_solver.addVar(evar) 
                 # add constraints for error variables 
                 gurobi_solver.addConstraint("linear", "==", tft_expr.ConstantExpr(1), tft_error_form.GroupErrorVarSum(gid, epss)) 
                 if (VERBOSE): 
-                    print ("Error Var Constraint: " + tft_error_form.GroupErrorVarSum(gid, epss).toCString() + " == 1") 
+                    print ("Error Var Constraint: " + tft_error_form.GroupErrorVarSum(gid, epss).toCString() + " == 1")
 
+            # add the optional type casting variables and constraints
+            if (tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS):
+                for gid,epss in eform.gid2epsilons.items():
+                    for cgid, cepss in eform.gid2epsilons.items():
+                        for ei in range(0, len(epss)):
+                            gvar = tft_error_form.GroupErrorVar(gid, ei)
+                            for cei in range(0, len(cepss)):
+                                cgvar = tft_error_form.GroupErrorVar(cgid, cei)
+                                evar = tft_error_form.TCastErrorVar(gid, ei, cgid, cei)
+                                gurobi_solver.addVar(evar)
+                                gurobi_solver.addConstraint("linear", ">=", gvar, evar) 
+                                gurobi_solver.addConstraint("linear", ">=", cgvar, evar) 
+                                gurobi_solver.addConstraint("linear", ">=",
+                                                            IR.BE("+", -1, tft_expr.ConstantExpr(1), evar, True),
+                                                            IR.BE("+", -1, gvar, cgvar, True))
+                    
             score_expr = eform.scoreExpr()
-            for v in score_expr.vars(): 
-                assert(v.hasBounds()) 
-                assert(v.lb() == tft_expr.ConstantExpr(0) and v.ub() == tft_expr.ConstantExpr(1)) 
+            for v in score_expr.vars():
+                assert(tft_expr.isPseudoBooleanVar(v))
                 gurobi_solver.addVar(v) 
 
             if (VERBOSE): 

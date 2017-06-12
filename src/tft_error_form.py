@@ -43,7 +43,24 @@ def GroupErrorVarName (gid, select):
 def GroupErrorVar (gid, select): 
     evar = tft_expr.VariableExpr(GroupErrorVarName(gid, select), int, -1, False) 
     evar.setLB(tft_expr.ConstantExpr(int(0))) 
-    evar.setUB(tft_expr.ConstantExpr(int(1))) 
+    evar.setUB(tft_expr.ConstantExpr(int(1)))
+    assert(tft_expr.isPseudoBooleanVar(evar))
+    return evar
+
+def TCastErrorVarName (gid, select, cgid, cselect):
+    assert(type(gid) is int and type(select) is int)
+    assert(type(cgid) is int and type(cselect) is int) 
+    assert(0 <= gid and 0 <= select)
+    assert(0 <= cgid and 0 <= cselect)
+    return tft_expr.TCAST_ERR_VAR_PREFIX + str(gid) + "_" + str(select) + "_" + str(cgid) + "_" + str(cselect) 
+
+def TCastErrorVar (gid, select, cgid, cselect):
+    evar = tft_expr.VariableExpr(TCastErrorVarName(gid, select,
+                                                   cgid, cselect),
+                                 int, -1, False)
+    evar.setLB(tft_expr.ConstantExpr(int(0)))
+    evar.setUB(tft_expr.ConstantExpr(int(1)))
+    assert(tft_expr.isPseudoBooleanVar(evar))
     return evar 
 
 def checkValidEpsilonList (epss): 
@@ -212,8 +229,17 @@ class ErrorTerm:
         else: 
             self.stored_absexpr = IR.MakeUnaryExpr("abs", -1, self.expr, True)
 
-        return self.stored_absexpr 
+        return self.stored_absexpr
 
+    def tcastExpr (self, select, cselect):
+        if (tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS):
+            return TCastErrorVar(self.gid, select,
+                                 self.context_gid, cselect) 
+        else:
+            return IR.BE("*", -1, 
+                         GroupErrorVar(self.gid, select), 
+                         GroupErrorVar(self.context_gid, cselect),
+                         True)
 
     def errorExpr (self, scaling_expr, gid2epsilons={}, casting_map={}): 
         assert(isinstance(scaling_expr, tft_expr.ConstantExpr))
@@ -261,10 +287,7 @@ class ErrorTerm:
             for i in range(0, len(epss)): 
                 for j in range(0, len(context_epss)): 
                     if (epss[i] < context_epss[j]): 
-                        temp_error = IR.BE("*", -1, 
-                                           GroupErrorVar(self.gid, i), 
-                                           GroupErrorVar(self.context_gid, j), 
-                                           True) 
+                        temp_error = self.tcastExpr(i, j)
                         temp_error = IR.BE("*", -1, 
                                            temp_error, 
                                            context_epss[j], 

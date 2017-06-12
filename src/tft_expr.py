@@ -4,12 +4,13 @@ import math
 from fractions import Fraction 
 import tft_utils 
 
-GROUP_ERR_VAR_PREFIX = "__g_err_" 
+GROUP_ERR_VAR_PREFIX = "__g_err_"
+TCAST_ERR_VAR_PREFIX = "__tc_err_" 
 ERR_VAR_PREFIX = "__err_" 
 ERR_SUM_PREFIX = "__errsum_" 
 ERR_TERM_REF_PREFIX = "__eterm_" 
 CNUM_PREFIX = "__cum" 
-PRESERVED_VAR_LABEL_PREFIXES = [GROUP_ERR_VAR_PREFIX, ERR_VAR_PREFIX, ERR_SUM_PREFIX, ERR_TERM_REF_PREFIX, CNUM_PREFIX] 
+PRESERVED_VAR_LABEL_PREFIXES = [GROUP_ERR_VAR_PREFIX, TCAST_ERR_VAR_PREFIX, ERR_VAR_PREFIX, ERR_SUM_PREFIX, ERR_TERM_REF_PREFIX, CNUM_PREFIX] 
 
 PRESERVED_CONST_VPREFIX = "__const" 
 PRESERVED_CONST_GID     = 9999
@@ -29,7 +30,20 @@ def isConstVar (var):
     if (var.label().startswith(PRESERVED_CONST_VPREFIX)): 
         return True 
     else: 
-        return False 
+        return False
+
+
+def isPseudoBooleanVar (var):
+    if (not isinstance(var, VariableExpr)):
+        return False
+    
+    if (not var.hasBounds()):
+        return False
+
+    if (not (var.lb() == ConstantExpr(0) and var.ub() == ConstantExpr(1))):
+        return False
+
+    return True 
 
 
 def RegisterVariableExpr (var): 

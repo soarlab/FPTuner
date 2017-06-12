@@ -38,7 +38,9 @@ TIME_PARSING           = None
 TIME_FIRST_DERIVATIVES = None
 TIME_GLOBAL_OPT        = None
 TIME_ALLOCATION        = None
-TIME_CHECK_M2          = None 
+TIME_CHECK_M2          = None
+
+LINEAR_TYPE_CASTING_CONSTRAINTS = False 
 
 
 
