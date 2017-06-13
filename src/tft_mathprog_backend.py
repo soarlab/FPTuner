@@ -1,5 +1,6 @@
 
 import tft_expr
+from fractions import Fraction
 
 
 class MathProg_Backend (object):
@@ -7,7 +8,7 @@ class MathProg_Backend (object):
     variables   = None
     objective   = None 
 
-    def MathProg_Backend (self):
+    def __init__ (self):
         self.constraints = []
         self.variables   = {}
 
@@ -16,12 +17,20 @@ class MathProg_Backend (object):
 
         vlabel = ve.label()
         vtype  = ve.type()
-        assert(vtype in [int, float]) 
+        lb     = None
+        if (ve.hasLB()):
+            lb = ve.lb().value()
+        ub     = None
+        if (ve.hasUB()):
+            ub = ve.ub().value() 
+        assert(vtype in [int, float, Fraction])
 
         if (vlabel not in self.variables.keys()):
-            self.variables[vlabel] = vtype
+            self.variables[vlabel] = [vtype, lb, ub]
         else:
-            assert(vtype is self.variables[vlabel])
+            assert(vtype is self.variables[vlabel][0])
+            assert(lb is self.variables[vlabel][1])
+            assert(ub is self.variables[vlabel][2])
             
     def setOptObj (self, obj_expr, opt_dir):
         assert(isinstance(obj_expr, tft_expr.Expr))
@@ -52,8 +61,9 @@ class MathProg_Backend (object):
         mathprog = open(fname, 'w')
 
         # write variables
-        for vlabel,vtype in self.variables.items():
-            vline = 'var ' + vlabel 
+        for vlabel,tlu in self.variables.items():
+            vline = 'var ' + vlabel
+            vtype = tlu[0] 
             if (vtype is int): 
                 vline = vline + ', integer;\n'
             else:
@@ -67,13 +77,26 @@ class MathProg_Backend (object):
         assert(self.objective is not None)
         assert(obj_name not in self.variables.keys())
 
-        mathprog.write(self.objective[0] + ' ' obj_name + ': ' + self.objective[1].toCString() + ';\n')
+        mathprog.write(self.objective[0] + ' ' + obj_name + ': ' + self.objective[1].toCString() + ';\n')
+
+        mathprog.write('\n')
+
+        # write variable ranges
+        n_conss = 0 
+        for vlabel,tlu in self.variables.items():
+            if (tlu[1] is not None):
+                mathprog.write('s.t. c'+str(n_conss)+': '+str(float(tlu[1]))+' <= '+vlabel+';\n')
+                n_conss += 1
+            if (tlu[2] is not None):
+                mathprog.write('s.t. c'+str(n_conss)+': '+vlabel+' <= '+str(float(tlu[2]))+';\n')                
+                n_conss += 1 
 
         mathprog.write('\n') 
 
         # write constraints
-        for ci in range(0, len(self.constraints)):
-            mathprog.write('s.t. c'+str(ci)+': ' + self.constraints[1].toCString() + ' ' + self.constraints[0] + ' ' + self.constraints[2].toCString() +';\n')
+        for cons in self.constraints: 
+            mathprog.write('s.t. c'+str(n_conss)+': ' + cons[1].toCString() + ' ' + cons[0] + ' ' + cons[2].toCString() +';\n')
+            n_conss += 1
 
         mathprog.write('\n')
 

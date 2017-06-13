@@ -12,7 +12,9 @@ import tft_error_form
 import tft_ask_gurobi 
 import tft_ask_gelpia 
 import tft_alloc 
-import tft_ir_api as IR 
+import tft_ir_api as IR
+
+import tft_mathprog_backend 
 
 
 # ==== global variables ==== 
@@ -223,7 +225,9 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
     tft_utils.VerboseMessage("allocating bit-widths...") 
         
 
-    # ==== solve the allocation problem ==== 
+    # ==== solve the allocation problem ====
+    mprog_back = tft_mathprog_backend.MathProg_Backend()
+    
     # ---- solve the alloc. problem by using gurobi ---- 
     if (optimizers["alloc"] == "gurobi"): 
         gurobi_solver = tft_ask_gurobi.GurobiSolver()
@@ -240,9 +244,15 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
             for gid,epss in eform.gid2epsilons.items(): 
                 for ei in range(0, len(epss)): 
                     evar = tft_error_form.GroupErrorVar(gid, ei)
-                    gurobi_solver.addVar(evar) 
+                    gurobi_solver.addVar(evar)
+                    
                 # add constraints for error variables 
-                gurobi_solver.addConstraint("linear", "==", tft_expr.ConstantExpr(1), tft_error_form.GroupErrorVarSum(gid, epss)) 
+                gurobi_solver.addConstraint("linear", "==", tft_expr.ConstantExpr(1), tft_error_form.GroupErrorVarSum(gid, epss))
+
+                mprog_back.addConstraint('==',
+                                         tft_expr.ConstantExpr(1),
+                                         tft_error_form.GroupErrorVarSum(gid, epss))
+                                                    
                 if (VERBOSE): 
                     print ("Error Var Constraint: " + tft_error_form.GroupErrorVarSum(gid, epss).toCString() + " == 1")
 
@@ -256,11 +266,18 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                                 cgvar = tft_error_form.GroupErrorVar(cgid, cei)
                                 evar = tft_error_form.TCastErrorVar(gid, ei, cgid, cei)
                                 gurobi_solver.addVar(evar)
-                                gurobi_solver.addConstraint("linear", ">=", gvar, evar) 
+                                gurobi_solver.addConstraint("linear", ">=", gvar, evar)
                                 gurobi_solver.addConstraint("linear", ">=", cgvar, evar) 
                                 gurobi_solver.addConstraint("linear", ">=",
                                                             IR.BE("+", -1, tft_expr.ConstantExpr(1), evar, True),
                                                             IR.BE("+", -1, gvar, cgvar, True))
+
+                                mprog_back.addConstraint('<=', evar, gvar)
+                                mprog_back.addConstraint('<=', evar, cgvar)
+                                mprog_back.addConstraint('<=',
+                                                         IR.BE('+', -1, gvar, cgvar, True),
+                                                         IR.BE('+', -1, tft_expr.ConstantExpr(1), evar, True))
+                                
                     
             score_expr = eform.scoreExpr()
             for v in score_expr.vars():
@@ -290,7 +307,8 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
                 assert(all([pvar.isPreservedVar() for pvar in term_expr.vars()]))
 
-                gurobi_solver.addConstraint("quadratic", "==", rvar, term_expr) 
+                gurobi_solver.addConstraint("quadratic", "==", rvar, term_expr)
+                mprog_back.addConstraint('==', rvar, term_expr) 
 
                 if (VERBOSE): 
                     print ("Ref. Expr.: " + rvar.toCString() + " == " + term_expr.toCString()) 
@@ -313,7 +331,8 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
             assert(eform.upper_bound > tft_expr.ConstantExpr(0)) 
             assert(isinstance(ref_sum, tft_expr.Expr)) 
             expr_scaled_upper_bound = IR.BE("*", -1, eform.upper_bound, expr_up_scaling, True) 
-            gurobi_solver.addConstraint("linear", "<=", ref_sum, expr_scaled_upper_bound)  
+            gurobi_solver.addConstraint("linear", "<=", ref_sum, expr_scaled_upper_bound)
+            mprog_back.addConstraint('<=', ref_sum, expr_scaled_upper_bound) 
 
             if (VERBOSE): 
                 print ("expr_scaled_upper_bound: " + str(expr_scaled_upper_bound)) 
@@ -338,7 +357,8 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                     ev_1 = tft_error_form.GroupErrorVar(gid_1, j) 
                     ev_2 = tft_error_form.GroupErrorVar(gid_2, j) 
 
-                    gurobi_solver.addConstraint("linear", "==", ev_1, ev_2) 
+                    gurobi_solver.addConstraint("linear", "==", ev_1, ev_2)
+                    mprog_back.addConstraint('==', ev_1, ev_2) 
 
         # ---- generate the constraint for the number of castings ---- 
         if (tft_utils.N_MAX_CASTINGS is not None):
@@ -353,7 +373,9 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
                 cnum_var = tft_expr.VariableExpr(tft_expr.CNUM_PREFIX+"_var", int, -1, False) 
                 gurobi_solver.addVar(cnum_var) 
                 gurobi_solver.addConstraint("quadratic", "==", cnum_expr, cnum_var) 
-                gurobi_solver.addConstraint("linear", "<=", cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS)) 
+                gurobi_solver.addConstraint("linear", "<=", cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS))
+                mprog_back.addConstraint('==', cnum_expr, cnum_var)
+                mprog_back.addConstraint('<=', cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS))
 
                 if (VERBOSE): 
                     print ("Casting Constraint: " + cnum_expr.toCString() + " <= " + str(tft_utils.N_MAX_CASTINGS)) 
@@ -370,10 +392,14 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
         assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
         if   (tft_utils.OPT_METHOD == "max-benefit"):
             gurobi_solver.setOptObj(score_sum, "max")
+            mprog_back.setOptObj(score_sum, 'max')
         elif (tft_utils.OPT_METHOD == "min-penalty"):
             gurobi_solver.setOptObj(score_sum, "min")
+            mprog_back.setOptObj(score_sum, 'min')
         else:
             assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
+
+        mprog_back.exportMathProg("__testmp.mp")
 
         if (VERBOSE): 
             print ("Tuning Objective: ") 
