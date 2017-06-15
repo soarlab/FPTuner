@@ -49,7 +49,11 @@ def main():
 
     parser.add_argument("--linear-tc",
                         action="store_true", default=False,
-                        help="Use linear type casting constraints") 
+                        help="Use linear type casting constraints")
+
+    parser.add_argument("--aopt",
+                        type=str, default="gurobi",
+                        help="Allocation optimization solver: \"gurobi\" for Gurobi and \"glpk\" for GLPK (must work with --linear-tc)")
 
     parser.add_argument("--gopt-timeout",
                         type=int, default=120,
@@ -127,7 +131,10 @@ def main():
 
     tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS = args.linear_tc
 
-
+    tft_tuning.OPTIMIZERS["alloc"]  = args.aopt
+    if (tft_tuning.OPTIMIZERS['alloc'] == 'glpk'):
+        assert(tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS), "Solver GLPK must work with --linear-tc"
+    
     # ==== load the input file as a module ====
     if INPUT_FILE.endswith(".py"):
         tokens      = tft_utils.String2Tokens(INPUT_FILE, "/")

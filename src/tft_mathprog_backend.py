@@ -4,9 +4,11 @@ from fractions import Fraction
 
 
 class MathProg_Backend (object):
-    constraints = None
-    variables   = None
-    objective   = None 
+    constraints  = None
+    variables    = None
+    objective    = None
+    mprog_fname  = None
+    obj_var_name = None
 
     def __init__ (self):
         self.constraints = []
@@ -58,7 +60,8 @@ class MathProg_Backend (object):
         self.constraints.append([comp, lhs, rhs])
 
     def exportMathProg (self, fname):
-        mathprog = open(fname, 'w')
+        self.mprog_fname = fname 
+        mathprog = open(self.mprog_fname, 'w')
 
         # write variables
         for vlabel,tlu in self.variables.items():
@@ -73,11 +76,11 @@ class MathProg_Backend (object):
         mathprog.write('\n') 
 
         # write objective
-        obj_name = '__opt_obj'
+        self.obj_var_name = '__opt_obj'
         assert(self.objective is not None)
-        assert(obj_name not in self.variables.keys())
+        assert(self.obj_var_name not in self.variables.keys())
 
-        mathprog.write(self.objective[0] + ' ' + obj_name + ': ' + self.objective[1].toCString() + ';\n')
+        mathprog.write(self.objective[0] + ' ' + self.obj_var_name + ': ' + self.objective[1].toCString() + ';\n')
 
         mathprog.write('\n')
 
@@ -106,7 +109,7 @@ class MathProg_Backend (object):
         if (len(self.variables.keys()) > 0):
             for vlabel in self.variables.keys():
                 mathprog.write(vlabel + ', ')
-        mathprog.write(obj_name + ';\n')
+        mathprog.write(self.obj_var_name + ';\n')
         mathprog.write('end;\n')
 
         mathprog.close() 

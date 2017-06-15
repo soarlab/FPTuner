@@ -9,7 +9,8 @@ from multiprocessing import Process, Queue
 import tft_utils 
 import tft_expr
 import tft_error_form 
-import tft_ask_gurobi 
+import tft_ask_gurobi
+import tft_ask_glpk
 import tft_ask_gelpia 
 import tft_alloc 
 import tft_ir_api as IR
@@ -18,7 +19,7 @@ import tft_mathprog_backend
 
 
 # ==== global variables ==== 
-ALL_OPTIMIZERS = ["gurobi", "gelpia"] 
+ALL_OPTIMIZERS = ["gurobi", "gelpia", "glpk"] 
 ID_ERROR_SUM   = 0 
 VERBOSE        = False 
 
@@ -228,230 +229,248 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
     # ==== solve the allocation problem ====
     mprog_back = tft_mathprog_backend.MathProg_Backend()
     
-    # ---- solve the alloc. problem by using gurobi ---- 
-    if (optimizers["alloc"] == "gurobi"): 
-        gurobi_solver = tft_ask_gurobi.GurobiSolver()
+    # ---- solve the alloc. problem by using gurobi ----
+    alloc_solver = None 
+    if   (optimizers["alloc"] == "gurobi"): 
+        alloc_solver = tft_ask_gurobi.GurobiSolver()
+    elif (optimizers["alloc"] == "glpk"):
+        alloc_solver = tft_ask_glpk.GLPKSolver("__mathprog_glpk.mp")
+    else:
+        sys.exit("ERROR: unknown alloc. optimizer: " + optimizers["alloc"]) 
 
-        # ---- solve ---- 
-        for eform in error_forms: 
-            # -- declare error variables and their range constraints --
-            # declare ref. variables 
-            for et in eform.terms: 
-                assert(isinstance(et, tft_error_form.ErrorTerm)) 
-                assert(not et.refVar().hasBounds())
-                gurobi_solver.addVar(et.refVar())
+    # ---- solve ---- 
+    for eform in error_forms: 
+        # -- declare error variables and their range constraints --
+        # declare ref. variables 
+        for et in eform.terms: 
+            assert(isinstance(et, tft_error_form.ErrorTerm)) 
+            assert(not et.refVar().hasBounds())
+            alloc_solver.addVar(et.refVar())
 
-            for gid,epss in eform.gid2epsilons.items(): 
-                for ei in range(0, len(epss)): 
-                    evar = tft_error_form.GroupErrorVar(gid, ei)
-                    gurobi_solver.addVar(evar)
+        for gid,epss in eform.gid2epsilons.items(): 
+            for ei in range(0, len(epss)): 
+                evar = tft_error_form.GroupErrorVar(gid, ei)
+                alloc_solver.addVar(evar)
                     
-                # add constraints for error variables 
-                gurobi_solver.addConstraint("linear", "==", tft_expr.ConstantExpr(1), tft_error_form.GroupErrorVarSum(gid, epss))
+            # add constraints for error variables
+            if   (optimizers['alloc'] == 'gurobi'):
+                alloc_solver.addConstraint("linear", "==", tft_expr.ConstantExpr(1), tft_error_form.GroupErrorVarSum(gid, epss))
+            elif (optimizers['alloc'] == 'glpk'):
+                alloc_solver.addConstraint('==',
+                                           tft_expr.ConstantExpr(1),
+                                           tft_error_form.GroupErrorVarSum(gid, epss))
+            else:
+                assert(False) 
 
-                mprog_back.addConstraint('==',
-                                         tft_expr.ConstantExpr(1),
-                                         tft_error_form.GroupErrorVarSum(gid, epss))
-                                                    
-                if (VERBOSE): 
-                    print ("Error Var Constraint: " + tft_error_form.GroupErrorVarSum(gid, epss).toCString() + " == 1")
+            if (VERBOSE): 
+                print ("Error Var Constraint: " + tft_error_form.GroupErrorVarSum(gid, epss).toCString() + " == 1")
 
-            # add the optional type casting variables and constraints
-            if (tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS):
-                for gid,epss in eform.gid2epsilons.items():
-                    for cgid, cepss in eform.gid2epsilons.items():
-                        for ei in range(0, len(epss)):
-                            gvar = tft_error_form.GroupErrorVar(gid, ei)
-                            for cei in range(0, len(cepss)):
-                                cgvar = tft_error_form.GroupErrorVar(cgid, cei)
-                                evar = tft_error_form.TCastErrorVar(gid, ei, cgid, cei)
-                                gurobi_solver.addVar(evar)
-                                gurobi_solver.addConstraint("linear", ">=", gvar, evar)
-                                gurobi_solver.addConstraint("linear", ">=", cgvar, evar) 
-                                gurobi_solver.addConstraint("linear", ">=",
-                                                            IR.BE("+", -1, tft_expr.ConstantExpr(1), evar, True),
-                                                            IR.BE("+", -1, gvar, cgvar, True))
-
-                                mprog_back.addConstraint('<=', evar, gvar)
-                                mprog_back.addConstraint('<=', evar, cgvar)
-                                mprog_back.addConstraint('<=',
-                                                         IR.BE('+', -1, gvar, cgvar, True),
-                                                         IR.BE('+', -1, tft_expr.ConstantExpr(1), evar, True))
+        # add the optional type casting variables and constraints
+        if (tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS):
+            for gid,epss in eform.gid2epsilons.items():
+                for cgid, cepss in eform.gid2epsilons.items():
+                    for ei in range(0, len(epss)):
+                        gvar = tft_error_form.GroupErrorVar(gid, ei)
+                        for cei in range(0, len(cepss)):
+                            cgvar = tft_error_form.GroupErrorVar(cgid, cei)
+                            evar  = tft_error_form.TCastErrorVar(gid, ei, cgid, cei)
+                            ubv   = IR.BE("+", -1, tft_expr.ConstantExpr(1), evar, True)
+                            lbv   = IR.BE("+", -1, gvar, cgvar, True)
+                            
+                            alloc_solver.addVar(evar)
+                            if   (optimizers['alloc'] == 'gurobi'):
+                                alloc_solver.addConstraint("linear", ">=", gvar, evar)
+                                alloc_solver.addConstraint("linear", ">=", cgvar, evar) 
+                                alloc_solver.addConstraint("linear", ">=", ubv, lbv)
                                 
-                    
-            score_expr = eform.scoreExpr()
-            for v in score_expr.vars():
-                assert(tft_expr.isPseudoBooleanVar(v))
-                gurobi_solver.addVar(v) 
+                            elif (optimizers['alloc'] == 'glpk'):
+                                alloc_solver.addConstraint('<=', evar, gvar)
+                                alloc_solver.addConstraint('<=', evar, cgvar)
+                                alloc_solver.addConstraint('<=', lbv, ubv)
 
-            if (VERBOSE): 
-                print ("Score Expr: " + score_expr.toCString())
+                            else:
+                                assert(False) 
 
-            # add constraints for ref. variables 
-            ref_sum = None 
-            expr_up_scaling = eform.scalingUpFactor() 
-            assert(isinstance(expr_up_scaling, tft_expr.ConstantExpr)) 
-            
-            if (VERBOSE): 
-                print ("Scaling up Expr: " + str(expr_up_scaling)) 
-
-            for et in eform.terms: 
-                # ref. variable 
-                rvar       = et.refVar() 
-
-                error_expr = et.errorExpr(eform.scalingUpFactor(), 
-                                          eform.gid2epsilons, 
-                                          eform.casting_map) 
-
-                term_expr  = et.overApproxExpr(error_expr) 
-
-                assert(all([pvar.isPreservedVar() for pvar in term_expr.vars()]))
-
-                gurobi_solver.addConstraint("quadratic", "==", rvar, term_expr)
-                mprog_back.addConstraint('==', rvar, term_expr) 
-
-                if (VERBOSE): 
-                    print ("Ref. Expr.: " + rvar.toCString() + " == " + term_expr.toCString()) 
-
-                if (ref_sum is None): 
-                    ref_sum = rvar 
-                else: 
-                    ref_sum = IR.BE("+", -1, ref_sum, rvar, True) 
-
-            # add M2 to ref_sum 
-            M2             = eform.M2 
-            assert(isinstance(M2,              tft_expr.ConstantExpr)) 
-            assert(isinstance(expr_up_scaling, tft_expr.ConstantExpr))
-            expr_scaled_M2 = tft_expr.ConstantExpr(M2.value() * expr_up_scaling.value()) 
-            # expr_scaled_M2 = IR.BE("*", -1, M2, expr_up_scaling, True) 
-            ref_sum        = IR.BE("+", -1, ref_sum, expr_scaled_M2, True) 
-            
-            # write error form upper found 
-            assert(isinstance(eform.upper_bound, tft_expr.ConstantExpr))
-            assert(eform.upper_bound > tft_expr.ConstantExpr(0)) 
-            assert(isinstance(ref_sum, tft_expr.Expr)) 
-            expr_scaled_upper_bound = IR.BE("*", -1, eform.upper_bound, expr_up_scaling, True) 
-            gurobi_solver.addConstraint("linear", "<=", ref_sum, expr_scaled_upper_bound)
-            mprog_back.addConstraint('<=', ref_sum, expr_scaled_upper_bound) 
-
-            if (VERBOSE): 
-                print ("expr_scaled_upper_bound: " + str(expr_scaled_upper_bound)) 
-            
-            if (VERBOSE): 
-                print ("Reference Constraint: " + ref_sum.toCString() + " <= " + expr_scaled_upper_bound.toCString())  
-
-            # write the constraints for equal bit-width groups 
-            for gp in eform.eq_gids: 
-                assert(len(gp) == 2) 
-                gid_1 = gp[0]
-                gid_2 = gp[1] 
-
-                assert(gid_1 != gid_2) 
-                assert(gid_1 in eform.gid2epsilons.keys()) 
-                assert(gid_2 in eform.gid2epsilons.keys()) 
-                assert(eform.gid2epsilons[gid_1] == eform.gid2epsilons[gid_2]) 
-
-                len_epss = len(eform.gid2epsilons[gid_1]) 
-
-                for j in range(0, len_epss): 
-                    ev_1 = tft_error_form.GroupErrorVar(gid_1, j) 
-                    ev_2 = tft_error_form.GroupErrorVar(gid_2, j) 
-
-                    gurobi_solver.addConstraint("linear", "==", ev_1, ev_2)
-                    mprog_back.addConstraint('==', ev_1, ev_2) 
-
-        # ---- generate the constraint for the number of castings ---- 
-        if (tft_utils.N_MAX_CASTINGS is not None):
-            assert(type(tft_utils.N_MAX_CASTINGS) is int)
-            assert(tft_utils.N_MAX_CASTINGS >= 0) 
-            
-            cnum_expr = UnifiedCastingNumExpr(error_forms) 
-
-            if (cnum_expr is not None): 
-                assert(isinstance(cnum_expr, tft_expr.Expr)) 
-
-                cnum_var = tft_expr.VariableExpr(tft_expr.CNUM_PREFIX+"_var", int, -1, False) 
-                gurobi_solver.addVar(cnum_var) 
-                gurobi_solver.addConstraint("quadratic", "==", cnum_expr, cnum_var) 
-                gurobi_solver.addConstraint("linear", "<=", cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS))
-                mprog_back.addConstraint('==', cnum_expr, cnum_var)
-                mprog_back.addConstraint('<=', cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS))
-
-                if (VERBOSE): 
-                    print ("Casting Constraint: " + cnum_expr.toCString() + " <= " + str(tft_utils.N_MAX_CASTINGS)) 
-        
-        # ---- add optimization obj. ----
-        score_sum = None 
-        for eform in error_forms: 
-            if (score_sum is None): 
-                score_sum = eform.scoreExpr() 
-            else: 
-                assert(score_sum == eform.scoreExpr()) 
-                # score_sum = IR.BE("+", -1, score_sum, eform.scoreExpr(), True)
-
-        assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
-        if   (tft_utils.OPT_METHOD == "max-benefit"):
-            gurobi_solver.setOptObj(score_sum, "max")
-            mprog_back.setOptObj(score_sum, 'max')
-        elif (tft_utils.OPT_METHOD == "min-penalty"):
-            gurobi_solver.setOptObj(score_sum, "min")
-            mprog_back.setOptObj(score_sum, 'min')
-        else:
-            assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
-
-        mprog_back.exportMathProg("__testmp.mp")
+        score_expr = eform.scoreExpr()
+        for v in score_expr.vars():
+            assert(tft_expr.isPseudoBooleanVar(v))
+            alloc_solver.addVar(v) 
 
         if (VERBOSE): 
-            print ("Tuning Objective: ") 
-            print (str(score_sum)) 
+            print ("Score Expr: " + score_expr.toCString())
 
-        # go opt. 
-        levar_sum_max = gurobi_solver.goOpt() 
-
-        alloc = tft_alloc.Alloc()
-        if (levar_sum_max is None): 
-            return None 
-        else: 
-            alloc.score = float(levar_sum_max) 
-            if (VERBOSE): 
-                print ("==== solver: the optimal score is : " + str(float(levar_sum_max)))
-
-        for eform in error_forms: 
-            for gid,c in eform.gid_counts.items(): 
-                evvs = [] 
-                assert(gid in eform.gid2epsilons.keys()) 
-
-                for ei in range(0, len(eform.gid2epsilons[gid])): 
-                    evv = gurobi_solver.getOptVarValue(tft_error_form.GroupErrorVar(gid, ei))
-                    assert(evv is not None) 
-                    assert(isinstance(evv, Fraction))
-                    # adjust value 
-                    tolerance = 0.01 
-                    if (((1 - tolerance) <= evv) and (evv <= (1 + tolerance))): 
-                        evv = Fraction(1, 1)
-                    if (((0 - tolerance) <= evv) and (evv <= (0 + tolerance))): 
-                        evv = Fraction(0, 1) 
-
-                    evvs.append(evv) 
-
-                if (sum(evvs) != Fraction(1, 1)): 
-                    print ("ERROR:[ " + str(gid) + "] : " + str(evvs) + " : " + str(sum(evvs))) 
-                assert(sum(evvs) == Fraction(1, 1)) 
-                assert(len(evvs) == len(eform.gid2epsilons[gid]))
+        # add constraints for ref. variables 
+        ref_sum = None 
+        expr_up_scaling = eform.scalingUpFactor() 
+        assert(isinstance(expr_up_scaling, tft_expr.ConstantExpr)) 
             
-                for ei in range(0, len(evvs)): 
-                    if (evvs[ei] == Fraction(1, 1)): 
-                        eps = eform.gid2epsilons[gid][ei]
-                        assert(isinstance(eps, tft_expr.ConstantExpr)) 
-                        alloc[gid] = eps.value() 
-                        break 
+        if (VERBOSE): 
+            print ("Scaling up Expr: " + str(expr_up_scaling)) 
 
-        tft_utils.TIME_ALLOCATION = tft_utils.TIME_ALLOCATION + (time.time() - time_allocation) 
+        for et in eform.terms: 
+            # ref. variable 
+            rvar       = et.refVar() 
 
-        return alloc
+            error_expr = et.errorExpr(eform.scalingUpFactor(), 
+                                      eform.gid2epsilons, 
+                                      eform.casting_map) 
 
+            term_expr  = et.overApproxExpr(error_expr) 
+
+            assert(all([pvar.isPreservedVar() for pvar in term_expr.vars()]))
+
+            if   (optimizers['alloc'] == 'gurobi'):
+                alloc_solver.addConstraint("quadratic", "==", rvar, term_expr)
+            elif (optimizers['alloc'] == 'glpk'):
+                alloc_solver.addConstraint('==', rvar, term_expr)
+            else:
+                assert(False)
+
+            if (VERBOSE): 
+                print ("Ref. Expr.: " + rvar.toCString() + " == " + term_expr.toCString()) 
+
+            if (ref_sum is None): 
+                ref_sum = rvar 
+            else: 
+                ref_sum = IR.BE("+", -1, ref_sum, rvar, True) 
+
+        # add M2 to ref_sum 
+        M2             = eform.M2 
+        assert(isinstance(M2,              tft_expr.ConstantExpr)) 
+        assert(isinstance(expr_up_scaling, tft_expr.ConstantExpr))
+        expr_scaled_M2 = tft_expr.ConstantExpr(M2.value() * expr_up_scaling.value()) 
+        # expr_scaled_M2 = IR.BE("*", -1, M2, expr_up_scaling, True) 
+        ref_sum        = IR.BE("+", -1, ref_sum, expr_scaled_M2, True) 
+            
+        # write error form upper found 
+        assert(isinstance(eform.upper_bound, tft_expr.ConstantExpr))
+        assert(eform.upper_bound > tft_expr.ConstantExpr(0)) 
+        assert(isinstance(ref_sum, tft_expr.Expr)) 
+        expr_scaled_upper_bound = IR.BE("*", -1, eform.upper_bound, expr_up_scaling, True)
+        if   (optimizers['alloc'] == 'gurobi'):
+            alloc_solver.addConstraint("linear", "<=", ref_sum, expr_scaled_upper_bound)
+        elif (optimizers['alloc'] == 'glpk'):
+            alloc_solver.addConstraint('<=', ref_sum, expr_scaled_upper_bound)
+        else:
+            assert(False) 
+
+        if (VERBOSE): 
+            print ("expr_scaled_upper_bound: " + str(expr_scaled_upper_bound)) 
+            
+        if (VERBOSE): 
+            print ("Reference Constraint: " + ref_sum.toCString() + " <= " + expr_scaled_upper_bound.toCString())  
+
+        # write the constraints for equal bit-width groups 
+        for gp in eform.eq_gids: 
+            assert(len(gp) == 2) 
+            gid_1 = gp[0]
+            gid_2 = gp[1] 
+
+            assert(gid_1 != gid_2) 
+            assert(gid_1 in eform.gid2epsilons.keys()) 
+            assert(gid_2 in eform.gid2epsilons.keys()) 
+            assert(eform.gid2epsilons[gid_1] == eform.gid2epsilons[gid_2]) 
+
+            len_epss = len(eform.gid2epsilons[gid_1]) 
+
+            for j in range(0, len_epss): 
+                ev_1 = tft_error_form.GroupErrorVar(gid_1, j) 
+                ev_2 = tft_error_form.GroupErrorVar(gid_2, j) 
+
+                if   (optimizers['alloc'] == 'gurobi'):
+                    alloc_solver.addConstraint("linear", "==", ev_1, ev_2)
+                elif (optimizers['alloc'] == 'glpk'):
+                    alloc_solver.addConstraint('==', ev_1, ev_2) 
+
+    # ---- generate the constraint for the number of castings ---- 
+    if (tft_utils.N_MAX_CASTINGS is not None):
+        assert(type(tft_utils.N_MAX_CASTINGS) is int)
+        assert(tft_utils.N_MAX_CASTINGS >= 0) 
+            
+        cnum_expr = UnifiedCastingNumExpr(error_forms) 
+
+        if (cnum_expr is not None): 
+            assert(isinstance(cnum_expr, tft_expr.Expr)) 
+
+            cnum_var = tft_expr.VariableExpr(tft_expr.CNUM_PREFIX+"_var", int, -1, False) 
+            alloc_solver.addVar(cnum_var)
+            if   (optimizers['alloc'] == 'gurobi'):
+                alloc_solver.addConstraint("quadratic", "==", cnum_expr, cnum_var) 
+                alloc_solver.addConstraint("linear", "<=", cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS))
+            elif (optimizers['alloc'] == 'glpk'):
+                alloc_solver.addConstraint('==', cnum_expr, cnum_var)
+                alloc_solver.addConstraint('<=', cnum_var, tft_expr.ConstantExpr(tft_utils.N_MAX_CASTINGS))
+            else:
+                assert(False) 
+
+            if (VERBOSE): 
+                print ("Casting Constraint: " + cnum_expr.toCString() + " <= " + str(tft_utils.N_MAX_CASTINGS)) 
+        
+    # ---- add optimization obj. ----
+    score_sum = None 
+    for eform in error_forms: 
+        if (score_sum is None): 
+            score_sum = eform.scoreExpr() 
+        else: 
+            assert(score_sum == eform.scoreExpr()) 
+            # score_sum = IR.BE("+", -1, score_sum, eform.scoreExpr(), True)
+
+    assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
+    if   (tft_utils.OPT_METHOD == "max-benefit"):
+        alloc_solver.setOptObj(score_sum, "max")
+    elif (tft_utils.OPT_METHOD == "min-penalty"):
+        alloc_solver.setOptObj(score_sum, "min")
+    else:
+        assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
+
+    if (VERBOSE): 
+        print ("Tuning Objective: ") 
+        print (str(score_sum)) 
+
+    # go opt. 
+    levar_sum_max = alloc_solver.goOpt() 
+
+    alloc = tft_alloc.Alloc()
+    if (levar_sum_max is None): 
+        return None 
     else: 
-        sys.exit("ERROR: unknown alloc. optimizer: " + optimizers["alloc"]) 
+        alloc.score = float(levar_sum_max) 
+        if (VERBOSE): 
+            print ("==== solver: the optimal score is : " + str(float(levar_sum_max)))
+
+    for eform in error_forms: 
+        for gid,c in eform.gid_counts.items(): 
+            evvs = [] 
+            assert(gid in eform.gid2epsilons.keys()) 
+
+            for ei in range(0, len(eform.gid2epsilons[gid])): 
+                evv = alloc_solver.getOptVarValue(tft_error_form.GroupErrorVar(gid, ei))
+                assert(evv is not None) 
+                assert(isinstance(evv, Fraction))
+                # adjust value 
+                tolerance = 0.01 
+                if (((1 - tolerance) <= evv) and (evv <= (1 + tolerance))): 
+                    evv = Fraction(1, 1)
+                if (((0 - tolerance) <= evv) and (evv <= (0 + tolerance))): 
+                    evv = Fraction(0, 1) 
+
+                evvs.append(evv) 
+
+            if (sum(evvs) != Fraction(1, 1)): 
+                print ("ERROR:[ " + str(gid) + "] : " + str(evvs) + " : " + str(sum(evvs))) 
+            assert(sum(evvs) == Fraction(1, 1)) 
+            assert(len(evvs) == len(eform.gid2epsilons[gid]))
+            
+            for ei in range(0, len(evvs)): 
+                if (evvs[ei] == Fraction(1, 1)): 
+                    eps = eform.gid2epsilons[gid][ei]
+                    assert(isinstance(eps, tft_expr.ConstantExpr)) 
+                    alloc[gid] = eps.value() 
+                    break 
+
+    tft_utils.TIME_ALLOCATION = tft_utils.TIME_ALLOCATION + (time.time() - time_allocation) 
+
+    return alloc
 
 
 
