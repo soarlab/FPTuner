@@ -11,7 +11,14 @@ vars_file = "fptuner_vars"
 
 # ========
 # subroutines 
-# ======== 
+# ========
+def InstallGLPK ():
+    if (not tft_utils.hasExe('glpsol')):
+        os.system("sudo apt-get install python-glpk")
+        os.system("sudo apt-get install glpk-utils")
+
+
+    
 def InstallGelpia (branch, silent=False): 
     assert(type(branch) is str) 
 
@@ -182,6 +189,7 @@ if   (OPT_SETUP == "install"):
     # ---- 
     # install the required tools
     # ----
+    InstallGLPK() 
     InstallFPTaylor("develop")
     # InstallGelpia("RustAD") 
     InstallGelpia("ArtifactEvaluation") 

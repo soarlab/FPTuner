@@ -1,7 +1,8 @@
 
 import os 
 import sys 
-from fractions import Fraction 
+from fractions import Fraction
+import subprocess as subp 
 
 
 # ======== 
@@ -279,6 +280,23 @@ def isSameMap (map1 = {}, map2 = {}):
         if (not (v == map1[k])): 
             return False 
     return True
+
+
+
+# ==== check executable ====
+def hasExe (exename):
+    exe = subp.Popen('which '+exename, shell=True, stdout=subp.PIPE, stderr=subp.PIPE)
+
+    erel = None
+    for aline in exe.stdout:
+        aline = aline.strip()
+        if (aline == ''):
+            continue
+        else:
+            assert(erel is None)
+            erel = aline
+
+    return (erel is not None) 
 
 
 
