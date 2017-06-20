@@ -16,7 +16,8 @@ def InstallGLPK ():
     if (not tft_utils.hasExe('glpsol')):
         os.system("sudo apt-get install python-glpk")
         os.system("sudo apt-get install glpk-utils")
-
+    else:
+        print("GLPK seems to already be installed.")
 
     
 def InstallGelpia (branch, silent=False): 
@@ -45,7 +46,6 @@ def InstallGelpia (branch, silent=False):
 
     if (not silent): 
         assert(tft_utils.checkGelpiaInstallation(branch)) 
-
 
 
 def InstallFPTaylor (branch): 
