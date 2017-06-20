@@ -72,8 +72,9 @@ class GLPKSolver (object):
                 break
             else:
                 n_runs += 1
-
-        assert(n_runs < max_reruns), "Error: GLPK failed to find a feasible allocation...")
+                print ("GLPK failed to find a feasible solution. Retry... ("+str(n_runs)+")")
+                
+        assert(n_runs < max_reruns), "Error: GLPK failed to find a feasible allocation..."
             
         # return the optimal value
         assert(self.mpbackend.obj_var_name in self.opt_vlabel_value.keys())
