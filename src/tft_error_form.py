@@ -112,23 +112,31 @@ def CastingNumExprTemplate (func_compare, casting_map = {}, gid2epsilons = {}):
 
         this_expr = None 
         for f in range(0, len(epss_from)): 
-            sum_expr = None 
+            sum_expr = None
+            var_from = GroupErrorVar(gid_from, f)
+            
             for t in range(0, len(epss_to)): 
-                if (func_compare(epss_from[f], epss_to[t])): 
-                    if (sum_expr is None): 
-                        sum_expr = GroupErrorVar(gid_to, t)
+                if (func_compare(epss_from[f], epss_to[t])):
+                    tc_expr = None
+                    if (tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS):
+                        tc_expr = TCastErrorVar(gid_from, f,
+                                                gid_to, t)
                     else:
-                        sum_expr = IR.BE("+", -1, sum_expr, GroupErrorVar(gid_to, t), True) 
+                        tc_expr = IR.BE("*", -1,
+                                        var_from, GroupErrorVar(gid_to, t), True)
+                    
+                    if (sum_expr is None): 
+                        sum_expr = tc_expr
+                    else:
+                        sum_expr = IR.BE("+", -1, sum_expr, tc_expr, True)
 
             if (sum_expr is None): 
                 continue 
 
-            f_expr = IR.BE("*", -1, GroupErrorVar(gid_from, f), sum_expr, True)
-
             if (this_expr is None): 
-                this_expr = f_expr 
+                this_expr = sum_expr
             else:
-                this_expr = IR.BE("+", -1, this_expr, f_expr, True)
+                this_expr = IR.BE("+", -1, this_expr, sum_expr, True)
 
         if (this_expr is None): 
             continue 
