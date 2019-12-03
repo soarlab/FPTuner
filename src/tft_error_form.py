@@ -328,7 +328,7 @@ class ErrorTerm:
 
         expr_abs_expr = self.absexpr()
         if ((not expr_abs_expr.hasLB()) or (not expr_abs_expr.hasUB())):
-            sys.exit("ERROR: cannot over-approximate expr. without both LB and UB...")
+            sys.exit("ERROR: cannot over-approximate expr. without both LB and UB.")
 
         value_lb = expr_abs_expr.lb().value()
         value_ub = expr_abs_expr.ub().value()
@@ -682,7 +682,7 @@ class ErrorForm:
             return ret_se
 
         else:
-            sys.exit("Error: invalid # of bit-width candidates...")
+            sys.exit("Error: invalid # of bit-width candidates.")
 
     def SummarizeOperatorBitwidths (self, alloc):
         assert(isinstance(alloc, tft_alloc.Alloc))

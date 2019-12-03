@@ -35,7 +35,7 @@ VERBOSE = True
 # ---- get arguments ----
 assert(len(sys.argv) >= 3)
 if (len(sys.argv) > 3):
-    print ("WARNING: only the first three arguments in sys.argv will be considered...")
+    print ("WARNING: only the first three arguments in sys.argv will be considered.")
 
 FNAME_CONFIG = sys.argv[1].strip()
 assert(os.path.isfile(FNAME_CONFIG))
@@ -43,7 +43,7 @@ FNAME_EXPRS = sys.argv[2].strip()
 assert(os.path.isfile(FNAME_EXPRS))
 
 if (not FNAME_EXPRS.endswith(".exprs")):
-    sys.exit("ERROR: DAT only takes .exprs file...")
+    sys.exit("ERROR: DAT only takes .exprs file.")
 
 
 # ---- pre-processing ----
@@ -58,9 +58,9 @@ DEF.LoadDATConfig(FNAME_CONFIG)
 tft_tuning.LoadConfig(FNAME_CONFIG)
 
 
-# ---- automatically silient some procedures... ----
+# ---- automatically silient some procedures. ----
 if (tft_sol_exprs.VERBOSE):
-    print ("WARNING: silient sol_exprs by default...")
+    print ("WARNING: silient sol_exprs by default.")
     tft_sol_exprs.VERBOSE = False
 
 

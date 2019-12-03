@@ -216,7 +216,7 @@ def main():
 
         # -- synthesize the mixed precision cpp file --
         if   (alloc is None):
-            print ("Warning: no allocation was generated... Thus no .cpp file will be generated...")
+            print ("Warning: no allocation was generated. Thus no .cpp file will be generated.")
         else:
             assert(isinstance(alloc, tft_alloc.Alloc))
             assert(eforms is not None)

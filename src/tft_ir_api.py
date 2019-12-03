@@ -129,7 +129,7 @@ def FConst (fpn):
                              True)
 
 
-# NOTE: Please don't call this function internally...
+# NOTE: Please don't call this function internally.
 def DeclareBoundedVar (label, vtype, gid, lb, ub, check_prefix=True):
     global EXTERNAL_GIDS
     global INPUT_VARS
@@ -215,7 +215,7 @@ def MakeUnaryExpr (op_label, op_gid, opd0, internal=False):
             opd0.gid = op_gid
         else:
             if (opd0.getGId() != op_gid):
-                print ("Warning: conflicting constant type...")
+                print ("Warning: conflicting constant type.")
 
     if (not internal):
         CountGID(op_gid)
@@ -292,7 +292,7 @@ def MakeBinaryExpr (op_label, op_gid, opd0, opd1, internal=False):
             opd0.gid = op_gid
         else:
             if (opd0.getGid() != op_gid):
-                print ("Warning: conflicting constant type...")
+                print ("Warning: conflicting constant type.")
     if ((not tft_utils.FIX_CONST_TYPE) and
         tft_expr.isConstVar(opd1)):
         if   (opd1.getGid() == tft_expr.PRESERVED_CONST_GID):
@@ -300,7 +300,7 @@ def MakeBinaryExpr (op_label, op_gid, opd0, opd1, internal=False):
             opd1.gid = op_gid
         else:
             if (opd1.getGid() != op_gid):
-                print ("Warning: conflicting constant type...")
+                print ("Warning: conflicting constant type.")
 
     if (not internal):
         CountGID(op_gid)
@@ -363,7 +363,7 @@ def SetGroupEpsilons (gid, in_epss = []):
                 sys.exit("Error: unknown epsilons string : " + str(e))
 
         else:
-            sys.exit("Error: unknown type of epsilons... " + str(e))
+            sys.exit("Error: unknown type of epsilons. " + str(e))
 
     assert(len(epss) > 0)
 

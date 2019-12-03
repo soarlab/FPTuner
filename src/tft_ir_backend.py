@@ -286,7 +286,7 @@ def FPTaylorExpr (expr, alloc):
         return FPTaylorTypeCastWrap(bw_mine,
                                     "(" + str_lhs + " " + expr.operator.label + " " + str_rhs + ")")
 
-    sys.exit("Error: not supported expr 4 FPTaylorExpr...")
+    sys.exit("Error: not supported expr 4 FPTaylorExpr.")
 
 def color(plain, my_bw, exp):
     if plain:
@@ -328,7 +328,7 @@ def ColorExpr(expr, alloc, plain=False):
             str_rhs = color(plain, bw_mine, "(") + str_rhs + color(plain, bw_mine, ")")
             return color(plain, bw_mine, expr.operator.label+" ") + str_lhs + " \n" + str_rhs
 
-        sys.exit("Error: not supported expr 4 ColorExpr...")
+        sys.exit("Error: not supported expr 4 ColorExpr.")
     bw_mine = alloc[expr.getGid()]
     return color(plain, bw_mine, "(") + _ColorExpr(expr, alloc) +color(plain, bw_mine, ")")
 
@@ -490,7 +490,7 @@ def ExportExpr2ExprsFile (expr_or_exprs, upper_bound, ifname):
           (type(upper_bound) is float)):
         upper_bound = tft_expr.ConstantExpr(upper_bound)
     else:
-        sys.exit("ERROR: unsupported type of upper_bound...")
+        sys.exit("ERROR: unsupported type of upper_bound.")
 
     assert(isinstance(upper_bound, tft_expr.ConstantExpr))
 
@@ -542,7 +542,7 @@ def ExportExpr2ExprsFile (expr_or_exprs, upper_bound, ifname):
             elif (type(str_eps) is float):
                 str_eps = "(" + str(str_eps) + ")"
             else:
-                sys.exit("ERROR: invalid type of group epsilon...")
+                sys.exit("ERROR: invalid type of group epsilon.")
 
             if (i == 0):
                 ifile.write("[" + str_eps)

@@ -118,15 +118,15 @@ def GenerateErrorTermsFromExpr (context_expr, expr, error_exprs = [], program_ex
             return [ my_et ] + ets_lhs + ets_rhs
 
         else:
-            sys.exit("ERROR: broken control flow in GenerateErrorTermsFromExpr...")
+            sys.exit("ERROR: broken control flow in GenerateErrorTermsFromExpr.")
 
     else:
-        sys.exit("ERROR: invlaid expr. type...")
+        sys.exit("ERROR: invlaid expr. type.")
 
 
 def GenerateErrorFormFromExpr (expr, error_type, upper_bound, M2, eq_gids = [], constraint_exprs = []):
     # -- call FPTaylor for first derivation --
-    tft_utils.DebugMessage("calling FPTaylor for the first derivatives...")
+    tft_utils.DebugMessage("calling FPTaylor for the first derivatives.")
 
     time_fd = time.time()
 
@@ -210,7 +210,7 @@ def CheckM2WithFPTaylor (fname_config):
     # assert(type(err_M2)    is float)
 
     if (tft_utils.FPTUNER_VERBOSE):
-        print ("[FPTaylor]: Check M2(" + fname_config + ")... M2: " + str(err_M2) + " Total: " + str(err_total))
+        print ("[FPTaylor]: Check M2(" + fname_config + "). M2: " + str(err_M2) + " Total: " + str(err_total))
 
     return err_total, err_M2
 
@@ -336,8 +336,8 @@ def SolveExprs (fname_exprs, optimizers = {}):
 
     time_parsing  = time.time()
 
-    tft_utils.VerboseMessage("parsing input expression...")
-    tft_utils.DebugMessage("reading .exprs file...")
+    tft_utils.VerboseMessage("parsing input expression.")
+    tft_utils.DebugMessage("reading .exprs file.")
 
     assert(os.path.isfile(fname_exprs))
     assert(ERROR_TYPE in ["abs", "rel"])
@@ -577,7 +577,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
 
     # ---- generate the Error Forms ----
     tft_utils.DebugMessage(".exprs file read")
-    tft_utils.DebugMessage("generating ErrorForms...")
+    tft_utils.DebugMessage("generating ErrorForms.")
 
     target_alloc = None
     irstrings = None
@@ -603,7 +603,7 @@ def SolveExprs (fname_exprs, optimizers = {}):
             print ("------------")
 
     if (target_alloc is None):
-        print ("TFT: no available allocation for the main expr...")
+        print ("TFT: no available allocation for the main expr.")
         return EFORMS, None
 
     # ---- some finalize before return ----

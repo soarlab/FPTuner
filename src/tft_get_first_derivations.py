@@ -12,10 +12,10 @@ import subprocess as subp
 # ========
 FNAME_FPT_QUERY = "__fpt_query"
 
-# please set this flag carefully...
+# please set this flag carefully.
 # by setting this flag as true, function "ResetGetFirstDerivations" must be called somewhere
 # in order to query FPTaylor at the first time.
-# Therefore, the reused results are the desired results...
+# Therefore, the reused results are the desired results.
 REUSE_FPT_REL    = False
 CACHE_TEXT_TERMS = {}
 VERBOSE          = False

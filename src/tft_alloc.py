@@ -85,7 +85,7 @@ def ConstantExprs2Fractions (ces):
 # class
 # ========
 class Alloc:
-    # Note that this is a mapping of GID/ErrorTerms to Fractions... I know that it should be GID/ErrorTerms to ConstantExprs... But let's leave it as this for now...
+    # Note that this is a mapping of GID/ErrorTerms to Fractions. I know that it should be GID/ErrorTerms to ConstantExprs. But let's leave it as this for now.
     gid2eps = None # GID to eps
 
     score = None
@@ -144,7 +144,7 @@ class Alloc:
         if (tft_utils.FPTUNER_VERBOSE):
             str_ret = str_ret + "Score: "
             if (self.score is None):
-                str_ret = str_ret + "not set...\n"
+                str_ret = str_ret + "not set.\n"
             else:
                 str_ret = str_ret + str(self.score) + "\n"
 

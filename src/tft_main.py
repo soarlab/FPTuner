@@ -53,7 +53,7 @@ FinalizeAlloc(FNAME_ATEXT, alloc, eforms)
 
 # -- additional tuning with more error thresholds --
 if (alloc is None):
-    print ("WARNING: no additional tuning when the \"base\" allocation is None...")
+    print ("WARNING: no additional tuning when the \"base\" allocation is None.")
     exit(1)
 
 assert(tft_sol_exprs.EFORMS is not None)

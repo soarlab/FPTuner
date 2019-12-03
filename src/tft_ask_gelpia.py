@@ -43,7 +43,7 @@ class GelpiaSolver :
         tft_utils.checkGelpiaInstallation("master")
 
         if ((id_retry is not None) and (id_retry >= MAX_RETRIES)):
-            print ("WARNING: Gelpia reached the max. # of retries...")
+            print ("WARNING: Gelpia reached the max. # of retries.")
 
         self.cached_result = None
 
@@ -163,7 +163,7 @@ class GelpiaSolver :
         os.chdir(now_dir)
 
         if (not finished) :
-            print ("WARNING: Manually timeout Gelpia... Gelpia's timeout facility may failed...")
+            print ("WARNING: Manually timeout Gelpia. Gelpia's timeout facility may failed.")
             return None
 
         # ---- read result ----
@@ -206,7 +206,7 @@ class GelpiaSolver :
                     if (str_val == "inf" or str_val == "nan"):
                         print ("WARNING: pessimistic bound: " + str_val)
                         print ("   expr: " + str(expr_optobj.toCString()))
-                        print ("Gelpia retry...")
+                        print ("Gelpia retry.")
 
                         if (id_retry is None):
                             return self.maxObj(expr_optobj, id_query, 1)
@@ -220,15 +220,15 @@ class GelpiaSolver :
                     try:
                         value_bound = Fraction(float(str_val))
                     except:
-                        print ("WARNING: cannot convert " + str_val + " to float...")
+                        print ("WARNING: cannot convert " + str_val + " to float.")
                         return None
 
             if (value_bound is None):
                 not_certain = True
-                print ("WARNING: Gelpia didn't return a certain answer...")
+                print ("WARNING: Gelpia didn't return a certain answer.")
             # assert(value_bound is not None)
 
-        if (not finished or not_certain):  # 1) Gelpia didn't terminate itself OR 2) Gelpia didn't return a certain answer...
+        if (not finished or not_certain):  # 1) Gelpia didn't terminate itself OR 2) Gelpia didn't return a certain answer.
             if (not finished):
                 exe_gelpia.terminate()
                 exe_gelpia.kill()
@@ -253,14 +253,14 @@ class GelpiaSolver :
                     try:
                         value_bound = Fraction(float(aline))
                     except:
-                        print ("WARNING: cannot convert " + aline + " to float...")
+                        print ("WARNING: cannot convert " + aline + " to float.")
 
                         sys.exit(1)
 
             flog.close()
 
             if (value_bound is None):
-                print ("WARNING: Gelpia terminated prematurely... retry...")
+                print ("WARNING: Gelpia terminated prematurely. retry.")
 
                 if (id_retry is None):
                     return self.maxObj(expr_optobj, id_query, 1)
@@ -269,7 +269,7 @@ class GelpiaSolver :
                     return self.maxObj(expr_optobj, id_query, (id_retry + 1))
 
         if (value_bound is None):
-            print ("EXIT: Gelpia abort with value_bound = None...")
+            print ("EXIT: Gelpia abort with value_bound = None.")
             print (":: " + str(expr_optobj))
             sys.exit(1)
 

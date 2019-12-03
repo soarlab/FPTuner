@@ -194,7 +194,7 @@ def String2VariableExpr (s, reject_internal):
                 return ve
 
         print ("ERROR: variable labeled with [" + label + "] " +
-               "with expression id [" + str(eid) + "] was not defined...")
+               "with expression id [" + str(eid) + "] was not defined.")
         assert(False)
 
     else :
@@ -440,7 +440,7 @@ def String2Expr (s, reject_internal):
     for i in range(0, len(s)):
         c = s[i]
 
-        # deciding FPT blackout ...
+        # deciding FPT blackout .
         if (c in C_ENV_START):
             if (sbuf in SBUF_FPT_BLACKOUT_KEYS):
                 assert(not fpt_skip)

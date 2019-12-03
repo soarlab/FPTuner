@@ -124,7 +124,7 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
     time_global_opt = time.time()
 
-    tft_utils.VerboseMessage("invoking global optimization to bound first derivatives...")
+    tft_utils.VerboseMessage("invoking global optimization to bound first derivatives.")
 
 
     # ==== solve expressions' ranges ====
@@ -161,7 +161,7 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 
             else: # sequential solvers
                 if (VERBOSE):
-                    print (str(obj_expr) + "  IN...")
+                    print (str(obj_expr) + "  IN.")
 
                 if (obj_expr.hasUB()):
                     value_max = obj_expr.ub().value()
@@ -223,7 +223,7 @@ def FirstLevelAllocSolver (optimizers, error_forms = []):
 #    for et in eform.terms:
 #        print ("GID: " + str(et.gid) + " (context: " + str(et.context_gid) + " ) : [" + str(et.absexpr().lb().value()) + ", " + str(float(et.absexpr().ub().value())) + "]")
 
-    tft_utils.VerboseMessage("allocating bit-widths...")
+    tft_utils.VerboseMessage("allocating bit-widths.")
 
 
     # ==== solve the allocation problem ====

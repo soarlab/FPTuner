@@ -196,7 +196,7 @@ def SamplePartitions():
     while (True):
         # prevent failing
         if (n_retries >= max_n_retries):
-            sys.exit("WARNING: Failed to sample a valid partition within " + str(max_n_retries) + " trials...")
+            sys.exit("WARNING: Failed to sample a valid partition within " + str(max_n_retries) + " trials.")
 
         # print out sampling progress
         this_prog = int(float(s)/float(DEF.N_Samples)*100.0)
@@ -214,7 +214,7 @@ def SamplePartitions():
         this_feature = DEF.InputPartition2Feature([DEF.Feature_Option, []], this_dvec)
 
         # check redundency
-        # NOTE: we currently don't check redundency...
+        # NOTE: we currently don't check redundency.
 
         # ==== solve alloc. ====
         this_eforms = None

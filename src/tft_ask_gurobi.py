@@ -89,13 +89,13 @@ class GurobiSolver:
 
                     last_task = tasks[len(tasks)-1]
                     if (last_task[0] == "combine"):
-                        sys.exit("ERROR: invalid consequent combines...")
+                        sys.exit("ERROR: invalid consequent combines.")
                     elif (last_task[0] == "left"):
                         tasks[len(tasks)-1] = ["right", last_task[1], c_rel, last_task[3]]
                     elif (last_task[0] == "right"):
                         tasks[len(tasks)-1] = ["combine", last_task[1], last_task[2], c_rel]
                     else:
-                        sys.exit("ERROR: invalid action of task...")
+                        sys.exit("ERROR: invalid action of task.")
 
                 elif (this_task[0] == "left"):
                     if (isinstance(this_task[2], tft_expr.ConstantExpr) or isinstance(this_task[2], tft_expr.VariableExpr)):
@@ -106,7 +106,7 @@ class GurobiSolver:
                         tasks.append(["left", this_task[2].operator.label, this_task[2].lhs(), this_task[2].rhs()])
 
                     else:
-                        assert(False), "Not supported expr. type for Gurobi..."
+                        assert(False), "Not supported expr. type for Gurobi."
 
                 elif (this_task[0] == "right"):
                     if (isinstance(this_task[3], tft_expr.ConstantExpr) or isinstance(this_task[3], tft_expr.VariableExpr)):
@@ -117,17 +117,17 @@ class GurobiSolver:
                         tasks.append(["left", this_task[3].operator.label, this_task[3].lhs(), this_task[3].rhs()])
 
                     else:
-                        assert("ERROR: not supported expr. type...")
+                        assert("ERROR: not supported expr. type.")
 
                 else:
-                    assert("ERROR: not supported expr. type...")
+                    assert("ERROR: not supported expr. type.")
 
             assert(len(tasks) == 0)
             assert(convert_rel is not None)
             return convert_rel
 
         else:
-            sys.exit("ERROR: invalid expr. type for convertExpr...")
+            sys.exit("ERROR: invalid expr. type for convertExpr.")
 
     def getVar (self, ve):
         assert(isinstance(ve, tft_expr.VariableExpr))
@@ -208,7 +208,7 @@ class GurobiSolver:
         elif (opt_dir == "min"):
             self.solver.setObjective(self.opt_obj, GRB.MINIMIZE)
         else:
-            sys.exit("ERROR: invalid opt. direction...")
+            sys.exit("ERROR: invalid opt. direction.")
 
     def goOpt (self):
         assert(not isinstance(self.opt_obj, str))
@@ -227,13 +227,13 @@ class GurobiSolver:
             self.solver.optimize()
             if (VERBOSE):
                 if (opt_rel == GRB.INFEASIBLE):
-                    print ("-- infeasible... --")
+                    print ("-- infeasible. --")
                 elif (opt_rel == GRB.INF_OR_UNBD):
-                    print ("-- infeasible or unbounded... --")
+                    print ("-- infeasible or unbounded. --")
                 elif (opt_rel == GRB.UNBOUNDED):
-                    print ("-- unbounded... --")
+                    print ("-- unbounded. --")
                 else:
-                    print ("-- ?? solution status... --")
+                    print ("-- ?? solution status. --")
             return None
 
         if (VERBOSE):

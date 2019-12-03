@@ -172,7 +172,7 @@ def CIDPredict (this_feature = []):
         sys.exit("ERROR: invalid prediction mode: " + DEF.TEST_MODE)
 
 
-# Return None if the theoretical prediction accuracy cannot be calculated...
+# Return None if the theoretical prediction accuracy cannot be calculated.
 def TheoreticalPredictionAccuracy ():
     if (DEF.TEST_MODE in ["random-uniform", "random-bias"]):
         assert(DEF.CID_HDLabel is not None)
@@ -407,7 +407,7 @@ def Testing ():
 
         Testing_Partitions.append(this_part)
 
-    String_Partitions = [] # release the space ...
+    String_Partitions = [] # release the space .
 
     # load testing feature -> CID
     Testing_Features = []
@@ -568,7 +568,7 @@ def Testing ():
 
         else:
             if (VERBOSE):
-                print (" ---- prediction failed...")
+                print (" ---- prediction failed.")
 
         # finalizing
         del Testing_Partitions[0]

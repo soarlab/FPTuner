@@ -30,7 +30,7 @@ def lift_consts(exp, inputs, assigns, consts=None, hashed=dict()):
       assert(exp[1] in consts)
       return exp
 
-    # It's Better To Beg For Forgiveness Than Ask For Permission ...
+    # It's Better To Beg For Forgiveness Than Ask For Permission .
     try:
       key = hashed[exp]
     except KeyError:

@@ -89,7 +89,7 @@ def ExprStatistics (expr, stat={}):
         stat["groups"]     = []
 
     if   (isinstance(expr, ConstantExpr)):
-        print ("ERROR: should not do statistics with expression containing real ConstantExprs...")
+        print ("ERROR: should not do statistics with expression containing real ConstantExprs.")
 
     elif (isinstance(expr, VariableExpr)):
 
@@ -156,7 +156,7 @@ class Expr (object):
 class ArithmeticExpr (Expr):
     def __init__ (self, set_index=True):
         if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only...")
+            sys.exit("Error: FPTuner is currently based on Python3 only.")
             super(ArithmeticExpr, self).__init__(set_index)
         elif (sys.version_info.major == 3):
             super().__init__(set_index)
@@ -166,7 +166,7 @@ class ArithmeticExpr (Expr):
 class Predicate (Expr):
     def __init__ (self, set_index=True):
         if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only...")
+            sys.exit("Error: FPTuner is currently based on Python3 only.")
             super(Predicate, self).__init__(set_index)
         elif (sys.version_info.major == 3):
             super().__init__(set_index)
@@ -183,7 +183,7 @@ class ConstantExpr (ArithmeticExpr):
             val = Fraction(val)
 
         if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only...")
+            sys.exit("Error: FPTuner is currently based on Python3 only.")
             super(ConstantExpr, self).__init__(False)
         elif (sys.version_info.major == 3):
             super().__init__(False)
@@ -352,7 +352,7 @@ class VariableExpr (ArithmeticExpr):
         assert(type(gid) is int)
 
         if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only...")
+            sys.exit("Error: FPTuner is currently based on Python3 only.")
             super(VariableExpr, self).__init__()
         elif (sys.version_info.major == 3):
             super().__init__()
@@ -368,7 +368,7 @@ class VariableExpr (ArithmeticExpr):
 
         if (check_prefix):
             if (self.isPreservedVar()):
-                print("ERROR: the given label \"" + label + "\" has a preserved prefix...")
+                print("ERROR: the given label \"" + label + "\" has a preserved prefix.")
                 assert(False)
 
         RegisterVariableExpr(self)
@@ -558,10 +558,10 @@ class UnaryExpr (ArithmeticExpr):
         assert(isinstance(opd0, Expr))
 
         if (opt.label == "-"):
-            sys.exit("ERROR: cannot directly create UnaryExpr -. It must be properly transfered to an expression tree...")
+            sys.exit("ERROR: cannot directly create UnaryExpr -. It must be properly transfered to an expression tree.")
 
         if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only...")
+            sys.exit("Error: FPTuner is currently based on Python3 only.")
             super(UnaryExpr, self).__init__()
         elif (sys.version_info.major == 3):
             super().__init__()
@@ -762,10 +762,10 @@ class BinaryExpr (ArithmeticExpr):
         assert(isinstance(opd1, Expr))
 
         if (opt.label == "^"):
-            sys.exit("ERROR: cannot directly create BinaryExpr ^. It must be properly transfered to an expression tree...")
+            sys.exit("ERROR: cannot directly create BinaryExpr ^. It must be properly transfered to an expression tree.")
 
         if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only...")
+            sys.exit("Error: FPTuner is currently based on Python3 only.")
             super(BinaryExpr, self).__init__()
         elif (sys.version_info.major == 3):
             super().__init__()
@@ -834,7 +834,7 @@ class BinaryExpr (ArithmeticExpr):
                 return False
 
         else:
-            sys.exit("ERROR: unknown binary operator... " + str(self.operator.label))
+            sys.exit("ERROR: unknown binary operator. " + str(self.operator.label))
 
     def identical (self, rhs):
         if (not isinstance(rhs, BinaryExpr)):
@@ -860,7 +860,7 @@ class BinaryExpr (ArithmeticExpr):
                 return False
 
         else:
-            sys.exit("ERROR: unknown binary operator... " + str(self.operator.label))
+            sys.exit("ERROR: unknown binary operator. " + str(self.operator.label))
 
     def setLB (self, lb):
         assert(isinstance(lb, ConstantExpr))
@@ -911,7 +911,7 @@ class BinaryExpr (ArithmeticExpr):
             else:
                 for rv in ret:
                     if (v.index == rv.index):
-                        print ("ERROR: duplicated vars in different subexpressions...")
+                        print ("ERROR: duplicated vars in different subexpressions.")
                         assert(False)
 
             if (not was_there):
@@ -1014,7 +1014,7 @@ class BinaryPredicate (Predicate):
         assert(relation.label in BinaryRelationLabels)
 
         if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only...")
+            sys.exit("Error: FPTuner is currently based on Python3 only.")
             super(BinaryPredicate, self).__init__(False)
         elif (sys.version_info.major == 3):
             super().__init__(False)
@@ -1066,7 +1066,7 @@ class BinaryPredicate (Predicate):
             return (vlhs <= vrhs)
 
         else:
-            sys.exit("Error: unhandled relation in concEval...")
+            sys.exit("Error: unhandled relation in concEval.")
 
     def __eq__ (self, rhs):
         if (not isinstance(rhs, BinaryPredicate)):
@@ -1192,4 +1192,4 @@ def isPreciseOperation (expr):
         return False
 
     else:
-        sys.exit("ERROR: unknown expression type...")
+        sys.exit("ERROR: unknown expression type.")
