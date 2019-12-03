@@ -1,5 +1,5 @@
 
-import tft_ir_api as IR 
+import tft_ir_api as IR
 
 gid = 0
 
@@ -33,4 +33,3 @@ gid += 1
 half_sqrt_all = IR.BE("*", gid, IR.FConst(0.5), sqrt_all)
 
 IR.TuneExpr(half_sqrt_all)
-

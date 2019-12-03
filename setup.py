@@ -17,7 +17,7 @@ def InstallGLPK ():
         os.system("sudo apt-get install python-glpk")
         os.system("sudo apt-get install glpk-utils")
 
-        
+
 def InstallGelpia(branch, commit=None):
     assert(type(branch) is str)
 

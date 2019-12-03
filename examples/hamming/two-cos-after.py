@@ -15,10 +15,10 @@ temp1 = IR.BE('/', gid+2,
 gid += 3
 
 rel = IR.BE('*', gid+2,
-            IR.FConst(-2.0), 
+            IR.FConst(-2.0),
             IR.BE('*', gid+1,
                   temp0,
                   IR.UE('sin', gid, temp1)))
 gid += 3
 
-IR.TuneExpr(rel) 
+IR.TuneExpr(rel)

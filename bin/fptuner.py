@@ -134,7 +134,7 @@ def main():
     tft_tuning.OPTIMIZERS["alloc"]  = args.aopt
     if (tft_tuning.OPTIMIZERS['alloc'] == 'glpk'):
         assert(tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS), "Solver GLPK must work with --linear-tc"
-    
+
     # ==== load the input file as a module ====
     if INPUT_FILE.endswith(".py"):
         tokens      = tft_utils.String2Tokens(INPUT_FILE, "/")

@@ -1,5 +1,5 @@
 
-import tft_ir_api as IR 
+import tft_ir_api as IR
 
 gid = 0
 
@@ -12,5 +12,4 @@ rel = IR.BE('/', gid+2,
             IR.BE('*', gid+1, a, b))
 gid += 3
 
-IR.TuneExpr(rel) 
-
+IR.TuneExpr(rel)

@@ -2,57 +2,57 @@
 import math
 import sys
 import tft_utils
-import tft_expr 
+import tft_expr
 import tft_parser
-import tft_alloc 
+import tft_alloc
 import tft_ir_api as IR
-from fractions import Fraction 
+from fractions import Fraction
 
 
-# ==== global variables ==== 
+# ==== global variables ====
 EPS_SCORE = {}
 
 
-# ==== sub-routines ==== 
-def UnifyCastingMapAndGid2Epsilons (eforms): 
-    uni_casting_map = None 
-    uni_gid2epsilons = None 
+# ==== sub-routines ====
+def UnifyCastingMapAndGid2Epsilons (eforms):
+    uni_casting_map = None
+    uni_gid2epsilons = None
 
-    for eform in eforms: 
-        assert(isinstance(eform, ErrorForm)) 
+    for eform in eforms:
+        assert(isinstance(eform, ErrorForm))
 
-        if (uni_casting_map is None): 
-            assert(uni_gid2epsilons is None) 
-            uni_casting_map     = eform.casting_map.copy() 
-            uni_gid2epsilons    = eform.gid2epsilons.copy() 
+        if (uni_casting_map is None):
+            assert(uni_gid2epsilons is None)
+            uni_casting_map     = eform.casting_map.copy()
+            uni_gid2epsilons    = eform.gid2epsilons.copy()
 
-        else: 
-            assert(tft_utils.isSameMap(uni_casting_map,  eform.casting_map)) 
-            assert(tft_utils.isSameMap(uni_gid2epsilons, eform.gid2epsilons)) 
+        else:
+            assert(tft_utils.isSameMap(uni_casting_map,  eform.casting_map))
+            assert(tft_utils.isSameMap(uni_gid2epsilons, eform.gid2epsilons))
 
-    return uni_casting_map, uni_gid2epsilons 
+    return uni_casting_map, uni_gid2epsilons
 
 
-def GroupErrorVarName (gid, select): 
-    assert(type(gid) is int) 
-    assert(type(select) is int) 
-    assert(0 <= gid) 
-    assert(0 <= select) 
-    return tft_expr.GROUP_ERR_VAR_PREFIX + str(gid) + "_" + str(select)     
+def GroupErrorVarName (gid, select):
+    assert(type(gid) is int)
+    assert(type(select) is int)
+    assert(0 <= gid)
+    assert(0 <= select)
+    return tft_expr.GROUP_ERR_VAR_PREFIX + str(gid) + "_" + str(select)
 
-def GroupErrorVar (gid, select): 
-    evar = tft_expr.VariableExpr(GroupErrorVarName(gid, select), int, -1, False) 
-    evar.setLB(tft_expr.ConstantExpr(int(0))) 
+def GroupErrorVar (gid, select):
+    evar = tft_expr.VariableExpr(GroupErrorVarName(gid, select), int, -1, False)
+    evar.setLB(tft_expr.ConstantExpr(int(0)))
     evar.setUB(tft_expr.ConstantExpr(int(1)))
     assert(tft_expr.isPseudoBooleanVar(evar))
     return evar
 
 def TCastErrorVarName (gid, select, cgid, cselect):
     assert(type(gid) is int and type(select) is int)
-    assert(type(cgid) is int and type(cselect) is int) 
+    assert(type(cgid) is int and type(cselect) is int)
     assert(0 <= gid and 0 <= select)
     assert(0 <= cgid and 0 <= cselect)
-    return tft_expr.TCAST_ERR_VAR_PREFIX + str(gid) + "_" + str(select) + "_" + str(cgid) + "_" + str(cselect) 
+    return tft_expr.TCAST_ERR_VAR_PREFIX + str(gid) + "_" + str(select) + "_" + str(cgid) + "_" + str(cselect)
 
 def TCastErrorVar (gid, select, cgid, cselect):
     evar = tft_expr.VariableExpr(TCastErrorVarName(gid, select,
@@ -61,61 +61,61 @@ def TCastErrorVar (gid, select, cgid, cselect):
     evar.setLB(tft_expr.ConstantExpr(int(0)))
     evar.setUB(tft_expr.ConstantExpr(int(1)))
     assert(tft_expr.isPseudoBooleanVar(evar))
-    return evar 
+    return evar
 
-def checkValidEpsilonList (epss): 
-    assert(len(epss) > 0) 
+def checkValidEpsilonList (epss):
+    assert(len(epss) > 0)
     assert(all([isinstance(eps, tft_expr.ConstantExpr) for eps in epss]))
     assert(all([(epss[i] > epss[i+1]) for i in range(0, (len(epss)-1))]))
 
-def checkSameEpsilonList (epss1, epss2): 
-    checkValidEpsilonList(epss1) 
-    checkValidEpsilonList(epss2) 
-    assert(len(epss1) == len(epss2)) 
-    assert(all([(epss1[i] == epss2[i]) for i in range(0, len(epss1))])) 
+def checkSameEpsilonList (epss1, epss2):
+    checkValidEpsilonList(epss1)
+    checkValidEpsilonList(epss2)
+    assert(len(epss1) == len(epss2))
+    assert(all([(epss1[i] == epss2[i]) for i in range(0, len(epss1))]))
 
-def GroupErrorVarSum (gid, epss=[]): 
-    assert((type(gid) is int) and (0 <= gid)) 
-    checkValidEpsilonList(epss) 
+def GroupErrorVarSum (gid, epss=[]):
+    assert((type(gid) is int) and (0 <= gid))
+    checkValidEpsilonList(epss)
 
-    expr_sum = None 
-    
-    for ei in range(0, len(epss)): 
-        if (expr_sum is None): 
-            expr_sum = GroupErrorVar(gid, ei) 
+    expr_sum = None
+
+    for ei in range(0, len(epss)):
+        if (expr_sum is None):
+            expr_sum = GroupErrorVar(gid, ei)
         else:
-            expr_sum = tft_expr.BinaryExpr(tft_expr.BinaryOp(-1, "+"), expr_sum, GroupErrorVar(gid, ei)) 
+            expr_sum = tft_expr.BinaryExpr(tft_expr.BinaryOp(-1, "+"), expr_sum, GroupErrorVar(gid, ei))
 
-    return expr_sum 
+    return expr_sum
 
 def CastingNumExprTemplate (func_compare, casting_map = {}, gid2epsilons = {}):
-    # generate the casting num. expr. 
-    cnum_expr = None 
-    for p,c in casting_map.items(): 
-        assert(len(p) == 2) 
-        assert((type(p[0]) is int) and (type(p[1]) is int)) 
+    # generate the casting num. expr.
+    cnum_expr = None
+    for p,c in casting_map.items():
+        assert(len(p) == 2)
+        assert((type(p[0]) is int) and (type(p[1]) is int))
 
-        gid_from = p[0] 
-        gid_to = p[1] 
+        gid_from = p[0]
+        gid_to = p[1]
 
-        assert(gid_to != tft_expr.PRESERVED_CONST_GID) 
-        if (gid_from == tft_expr.PRESERVED_CONST_GID): 
-            continue 
-            
-        assert(0 <= gid_from) 
+        assert(gid_to != tft_expr.PRESERVED_CONST_GID)
+        if (gid_from == tft_expr.PRESERVED_CONST_GID):
+            continue
+
+        assert(0 <= gid_from)
         assert(gid_from in gid2epsilons.keys())
         assert(0 <= gid_to)
         assert(gid_to in gid2epsilons.keys())
 
-        epss_from = gid2epsilons[gid_from] 
-        epss_to = gid2epsilons[gid_to] 
+        epss_from = gid2epsilons[gid_from]
+        epss_to = gid2epsilons[gid_to]
 
-        this_expr = None 
-        for f in range(0, len(epss_from)): 
+        this_expr = None
+        for f in range(0, len(epss_from)):
             sum_expr = None
             var_from = GroupErrorVar(gid_from, f)
-            
-            for t in range(0, len(epss_to)): 
+
+            for t in range(0, len(epss_to)):
                 if (func_compare(epss_from[f], epss_to[t])):
                     tc_expr = None
                     if (tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS):
@@ -124,117 +124,117 @@ def CastingNumExprTemplate (func_compare, casting_map = {}, gid2epsilons = {}):
                     else:
                         tc_expr = IR.BE("*", -1,
                                         var_from, GroupErrorVar(gid_to, t), True)
-                    
-                    if (sum_expr is None): 
+
+                    if (sum_expr is None):
                         sum_expr = tc_expr
                     else:
                         sum_expr = IR.BE("+", -1, sum_expr, tc_expr, True)
 
-            if (sum_expr is None): 
-                continue 
+            if (sum_expr is None):
+                continue
 
-            if (this_expr is None): 
+            if (this_expr is None):
                 this_expr = sum_expr
             else:
                 this_expr = IR.BE("+", -1, this_expr, sum_expr, True)
 
-        if (this_expr is None): 
-            continue 
+        if (this_expr is None):
+            continue
 
-        this_expr = IR.BE("*", -1, tft_expr.ConstantExpr(c), this_expr, True) 
-        if (cnum_expr is None): 
+        this_expr = IR.BE("*", -1, tft_expr.ConstantExpr(c), this_expr, True)
+        if (cnum_expr is None):
             cnum_expr = this_expr
         else:
-            cnum_expr = IR.BE("+", -1, cnum_expr, this_expr, True) 
+            cnum_expr = IR.BE("+", -1, cnum_expr, this_expr, True)
 
-    return cnum_expr 
+    return cnum_expr
 
-def CastingNumExprH2L (casting_map = {}, gid2epsilons = {}): 
+def CastingNumExprH2L (casting_map = {}, gid2epsilons = {}):
     return CastingNumExprTemplate( (lambda x,y : x < y), casting_map, gid2epsilons )
 
-def CastingNumExprL2H (casting_map = {}, gid2epsilons = {}): 
-    return CastingNumExprTemplate( (lambda x,y : x > y), casting_map, gid2epsilons ) 
+def CastingNumExprL2H (casting_map = {}, gid2epsilons = {}):
+    return CastingNumExprTemplate( (lambda x,y : x > y), casting_map, gid2epsilons )
 
-def CastingNumExpr (casting_map = {}, gid2epsilons = {}): 
-    expr_h2l = CastingNumExprH2L(casting_map, gid2epsilons) 
-    expr_l2h = CastingNumExprL2H(casting_map, gid2epsilons) 
+def CastingNumExpr (casting_map = {}, gid2epsilons = {}):
+    expr_h2l = CastingNumExprH2L(casting_map, gid2epsilons)
+    expr_l2h = CastingNumExprL2H(casting_map, gid2epsilons)
 
-    if ((expr_h2l is None) and (expr_l2h is None)): 
-        return None 
-    
-    if (expr_h2l is None): 
-        return expr_l2h 
-    
-    if (expr_l2h is None): 
-        return expr_h2l 
+    if ((expr_h2l is None) and (expr_l2h is None)):
+        return None
 
-    return IR.BE("+", -1, expr_h2l, expr_l2h, True) 
+    if (expr_h2l is None):
+        return expr_l2h
+
+    if (expr_l2h is None):
+        return expr_h2l
+
+    return IR.BE("+", -1, expr_h2l, expr_l2h, True)
 
 def countOptsInsts (eforms):
     assert(len(eforms) > 0)
-    assert(all([isinstance(ef, ErrorForm) for ef in eforms])) 
-    
-    n_insts = 0 
+    assert(all([isinstance(ef, ErrorForm) for ef in eforms]))
 
-    gids = [] 
-    
+    n_insts = 0
+
+    gids = []
+
     for ef in eforms:
         for gid,epss in ef.gid2epsilons.items():
             if (gid not in gids):
                 gids.append(gid)
-        
-        for gid,c in ef.gid_counts.items(): 
-            assert(gid in gids) 
 
-            n_insts = n_insts + c 
+        for gid,c in ef.gid_counts.items():
+            assert(gid in gids)
 
-    return len(gids), n_insts 
-    
+            n_insts = n_insts + c
 
-# ==== classes ==== 
-FRESH_ERRORTERM_INDEX = 0 
-class ErrorTerm: 
-    index                  = None 
-    expr                   = None 
-    context_gid            = None 
-    gid                    = None 
-    stored_absexpr         = None 
-    stored_overapprox_expr = None 
-    is_precise_opt         = False 
+    return len(gids), n_insts
 
-    def __init__ (self, err_expr, context_gid, gid, is_precise_opt=False): 
-        global FRESH_ERRORTERM_INDEX 
-        assert(FRESH_ERRORTERM_INDEX >= 0) 
-        assert(isinstance(err_expr, tft_expr.Expr)) 
-        assert((type(gid) is int) and (gid >= 0)) 
 
-        self.index          = FRESH_ERRORTERM_INDEX 
+# ==== classes ====
+FRESH_ERRORTERM_INDEX = 0
+class ErrorTerm:
+    index                  = None
+    expr                   = None
+    context_gid            = None
+    gid                    = None
+    stored_absexpr         = None
+    stored_overapprox_expr = None
+    is_precise_opt         = False
+
+    def __init__ (self, err_expr, context_gid, gid, is_precise_opt=False):
+        global FRESH_ERRORTERM_INDEX
+        assert(FRESH_ERRORTERM_INDEX >= 0)
+        assert(isinstance(err_expr, tft_expr.Expr))
+        assert((type(gid) is int) and (gid >= 0))
+
+        self.index          = FRESH_ERRORTERM_INDEX
         self.expr           = err_expr
-        self.context_gid    = context_gid 
-        self.gid            = gid 
+        self.context_gid    = context_gid
+        self.gid            = gid
         self.is_precise_opt = is_precise_opt
-        
-        FRESH_ERRORTERM_INDEX = FRESH_ERRORTERM_INDEX + 1 
 
-    def refVarName (self): 
-        assert(type(self.index) is int) 
-        assert(self.index >= 0) 
+        FRESH_ERRORTERM_INDEX = FRESH_ERRORTERM_INDEX + 1
+
+    def refVarName (self):
+        assert(type(self.index) is int)
+        assert(self.index >= 0)
         return tft_expr.ERR_TERM_REF_PREFIX + str(self.index)
 
-    def refVar (self): 
+    def refVar (self):
         return tft_expr.VariableExpr(self.refVarName(), Fraction, -1, False)
 
     def absexpr (self):
-        if (self.stored_absexpr is not None): 
-            return self.stored_absexpr 
+        if (self.stored_absexpr is not None):
+            return self.stored_absexpr
 
-        if (self.expr.hasLB() and self.expr.lb().value() >= Fraction(0, 1)): 
-            self.stored_absexpr = self.expr 
+        if (self.expr.hasLB() and self.expr.lb().value() >= Fraction(0, 1)):
+            self.stored_absexpr = self.expr
 
-        elif (isinstance(self.expr, tft_expr.UnaryExpr) and (self.expr.operator.label == "abs")): 
-            self.stored_absexpr = self.expr 
+        elif (isinstance(self.expr, tft_expr.UnaryExpr) and (self.expr.operator.label == "abs")):
+            self.stored_absexpr = self.expr
 
-        else: 
+        else:
             self.stored_absexpr = IR.MakeUnaryExpr("abs", -1, self.expr, True)
 
         return self.stored_absexpr
@@ -242,365 +242,365 @@ class ErrorTerm:
     def tcastExpr (self, select, cselect):
         if (tft_utils.LINEAR_TYPE_CASTING_CONSTRAINTS):
             return TCastErrorVar(self.gid, select,
-                                 self.context_gid, cselect) 
+                                 self.context_gid, cselect)
         else:
-            return IR.BE("*", -1, 
-                         GroupErrorVar(self.gid, select), 
+            return IR.BE("*", -1,
+                         GroupErrorVar(self.gid, select),
                          GroupErrorVar(self.context_gid, cselect),
                          True)
 
-    def errorExpr (self, scaling_expr, gid2epsilons={}, casting_map={}): 
+    def errorExpr (self, scaling_expr, gid2epsilons={}, casting_map={}):
         assert(isinstance(scaling_expr, tft_expr.ConstantExpr))
-        assert(type(self.context_gid)   is int) 
+        assert(type(self.context_gid)   is int)
         assert(type(self.gid)           is int)
-        assert(self.context_gid         in gid2epsilons.keys()) 
-        assert(self.gid                 in gid2epsilons.keys()) 
-        assert((self.gid == self.context_gid) or 
+        assert(self.context_gid         in gid2epsilons.keys())
+        assert(self.gid                 in gid2epsilons.keys())
+        assert((self.gid == self.context_gid) or
                ((self.gid, self.context_gid) in casting_map.keys()))
 
         temp_epss         = gid2epsilons[self.gid]
         temp_context_epss = gid2epsilons[self.context_gid]
-        epss              = [] 
+        epss              = []
         context_epss      = []
 
         checkValidEpsilonList(temp_epss)
         checkValidEpsilonList(temp_context_epss)
 
-        # scaling up the epsilons 
-        for i in range(0, len(temp_epss)): 
+        # scaling up the epsilons
+        for i in range(0, len(temp_epss)):
             epss.append( tft_expr.ConstantExpr(temp_epss[i].value() * scaling_expr.value()) )
-        for j in range(0, len(temp_context_epss)): 
-            context_epss.append( tft_expr.ConstantExpr(temp_context_epss[j].value() * scaling_expr.value()) ) 
+        for j in range(0, len(temp_context_epss)):
+            context_epss.append( tft_expr.ConstantExpr(temp_context_epss[j].value() * scaling_expr.value()) )
 
         error_expr = None
 
-        if (not self.is_precise_opt): 
-            error_expr = IR.BE("*", -1, 
-                               GroupErrorVar(self.gid, 0), 
-                               epss[0], 
-                               True) 
+        if (not self.is_precise_opt):
+            error_expr = IR.BE("*", -1,
+                               GroupErrorVar(self.gid, 0),
+                               epss[0],
+                               True)
 
-            for i in range(1, len(epss)): 
-                error_expr = IR.BE("+", -1, 
-                                   error_expr, 
-                                   IR.BE("*", -1, 
-                                         GroupErrorVar(self.gid, i), 
-                                         epss[i], 
-                                         True), 
-                                   True) 
+            for i in range(1, len(epss)):
+                error_expr = IR.BE("+", -1,
+                                   error_expr,
+                                   IR.BE("*", -1,
+                                         GroupErrorVar(self.gid, i),
+                                         epss[i],
+                                         True),
+                                   True)
 
-        tc_error = None 
-        
-        if (self.gid != self.context_gid): 
-            for i in range(0, len(epss)): 
-                for j in range(0, len(context_epss)): 
-                    if (epss[i] < context_epss[j]): 
+        tc_error = None
+
+        if (self.gid != self.context_gid):
+            for i in range(0, len(epss)):
+                for j in range(0, len(context_epss)):
+                    if (epss[i] < context_epss[j]):
                         temp_error = self.tcastExpr(i, j)
-                        temp_error = IR.BE("*", -1, 
-                                           temp_error, 
-                                           context_epss[j], 
-                                           # tft_expr.ConstantExpr(context_epss[j].value() + 
-                                           #                       (context_epss[j].value() * epss[i].value())), 
-                                           True) 
-                        if (tc_error is None): 
-                            tc_error = temp_error 
+                        temp_error = IR.BE("*", -1,
+                                           temp_error,
+                                           context_epss[j],
+                                           # tft_expr.ConstantExpr(context_epss[j].value() +
+                                           #                       (context_epss[j].value() * epss[i].value())),
+                                           True)
+                        if (tc_error is None):
+                            tc_error = temp_error
                         else:
-                            tc_error = IR.BE("+", -1, 
-                                             tc_error, 
-                                             temp_error, 
-                                             True) 
-        
-        if   (error_expr is None and tc_error is None): 
+                            tc_error = IR.BE("+", -1,
+                                             tc_error,
+                                             temp_error,
+                                             True)
+
+        if   (error_expr is None and tc_error is None):
             return tft_expr.ConstantExpr(0.0)
-        elif (tc_error is None): 
-            return error_expr 
-        elif (error_expr is None): 
+        elif (tc_error is None):
+            return error_expr
+        elif (error_expr is None):
             return tc_error
-        else: 
-            return IR.BE("+", -1, error_expr, tc_error, True) 
+        else:
+            return IR.BE("+", -1, error_expr, tc_error, True)
 
 
-    def overApproxExpr (self, error_expr): 
-        assert(isinstance(error_expr, tft_expr.ArithmeticExpr)) 
-        
-        if (self.stored_overapprox_expr is not None): 
-            return self.stored_overapprox_expr 
+    def overApproxExpr (self, error_expr):
+        assert(isinstance(error_expr, tft_expr.ArithmeticExpr))
 
-        expr_abs_expr = self.absexpr() 
-        if ((not expr_abs_expr.hasLB()) or (not expr_abs_expr.hasUB())): 
-            sys.exit("ERROR: cannot over-approximate expr. without both LB and UB...")             
+        if (self.stored_overapprox_expr is not None):
+            return self.stored_overapprox_expr
 
-        value_lb = expr_abs_expr.lb().value() 
-        value_ub = expr_abs_expr.ub().value() 
-            
-        assert(Fraction(0, 1) <= value_lb) 
-        assert(value_lb <= value_ub) 
-        
-        self.stored_overapprox_expr = IR.MakeBinaryExpr("*", -1, 
-                                                        tft_expr.ConstantExpr(value_ub), 
-                                                        error_expr, 
+        expr_abs_expr = self.absexpr()
+        if ((not expr_abs_expr.hasLB()) or (not expr_abs_expr.hasUB())):
+            sys.exit("ERROR: cannot over-approximate expr. without both LB and UB...")
+
+        value_lb = expr_abs_expr.lb().value()
+        value_ub = expr_abs_expr.ub().value()
+
+        assert(Fraction(0, 1) <= value_lb)
+        assert(value_lb <= value_ub)
+
+        self.stored_overapprox_expr = IR.MakeBinaryExpr("*", -1,
+                                                        tft_expr.ConstantExpr(value_ub),
+                                                        error_expr,
                                                         True)
 
-        return self.stored_overapprox_expr 
+        return self.stored_overapprox_expr
 
-    def __hash__ (self): 
-        return hash(self.index) 
-        
-    def copy (self, specific_epss=None): 
+    def __hash__ (self):
+        return hash(self.index)
+
+    def copy (self, specific_epss=None):
         if (specific_epss is None):
-            ret_et = ErrorTerm(self.expr, self.stored_cmt_expr) 
-        else: 
-            assert(isinstance(specific_epss[i], tft_expr.ConstantExpr) for i in range(0, len(specific_epss))) 
-            ret_et = ErrorTerm(self.expr, self.stored_cmt_expr, specific_epss[:]) 
+            ret_et = ErrorTerm(self.expr, self.stored_cmt_expr)
+        else:
+            assert(isinstance(specific_epss[i], tft_expr.ConstantExpr) for i in range(0, len(specific_epss)))
+            ret_et = ErrorTerm(self.expr, self.stored_cmt_expr, specific_epss[:])
 
-        ret_et.gid = self.gid 
-        ret_et.stored_cmt_expr = self.stored_cmt_expr 
+        ret_et.gid = self.gid
+        ret_et.stored_cmt_expr = self.stored_cmt_expr
 
-        return ret_eform 
+        return ret_eform
 
     def getGid (self):
-        return self.gid 
+        return self.gid
 
-    def getContextGid (self): 
-        return self.context_gid 
-        
-                
+    def getContextGid (self):
+        return self.context_gid
+
+
 class ErrorForm:
     terms = None
-    upper_bound = None 
-    M2 = None 
+    upper_bound = None
+    M2 = None
 
-    gid2epsilons = None 
-    
-    gid_counts = None 
+    gid2epsilons = None
 
-    gid_weight = None 
+    gid_counts = None
 
-    casting_map = None 
+    gid_weight = None
 
-    eq_gids = None 
+    casting_map = None
 
-    constraints = None 
+    eq_gids = None
 
-    def __init__ (self, upper_bound, M2): 
-        assert(isinstance(upper_bound, tft_expr.ConstantExpr)) 
-        assert(isinstance(M2, tft_expr.ConstantExpr)) 
+    constraints = None
+
+    def __init__ (self, upper_bound, M2):
+        assert(isinstance(upper_bound, tft_expr.ConstantExpr))
+        assert(isinstance(M2, tft_expr.ConstantExpr))
 
         self.upper_bound = upper_bound
-        self.M2 = M2 
+        self.M2 = M2
 
         self.terms = []
-        self.casting_map = {} 
-        self.gid2epsilons = {} 
-        self.gid_counts = {} 
-        self.gid_weight = {} 
+        self.casting_map = {}
+        self.gid2epsilons = {}
+        self.gid_counts = {}
+        self.gid_weight = {}
 
-    def add (self, term): 
+    def add (self, term):
         assert(isinstance(term, ErrorTerm))
-        assert(term.index >= 0) 
+        assert(term.index >= 0)
 
-        # check group validity 
-        gid = term.getGid() 
-        assert(0 <= gid) 
-        assert(gid in self.gid2epsilons) 
+        # check group validity
+        gid = term.getGid()
+        assert(0 <= gid)
+        assert(gid in self.gid2epsilons)
 
-        # check redundnecy 
-        assert(term not in self.terms) 
+        # check redundnecy
+        assert(term not in self.terms)
 
-        # add the ErrorTerm 
+        # add the ErrorTerm
         self.terms.append(term)
 
-    def nInstances (self): 
-        total_inst = 0 
-        for g,c in self.gid_counts.items(): 
-            if (g == tft_expr.PRESERVED_CONST_GID): 
-                continue 
-            total_inst = total_inst + c 
-        return total_inst 
+    def nInstances (self):
+        total_inst = 0
+        for g,c in self.gid_counts.items():
+            if (g == tft_expr.PRESERVED_CONST_GID):
+                continue
+            total_inst = total_inst + c
+        return total_inst
 
-    def scalingUpFactor (self):         
-        if   (IR.PREC_CANDIDATES == ["e32", "e64"]): 
+    def scalingUpFactor (self):
+        if   (IR.PREC_CANDIDATES == ["e32", "e64"]):
             return tft_expr.ConstantExpr(math.pow(2, 21))
         elif (IR.PREC_CANDIDATES == ["e64", "e128"]):
             return tft_expr.ConstantExpr(math.pow(2, 50))
         elif (IR.PREC_CANDIDATES == ["e32", "e64", "e128"]):
             return tft_expr.ConstantExpr(math.pow(2, 48))
-        else: 
+        else:
             sys.exit("Error: invalid setting of IR.PREC_CANDIDATES: " + str(IR.PREC_CANDIDATES))
 
-        # scaling_eps = Fraction(0.0) 
-        scaling_eps = Fraction(1.0) 
-        
-        for gid,epss in self.gid2epsilons.items(): 
-            for eps in epss: 
-                assert(eps.value() >= 0.0) 
+        # scaling_eps = Fraction(0.0)
+        scaling_eps = Fraction(1.0)
 
-                if (eps.value() == 0.0): 
-                    continue 
+        for gid,epss in self.gid2epsilons.items():
+            for eps in epss:
+                assert(eps.value() >= 0.0)
 
-#                if (scaling_eps < eps.value()): 
-                if (scaling_eps > eps.value()): 
-                    scaling_eps = eps.value() 
+                if (eps.value() == 0.0):
+                    continue
 
-        up_fac = Fraction(scaling_eps.denominator, scaling_eps.numerator) 
-        # return tft_expr.ConstantExpr(up_fac) 
-        # return tft_expr.ConstantExpr(up_fac * 512.0) 
-        return tft_expr.ConstantExpr(up_fac / 8.0 ) # It is just a heuristic to divide by 8.0 
+#                if (scaling_eps < eps.value()):
+                if (scaling_eps > eps.value()):
+                    scaling_eps = eps.value()
 
-    def errorExpr (self, context_gid, gid): 
-        assert(False) 
-        assert(type(context_gid)   is int) 
+        up_fac = Fraction(scaling_eps.denominator, scaling_eps.numerator)
+        # return tft_expr.ConstantExpr(up_fac)
+        # return tft_expr.ConstantExpr(up_fac * 512.0)
+        return tft_expr.ConstantExpr(up_fac / 8.0 ) # It is just a heuristic to divide by 8.0
+
+    def errorExpr (self, context_gid, gid):
+        assert(False)
+        assert(type(context_gid)   is int)
         assert(type(gid)           is int)
-        assert(context_gid         in self.gid2epsilons.keys()) 
-        assert(gid                 in self.gid2epsilons.keys()) 
-        assert((gid == context_gid) or 
+        assert(context_gid         in self.gid2epsilons.keys())
+        assert(gid                 in self.gid2epsilons.keys())
+        assert((gid == context_gid) or
                ((gid, context_gid) in self.casting_map.keys()))
 
         temp_epss         = self.gid2epsilons[gid]
         temp_context_epss = self.gid2epsilons[context_gid]
-        epss              = [] 
+        epss              = []
         context_epss      = []
 
         checkValidEpsilonList(temp_epss)
         checkValidEpsilonList(temp_context_epss)
 
-        # scaling up the epsilons 
-        scaling_expr = self.scalingUpFactor() 
-        for i in range(0, len(temp_epss)): 
+        # scaling up the epsilons
+        scaling_expr = self.scalingUpFactor()
+        for i in range(0, len(temp_epss)):
             epss.append(         tft_expr.ConstantExpr(temp_epss[i].value() * scaling_expr.value()) )
-        for j in range(0, len(temp_context_epss)): 
-            context_epss.append( tft_expr.ConstantExpr(temp_context_epss[j].value() * scaling_expr.value()) ) 
-                
-        error_expr = IR.BE("*", -1, 
-                           GroupErrorVar(gid, 0), 
-                           epss[0], 
-                           True) 
+        for j in range(0, len(temp_context_epss)):
+            context_epss.append( tft_expr.ConstantExpr(temp_context_epss[j].value() * scaling_expr.value()) )
 
-        for i in range(1, len(epss)): 
-            error_expr = IR.BE("+", -1, 
-                               error_expr, 
-                               IR.BE("*", -1, 
-                                     GroupErrorVar(gid, i), 
-                                     epss[i], 
-                                     True), 
-                               True) 
+        error_expr = IR.BE("*", -1,
+                           GroupErrorVar(gid, 0),
+                           epss[0],
+                           True)
 
-        tc_error = None 
-        
-        if (gid != context_gid): 
-            for i in range(0, len(epss)): 
-                for j in range(0, len(context_epss)): 
-                    if (epss[i] < context_epss[j]): 
-                        temp_error = IR.BE("*", -1, 
-                                           GroupErrorVar(gid, i), 
-                                           GroupErrorVar(context_gid, j), 
-                                           True) 
-                        temp_error = IR.BE("*", -1, 
-                                           temp_error, 
-                                           context_epss[j], 
-                                           # tft_expr.ConstantExpr(context_epss[j].value() + 
-                                           #                       (context_epss[j].value() * epss[i].value())), 
-                                           True) 
-                        if (tc_error is None): 
-                            tc_error = temp_error 
+        for i in range(1, len(epss)):
+            error_expr = IR.BE("+", -1,
+                               error_expr,
+                               IR.BE("*", -1,
+                                     GroupErrorVar(gid, i),
+                                     epss[i],
+                                     True),
+                               True)
+
+        tc_error = None
+
+        if (gid != context_gid):
+            for i in range(0, len(epss)):
+                for j in range(0, len(context_epss)):
+                    if (epss[i] < context_epss[j]):
+                        temp_error = IR.BE("*", -1,
+                                           GroupErrorVar(gid, i),
+                                           GroupErrorVar(context_gid, j),
+                                           True)
+                        temp_error = IR.BE("*", -1,
+                                           temp_error,
+                                           context_epss[j],
+                                           # tft_expr.ConstantExpr(context_epss[j].value() +
+                                           #                       (context_epss[j].value() * epss[i].value())),
+                                           True)
+                        if (tc_error is None):
+                            tc_error = temp_error
                         else:
-                            tc_error = IR.BE("+", -1, 
-                                             tc_error, 
-                                             temp_error, 
-                                             True) 
+                            tc_error = IR.BE("+", -1,
+                                             tc_error,
+                                             temp_error,
+                                             True)
 
-        if (tc_error is None): 
-            return error_expr 
-                        
-        else: 
-            return IR.BE("+", -1, error_expr, tc_error, True) 
+        if (tc_error is None):
+            return error_expr
 
-    def copy (self, specific_alloc=None): 
-        ef_ret = ErrorForm(self.upper_bound) 
+        else:
+            return IR.BE("+", -1, error_expr, tc_error, True)
+
+    def copy (self, specific_alloc=None):
+        ef_ret = ErrorForm(self.upper_bound)
         ef_ret.M2 = self.M2
-        for et in self.terms: 
-            epss = None 
-            if (specific_alloc is not None): 
+        for et in self.terms:
+            epss = None
+            if (specific_alloc is not None):
                 assert(specific_alloc.isAssigned(et))
                 epss = [tft_expr.ConstantExpr(specific_alloc[et])]
-            ef_ret.add(et.copy(epss)) 
+            ef_ret.add(et.copy(epss))
 
-        ef_ret.gid2epsilons = self.gid2epsilons.copy() 
-        ef_ret.gid_counts = self.gid_counts.copy() 
-        ef_ret.casting_map = self.casting_map.copy() 
+        ef_ret.gid2epsilons = self.gid2epsilons.copy()
+        ef_ret.gid_counts = self.gid_counts.copy()
+        ef_ret.casting_map = self.casting_map.copy()
 
-        return ef_ret 
+        return ef_ret
 
-    def __str__ (self): 
-        str_ret = "==== error form ====\n" 
+    def __str__ (self):
+        str_ret = "==== error form ====\n"
 
-        str_ret = str_ret + "-- error terms --\n" 
-        for et in self.terms: 
+        str_ret = str_ret + "-- error terms --\n"
+        for et in self.terms:
 
-            str_ret = str_ret + "ET[" + str(et.index) +"] [CONTEXT: " + str(et.context_gid) + "] [GID: " + str(et.gid) + "] [Precise Opt: " + str(et.is_precise_opt) + "]\n" 
-            str_ret = str_ret + str(et.stored_overapprox_expr) + "\n" 
+            str_ret = str_ret + "ET[" + str(et.index) +"] [CONTEXT: " + str(et.context_gid) + "] [GID: " + str(et.gid) + "] [Precise Opt: " + str(et.is_precise_opt) + "]\n"
+            str_ret = str_ret + str(et.stored_overapprox_expr) + "\n"
 
-#            str_ret = str_ret + "-- first derivation expr --\n" 
-            # str_ret = str_ret + str(et.absexpr()) + "\n" 
-#            str_ret = str_ret + et.absexpr().toCString() + "\n" 
+#            str_ret = str_ret + "-- first derivation expr --\n"
+            # str_ret = str_ret + str(et.absexpr()) + "\n"
+#            str_ret = str_ret + et.absexpr().toCString() + "\n"
 
             str_ret = str_ret + "--------\n"
 
         str_ret = str_ret + "-- M2 --\n"
         str_ret = str_ret + str(self.M2) + "\n"
 
-        str_ret = str_ret + "-- scoring expression --\n" 
-        str_ret = str_ret + self.scoreExpr().toCString() + "\n" 
+        str_ret = str_ret + "-- scoring expression --\n"
+        str_ret = str_ret + self.scoreExpr().toCString() + "\n"
 
-        str_ret = str_ret + "-- # instanes " + str(self.nInstances()) + " --\n" 
+        str_ret = str_ret + "-- # instanes " + str(self.nInstances()) + " --\n"
 
         str_ret = str_ret + "-- upper bound --\n"
-        assert(isinstance(self.upper_bound, tft_expr.ConstantExpr) and 
-               isinstance(self.scalingUpFactor(), tft_expr.ConstantExpr)) 
+        assert(isinstance(self.upper_bound, tft_expr.ConstantExpr) and
+               isinstance(self.scalingUpFactor(), tft_expr.ConstantExpr))
         str_ret = str_ret + str(self.upper_bound) + " * " + str(self.scalingUpFactor()) + " = " + str(float(self.upper_bound.value()) * float(self.scalingUpFactor().value())) + "\n"
 
-        str_ret = str_ret + "-- casting map --\n" 
-        for p,c in self.casting_map.items(): 
-            str_ret = str_ret + str(p) + " : " + str(c) + "\n" 
-        
-        str_ret = str_ret + "-- gid 2 epsilons --\n" 
-        for gid,epss in self.gid2epsilons.items(): 
-            str_ret = str_ret + str(gid) + " :  " 
-            for e in epss: 
+        str_ret = str_ret + "-- casting map --\n"
+        for p,c in self.casting_map.items():
+            str_ret = str_ret + str(p) + " : " + str(c) + "\n"
+
+        str_ret = str_ret + "-- gid 2 epsilons --\n"
+        for gid,epss in self.gid2epsilons.items():
+            str_ret = str_ret + str(gid) + " :  "
+            for e in epss:
                 str_ret = str_ret + e.toCString() + "  "
             str_ret = str_ret + "\n"
 
-        str_ret = str_ret + "-- gid counts --\n" 
-        for gid,c in self.gid_counts.items(): 
-            str_ret = str_ret + str(gid) + " : " + str(c) + "\n" 
+        str_ret = str_ret + "-- gid counts --\n"
+        for gid,c in self.gid_counts.items():
+            str_ret = str_ret + str(gid) + " : " + str(c) + "\n"
 
-        str_ret = str_ret + "-- eq gids -- \n" 
-        for gp in self.eq_gids: 
-            assert(len(gp) == 2) 
-            str_ret = str_ret + str(gp[0]) + " = " + str(gp[1]) + "\n" 
+        str_ret = str_ret + "-- eq gids -- \n"
+        for gp in self.eq_gids:
+            assert(len(gp) == 2)
+            str_ret = str_ret + str(gp[0]) + " = " + str(gp[1]) + "\n"
 
-        str_ret = str_ret + "-- constraints --\n" 
-        for cons in self.constraints: 
-            str_ret = str_ret + str(cons) + "\n" 
-        
-        str_ret = str_ret + "# of operation instances: " + str(self.nInstances()) + "\n" 
+        str_ret = str_ret + "-- constraints --\n"
+        for cons in self.constraints:
+            str_ret = str_ret + str(cons) + "\n"
+
+        str_ret = str_ret + "# of operation instances: " + str(self.nInstances()) + "\n"
         str_ret = str_ret + "====================\n"
-        return str_ret 
+        return str_ret
 
     def scoreExpr (self):
         global EPS_SCORE
-        
-        ret_se = None 
 
-        if   (len(IR.PREC_CANDIDATES) == 2): 
-            for gid,c in self.gid_counts.items(): 
-                if (gid == tft_expr.PRESERVED_CONST_GID): 
-                    continue 
+        ret_se = None
 
-                checkValidEpsilonList(self.gid2epsilons[gid]) 
+        if   (len(IR.PREC_CANDIDATES) == 2):
+            for gid,c in self.gid_counts.items():
+                if (gid == tft_expr.PRESERVED_CONST_GID):
+                    continue
 
-                group_evar = None 
-                assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
+                checkValidEpsilonList(self.gid2epsilons[gid])
+
+                group_evar = None
+                assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS)
                 if   (tft_utils.OPT_METHOD == "max-benefit"):
                     group_evar = GroupErrorVar(gid, 0)
                 elif (tft_utils.OPT_METHOD == "min-penalty"):
@@ -608,178 +608,177 @@ class ErrorForm:
                 else:
                     assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
                 assert(group_evar is not None)
-                
-                expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(int(c)), True) 
 
-                assert(group_evar.hasBounds()) 
+                expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(int(c)), True)
 
-                if gid in self.gid_weight.keys(): 
-                    weight = self.gid_weight[gid] 
-                    assert((type(weight) is float) and (0 <= weight)) 
+                assert(group_evar.hasBounds())
 
-                    expr_score = IR.BE("*", -1, expr_score, tft_expr.ConstantExpr(weight), True) 
-            
-                if (ret_se is None): 
-                    ret_se = expr_score 
-                else: 
+                if gid in self.gid_weight.keys():
+                    weight = self.gid_weight[gid]
+                    assert((type(weight) is float) and (0 <= weight))
+
+                    expr_score = IR.BE("*", -1, expr_score, tft_expr.ConstantExpr(weight), True)
+
+                if (ret_se is None):
+                    ret_se = expr_score
+                else:
                     ret_se = IR.BE("+", -1, ret_se, expr_score, True)
 
             assert(ret_se is not None)
             return ret_se
 
         elif (len(IR.PREC_CANDIDATES) >= 3):
-            assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS) 
+            assert(tft_utils.OPT_METHOD in tft_utils.OPT_METHODS)
             if   (tft_utils.OPT_METHOD == "max-benefit"):
                 EPS_SCORE[tft_alloc.EPSILON_32]  = 100.0
                 EPS_SCORE[tft_alloc.EPSILON_64]  = 1.0
                 EPS_SCORE[tft_alloc.EPSILON_128] = 0.0
             elif (tft_utils.OPT_METHOD == "min-penalty"):
-                EPS_SCORE[tft_alloc.EPSILON_32]  = 0.0 
+                EPS_SCORE[tft_alloc.EPSILON_32]  = 0.0
                 EPS_SCORE[tft_alloc.EPSILON_64]  = 1.0
-                EPS_SCORE[tft_alloc.EPSILON_128] = 100.0                
+                EPS_SCORE[tft_alloc.EPSILON_128] = 100.0
             else:
                 assert(False), "No such optimization method: " + str(tft_utils.OPT_METHOD)
-            
-            for gid,c in self.gid_counts.items(): 
-                if (gid == tft_expr.PRESERVED_CONST_GID): 
-                    continue 
 
-                checkValidEpsilonList(self.gid2epsilons[gid]) 
-                
-                for ei in range(0, len(self.gid2epsilons[gid])): 
-                    expr_score = None 
+            for gid,c in self.gid_counts.items():
+                if (gid == tft_expr.PRESERVED_CONST_GID):
+                    continue
+
+                checkValidEpsilonList(self.gid2epsilons[gid])
+
+                for ei in range(0, len(self.gid2epsilons[gid])):
+                    expr_score = None
 
                     group_evar = GroupErrorVar(gid, ei)
-                    assert(group_evar.hasBounds()) 
+                    assert(group_evar.hasBounds())
 
                     eps = self.gid2epsilons[gid][ei].value()
                     assert(eps in EPS_SCORE.keys())
-                    
+
                     weight = EPS_SCORE[eps]
-                    assert(type(weight) is float) 
+                    assert(type(weight) is float)
 
-                    weight = weight * float(c) 
+                    weight = weight * float(c)
 
-                    if gid in self.gid_weight.keys(): 
+                    if gid in self.gid_weight.keys():
                         ext_weight = self.gid_weight[gid]
-                        assert((type(ext_weight) is float) and (0 <= ext_weight)) 
-                        weight = weight * ext_weight 
+                        assert((type(ext_weight) is float) and (0 <= ext_weight))
+                        weight = weight * ext_weight
 
-                    assert(0 <= weight) 
+                    assert(0 <= weight)
 
                     if (weight > 0.0):
-                        expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(weight), True) 
+                        expr_score = IR.BE("*", -1, group_evar, tft_expr.ConstantExpr(weight), True)
 
-                        if (ret_se is None): 
-                            ret_se = expr_score 
-                        else: 
+                        if (ret_se is None):
+                            ret_se = expr_score
+                        else:
                             ret_se = IR.BE("+", -1, ret_se, expr_score, True)
 
-                    else: 
-                        pass 
+                    else:
+                        pass
 
             assert(ret_se is not None)
             return ret_se
 
-        else: 
-            sys.exit("Error: invalid # of bit-width candidates...") 
+        else:
+            sys.exit("Error: invalid # of bit-width candidates...")
 
-    def SummarizeOperatorBitwidths (self, alloc): 
+    def SummarizeOperatorBitwidths (self, alloc):
         assert(isinstance(alloc, tft_alloc.Alloc))
 
         count_bw = {}
         count_bw[tft_alloc.EPSILON_32]  = 0
         count_bw[tft_alloc.EPSILON_64]  = 0
         count_bw[tft_alloc.EPSILON_128] = 0
-        
+
         for gid,eps in alloc.gid2eps.items():
             assert(gid in self.gid_counts.keys())
             assert(eps in count_bw.keys())
-            if (gid == tft_expr.PRESERVED_CONST_GID): 
-                continue 
-            count_bw[eps] = count_bw[eps] + self.gid_counts[gid] 
+            if (gid == tft_expr.PRESERVED_CONST_GID):
+                continue
+            count_bw[eps] = count_bw[eps] + self.gid_counts[gid]
 
         print ("Total # of operators: " + str(sum(count_bw.values())))
-            
-        for str_bw in IR.PREC_CANDIDATES: 
+
+        for str_bw in IR.PREC_CANDIDATES:
             if   (str_bw == "e32"):
                 print ("# of 32-bit operators: "  + tft_utils.tx32bit(str(count_bw[tft_alloc.EPSILON_32])))
-            elif (str_bw == "e64"): 
+            elif (str_bw == "e64"):
                 print ("# of 64-bit operators: "  + tft_utils.tx64bit(str(count_bw[tft_alloc.EPSILON_64])))
             elif (str_bw == "e128"):
                 print ("# of 128-bit operators: " + tft_utils.tx128bit(str(count_bw[tft_alloc.EPSILON_128])))
-                pass 
-            else: 
-                sys.exit("Error: invalid bit-width string: " + str_bw) 
+                pass
+            else:
+                sys.exit("Error: invalid bit-width string: " + str_bw)
 
 
 
 # ========
-# ErrorForm Optimization 
+# ErrorForm Optimization
 # ========
-def OptimizeErrorFormByGroup (eform): 
+def OptimizeErrorFormByGroup (eform):
     assert(isinstance(eform, ErrorForm))
 
-    opt_eform = ErrorForm(eform.upper_bound, eform.M2) 
+    opt_eform = ErrorForm(eform.upper_bound, eform.M2)
 
-    # These are Important!! 
-    # Need to overwrite the gid-counts 
-    opt_eform.gid_counts = eform.gid_counts.copy() 
-    # Need to overwrite the gid-weight 
-    opt_eform.gid_weight = eform.gid_weight.copy() 
-    # Need to overwrite the map of gid -> epsilons 
-    opt_eform.gid2epsilons = eform.gid2epsilons.copy() 
-    # Need to overwrite the casting_map!! 
+    # These are Important!!
+    # Need to overwrite the gid-counts
+    opt_eform.gid_counts = eform.gid_counts.copy()
+    # Need to overwrite the gid-weight
+    opt_eform.gid_weight = eform.gid_weight.copy()
+    # Need to overwrite the map of gid -> epsilons
+    opt_eform.gid2epsilons = eform.gid2epsilons.copy()
+    # Need to overwrite the casting_map!!
     opt_eform.casting_map = eform.casting_map.copy()
-    # Need to overwrite eq_gids 
-    opt_eform.eq_gids = eform.eq_gids[:] 
-    # Need to overwrite constraints 
+    # Need to overwrite eq_gids
+    opt_eform.eq_gids = eform.eq_gids[:]
+    # Need to overwrite constraints
     opt_eform.constraints = eform.constraints[:]
 
     handled_etids = []
 
-    for et in eform.terms: 
-        if (et.index in handled_etids): 
-            continue 
+    for et in eform.terms:
+        if (et.index in handled_etids):
+            continue
 
-        gid            = et.getGid() 
+        gid            = et.getGid()
         context_gid    = et.getContextGid()
         is_precise_opt = et.is_precise_opt
 
-        assert(0 <= gid) 
+        assert(0 <= gid)
 
-        group = [et] 
-        handled_etids.append(et.index) 
+        group = [et]
+        handled_etids.append(et.index)
 
-        for et_p in eform.terms: 
-            if (et.index == et_p.index): 
-                continue 
-            if (et_p.index in handled_etids): 
-                continue 
+        for et_p in eform.terms:
+            if (et.index == et_p.index):
+                continue
+            if (et_p.index in handled_etids):
+                continue
 
-            if ((gid         == et_p.getGid()) and 
+            if ((gid         == et_p.getGid()) and
                 (context_gid == et_p.getContextGid()) and
-                ((is_precise_opt and et_p.is_precise_opt) or ((not is_precise_opt) and (not et_p.is_precise_opt)))): 
+                ((is_precise_opt and et_p.is_precise_opt) or ((not is_precise_opt) and (not et_p.is_precise_opt)))):
                 group.append(et_p)
-                handled_etids.append(et_p.index) 
+                handled_etids.append(et_p.index)
 
-        assert(len(group) > 0) 
+        assert(len(group) > 0)
 
-        combined_expr     = group[0].absexpr() 
+        combined_expr     = group[0].absexpr()
 
-        for i in range(1, len(group)): 
-            combined_expr = tft_expr.BinaryExpr(tft_expr.BinaryOp(-1, "+"), 
-                                                combined_expr, 
-                                                group[i].absexpr()) 
+        for i in range(1, len(group)):
+            combined_expr = tft_expr.BinaryExpr(tft_expr.BinaryOp(-1, "+"),
+                                                combined_expr,
+                                                group[i].absexpr())
 
-        combined_expr = tft_expr.UnaryExpr(tft_expr.UnaryOp(-1, "abs"), 
-                                           combined_expr) 
+        combined_expr = tft_expr.UnaryExpr(tft_expr.UnaryOp(-1, "abs"),
+                                           combined_expr)
 
-        combined_et = ErrorTerm(combined_expr, context_gid, gid, is_precise_opt) 
+        combined_et = ErrorTerm(combined_expr, context_gid, gid, is_precise_opt)
 
-        assert(gid in eform.gid_counts.keys()) 
-        
-        opt_eform.add(combined_et) 
+        assert(gid in eform.gid_counts.keys())
+
+        opt_eform.add(combined_et)
 
     return opt_eform
-        
