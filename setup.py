@@ -196,8 +196,8 @@ def main(argv):
         # install the required tools
         # ----
         InstallGLPK()
-        InstallFPTaylor("develop", "bb773cb0e9e1b13db8845623e80186e1a343bb11")
-        InstallGelpia("ArtifactEvaluation")
+        InstallFPTaylor("develop", "c14d05eb9dc59a1736f043789e9f8d2659f742a0")
+        InstallGelpia("develop")
 
         # ----
         # message
