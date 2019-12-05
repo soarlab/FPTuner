@@ -1,142 +1,146 @@
 
-import sys
-import math
-from fractions import Fraction
+
+from fptuner_logging import Logger
+
 import tft_utils
 
-GROUP_ERR_VAR_PREFIX = "__g_err_"
-TCAST_ERR_VAR_PREFIX = "__tc_err_"
-ERR_VAR_PREFIX = "__err_"
+from fractions import Fraction
+
+import sys
+import math
+
+
+logger = Logger()
+
+CNUM_PREFIX = "__cum"
 ERR_SUM_PREFIX = "__errsum_"
 ERR_TERM_REF_PREFIX = "__eterm_"
-CNUM_PREFIX = "__cum"
-PRESERVED_VAR_LABEL_PREFIXES = [GROUP_ERR_VAR_PREFIX, TCAST_ERR_VAR_PREFIX, ERR_VAR_PREFIX, ERR_SUM_PREFIX, ERR_TERM_REF_PREFIX, CNUM_PREFIX]
+ERR_VAR_PREFIX = "__err_"
+GROUP_ERR_VAR_PREFIX = "__g_err_"
+TCAST_ERR_VAR_PREFIX = "__tc_err_"
+PRESERVED_VAR_LABEL_PREFIXES = [
+    CNUM_PREFIX,
+    ERR_SUM_PREFIX,
+    ERR_TERM_REF_PREFIX,
+    ERR_VAR_PREFIX,
+    GROUP_ERR_VAR_PREFIX,
+    TCAST_ERR_VAR_PREFIX,
+]
 
 PRESERVED_CONST_VPREFIX = "__const"
 PRESERVED_CONST_GID     = 9999
 
-
 ALL_VariableExprs = []
 
+ExprCounter = 0
+
+UnaryOpLabels = ["sqrt", "abs", "-", "sin", "cos", "exp", "log"]
+
+BinaryOpLabels = ["+", "-", "*", "/", "^"]
+
+BinaryRelationLabels = ["=", "<", "<="]
 
 
-# ========
-# sub-routines
-# ========
-def isConstVar (var):
-    if (not isinstance(var, VariableExpr)):
+def isConstVar(var):
+    if not isinstance(var, VariableExpr):
         return False
 
-    if (var.label().startswith(PRESERVED_CONST_VPREFIX)):
-        return True
-    else:
-        return False
+    return var.label().startswith(PRESERVED_CONST_VPREFIX)
 
 
-def isPseudoBooleanVar (var):
-    if (not isinstance(var, VariableExpr)):
-        return False
-
-    if (not var.hasBounds()):
-        return False
-
-    if (not (var.lb() == ConstantExpr(0) and var.ub() == ConstantExpr(1))):
-        return False
-
-    return True
+def isPseudoBooleanVar(var):
+    return (isinstance(var, VariableExpr)
+            and var.hasBounds()
+            and var.lb() == ConstantExpr(0)
+            and var.ub() == ConstantExpr(1))
 
 
-def RegisterVariableExpr (var):
+def RegisterVariableExpr(var):
     global ALL_VariableExprs
 
     assert(isinstance(var, VariableExpr))
 
-    if (var.isPreservedVar()):
-        return
+    if var.isPreservedVar():
+        logger.dlog("Refused to register: {}", var)
+        return None
 
     was_registered = False
 
     for v in ALL_VariableExprs:
         assert(v.hasBounds())
 
-        if (v.identical(var)):
+        if v.identical(var):
             was_registered = True
 
-        if (var == v):
-
-            if (var.hasBounds()):
+        if var == v:
+            if var.hasBounds():
                 assert(var.lb().value() == v.lb().value())
                 assert(var.ub().value() == v.ub().value())
 
             else:
                 var.setBounds(v.lb(), v.ub())
 
-    if (not was_registered):
+    if not was_registered:
+        logger.dlog("Registered: {}", var)
         ALL_VariableExprs.append(var)
 
 
-def ExprStatistics (expr, stat={}):
+def ExprStatistics(expr, stat={}):
     assert(isinstance(expr, Expr))
 
     # initialize stat
-    if ("# constants"  not in stat.keys()):
+    if "# constants"  not in stat.keys():
         stat["# constants"]  = 0
-    if ("# variables"  not in stat.keys()):
+    if "# variables"  not in stat.keys():
         stat["# variables"]  = 0
-    if ("# operations" not in stat.keys()):
+    if "# operations" not in stat.keys():
         stat["# operations"] = 0
-    if ("groups"       not in stat.keys()):
-        stat["groups"]     = []
+    if "groups"       not in stat.keys():
+        stat["groups"]       = []
 
-    if   (isinstance(expr, ConstantExpr)):
-        print ("ERROR: should not do statistics with expression containing real ConstantExprs.")
+    if isinstance(expr, ConstantExpr):
+        logger.error("Should not do statistics with expression containing real "
+                     "ConstantExprs.")
+        sys.exit(1)
 
-    elif (isinstance(expr, VariableExpr)):
-
-        if    (isConstVar(expr)):
-            stat["# constants"] = stat["# constants"] + 1
+    if isinstance(expr, VariableExpr):
+        if isConstVar(expr):
+            stat["# constants"] += 1
 
         else:
             assert(expr.getGid() != PRESERVED_CONST_GID)
 
             gid = expr.getGid()
 
-            if (gid not in stat["groups"]):
+            if gid not in stat["groups"]:
                 stat["groups"].append(gid)
 
-            stat["# variables"] = stat["# variables"] + 1
+            stat["# variables"] += 1
 
-    elif (isinstance(expr, UnaryExpr)):
+    elif isinstance(expr, UnaryExpr):
 
         gid = expr.getGid()
 
-        if (gid not in stat["groups"]):
+        if gid not in stat["groups"]:
             stat["groups"].append(gid)
 
-        stat["# operations"] = stat["# operations"] + 1
+        stat["# operations"] += 1
 
         ExprStatistics(expr.opd(), stat)
 
-    elif (isinstance(expr, BinaryExpr)):
+    elif isinstance(expr, BinaryExpr):
 
         gid = expr.getGid()
 
-        if (gid not in stat["groups"]):
+        if gid not in stat["groups"]:
             stat["groups"].append(gid)
 
-        stat["# operations"] = stat["# operations"] + 1
+        stat["# operations"] += 1
 
         ExprStatistics(expr.lhs(), stat)
         ExprStatistics(expr.rhs(), stat)
 
 
-
-# ========
-# class definitions
-# ========
-
-# ==== the base class of expression ====
-ExprCounter = 0
 class Expr (object):
     index        = None
     operands     = None
@@ -144,380 +148,359 @@ class Expr (object):
     upper_bound  = None
     gid          = None
 
-    def __init__ (self, set_index=True):
+    def __init__(self, set_index=True):
         global ExprCounter
-        if (set_index):
+        if set_index:
             self.index = ExprCounter
         self.operands = []
         lower_bound = ""
         upper_bound = ""
         ExprCounter = ExprCounter + 1
 
+
 class ArithmeticExpr (Expr):
-    def __init__ (self, set_index=True):
-        if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only.")
-            super(ArithmeticExpr, self).__init__(set_index)
-        elif (sys.version_info.major == 3):
-            super().__init__(set_index)
-        else:
-            sys.exit("ERROR: not supported python version: " + str(sys.version_info))
+    def __init__(self, set_index=True):
+        super().__init__(set_index)
+
 
 class Predicate (Expr):
-    def __init__ (self, set_index=True):
-        if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only.")
-            super(Predicate, self).__init__(set_index)
-        elif (sys.version_info.major == 3):
-            super().__init__(set_index)
-        else:
-            sys.exit("ERROR: not supported python version: " + str(sys.version_info))
+    def __init__(self, set_index=True):
+        super().__init__(set_index)
 
 
-
-# ==== constant expression ====
 class ConstantExpr (ArithmeticExpr):
-    def __init__ (self, val):
-        assert((type(val) is int) or (isinstance(val, Fraction)) or (type(val) is float))
-        if (type(val) is float):
+    def __init__(self, val):
+        assert(type(val) in {int, float} or isinstance(val, Fraction))
+        if type(val) is float:
             val = Fraction(val)
-
-        if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only.")
-            super(ConstantExpr, self).__init__(False)
-        elif (sys.version_info.major == 3):
-            super().__init__(False)
-        else:
-            sys.exit("ERROR: not supported python version: " + str(sys.version_info))
-
+        super().__init__(False)
         self.operands.append(val)
         self.lower_bound = val
         self.upper_bound = val
         self.gid        = -1
 
-    def value (self):
+    def value(self):
         assert(len(self.operands) == 1)
         return self.operands[0]
 
-    def type (self):
+    def type(self):
         return type(self.value())
 
-    def rational_value (self):
-        if (self.type() == int):
+    def rational_value(self):
+        if self.type() == int:
             return Fraction(self.value(), 1)
-        elif (self.type() == Fraction):
+        elif self.type() == Fraction:
             return self.value()
         else:
-            sys.exit("ERROR: invalid value type for ConstantExpr")
+            logger.error("Invalid value type for ConstantExpr: {}", self.type())
+            sys.exit(1)
 
-    def lb (self):
+    def lb(self):
         return self
 
-    def ub (self):
+    def ub(self):
         return self
 
-    def setLB (self, expr):
+    def setLB(self, expr):
         assert(isinstance(expr, Expr))
         assert(expr.value() <= self.value())
 
-    def setUB (self, expr):
+    def setUB(self, expr):
         assert(isinstance(expr, Expr))
         assert(self.value() <= expr.value())
 
-    def __str__ (self):
-        if (self.type() == int):
+    def __str__(self):
+        if self.type() == int:
             return "([Const:int] " + str(self.value()) + ")"
-        elif (self.type() == Fraction):
+        elif self.type() == Fraction:
             return "([Const:Fraction] " + str(float(self.value())) + ")"
         else:
-            sys.exit("ERROR: invalid type of ConstantExpr found in __str__")
+            logger.error("Invalid type of ConstantExpr found in __str__: {}",
+                         self.type())
+            sys.exit(1)
 
-    def toCString (self, const_inline=False): # to int or float string
-        if (self.type() == int):
+    def toCString(self, const_inline=False): # to int or float string
+        if self.type() == int:
             return str(self.value())
-        elif (self.type() == Fraction):
+        elif self.type() == Fraction:
             assert(isinstance(self.value(), Fraction))
-            # return str(float(self.value().numerator) / float(self.value().denominator))
             return str(float(self.value()))
         else:
-            sys.exit("ERROR: invalid type of ConstantExpr: " + str(self))
+            logger.error("Invalid type of ConstantExpr: {}", self.type())
+            sys.exit(1)
 
-    def toIRString (self):
+    def toIRString(self):
         return "(" + self.toCString() + ")"
 
-    def toASTString (self):
+    def toASTString(self):
         return self.toIRString()
 
-    def toFPCoreString (self):
+    def toFPCoreString(self):
         return self.toCString()
 
-    def __eq__ (self, rhs):
-        if (not isinstance(rhs, ConstantExpr)):
+    def __eq__(self, rhs):
+        if not isinstance(rhs, ConstantExpr):
             return False
-        if (self.type() == rhs.type()):
-            return (self.value() == rhs.value())
-        elif (self.type() == int and rhs.type() == Fraction):
-            return (Fraction(self.value(), 1) == rhs.value())
-        elif (self.type() == Fraction and rhs.type() == int):
-            return (self.value() == Fraction(rhs.value(), 1))
-        else:
-            sys.exit("ERROR: invlaid __eq__ scenario of ConstExpr")
+        if self.type() == rhs.type():
+            return self.value() == rhs.value()
+        if self.type() == int and rhs.type() == Fraction:
+            return Fraction(self.value(), 1) == rhs.value()
+        if self.type() == Fraction and rhs.type() == int:
+            return self.value() == Fraction(rhs.value(), 1)
 
-    def identical (self, rhs):
-        if (not isinstance(rhs, ConstantExpr)):
-            return False
-        if (self.index == rhs.index):
+        logging.error("Invlaid __eq__ scenario of ConstExpr: {} __eq__ {}",
+                      self.type(), rhs.type())
+        sys.exit(1)
+
+    def identical(self, rhs):
+        retval = (isinstance(rhs, ConstantExpr)
+                  and self.index == rhs.index)
+        if retval:
             assert(self.value() == rhs.value())
-            return True
-        else:
-            return False
 
-    def __ne__ (self, rhs):
-        return (not self == rhs)
+        return retval
 
-    def __gt__ (self, rhs):
-        if (not isinstance(rhs, ConstantExpr)):
+    def __ne__(self, rhs):
+        return not self == rhs
+
+    def __gt__(self, rhs):
+        if not isinstance(rhs, ConstantExpr):
             return False
-        if (self.type() == rhs.type()):
-            return (self.value() > rhs.value())
-        elif (self.type() == int and rhs.type() == Fraction):
+        if self.type() == rhs.type():
+            return self.value() > rhs.value()
+        if self.type() == int and rhs.type() == Fraction:
             return (Fraction(self.value(), 1) > rhs.value())
-        elif (self.type() == Fraction and rhs.type() == int):
+        if self.type() == Fraction and rhs.type() == int:
             return (self.value() > Fraction(rhs.value(), 1))
-        else:
-            sys.exit("ERROR: invlaid __gt__ scenario of ConstExpr")
 
-    def __lt__ (self, rhs):
-        if (not isinstance(rhs, ConstantExpr)):
+        logging.error("Invlaid __gt__ scenario of ConstExpr: {} __gt__ {}",
+                      self.type(), rhs.type())
+        sys.exit(1)
+
+    def __lt__(self, rhs):
+        if not isinstance(rhs, ConstantExpr):
             return False
-        if (self.type() == rhs.type()):
+        if self.type() == rhs.type():
             return (self.value() < rhs.value())
-        elif (self.type() == int and rhs.type() == Fraction):
+        if self.type() == int and rhs.type() == Fraction:
             return (Fraction(self.value(), 1) < rhs.value())
-        elif (self.type() == Fraction and rhs.type() == int):
+        if self.type() == Fraction and rhs.type() == int:
             return (self.value() < Fraction(rhs.value(), 1))
-        else:
-            sys.exit("ERROR: invlaid __lt__ scenario of ConstExpr")
 
-    def __ge__ (self, rhs):
-        return ((self == rhs) or (self > rhs))
+        logging.error("Invlaid __lt__ scenario of ConstExpr: {} __lt__ {}",
+                      self.type(), rhs.type())
+        sys.exit(1)
 
-    def __le__ (self, rhs):
-        return ((self == rhs) or (self < rhs))
+    def __ge__(self, rhs):
+        return self == rhs or self > rhs
 
-    def hasLB (self):
+    def __le__(self, rhs):
+        return self == rhs or self < rhs
+
+    def hasLB(self):
         return True
 
-    def hasUB (self):
+    def hasUB(self):
         return True
 
-    def hasBounds (self):
+    def hasBounds(self):
         return True
 
-    def vars (self, by_label=True):
+    def vars(self, by_label=True):
         return []
 
-    def __hash__ (self):
+    def __hash__(self):
         return hash(self.value())
 
-    def getGid (self):
+    def getGid(self):
         return self.gid
 
-    def includedGids (self):
+    def includedGids(self):
         return [self.getGid()]
 
-    def concEval (self, vmap = {}):
+    def concEval(self, vmap = {}):
         retv = self.value()
-        assert((type(retv) is int) or (type(retv) is float) or (isinstance(retv, Fraction)))
+        assert((type(retv) in {int, float} or isinstance(retv, Fraction)))
         return retv
 
-    def getCastings (self):
+    def getCastings(self):
         return []
 
-    def listCrisis (self):
+    def listCrisis(self):
         return []
 
-    def copy (self, check_prefix=True):
+    def copy(self, check_prefix=True):
         return ConstantExpr(self.value())
 
 
-
-# ==== variable expression ====
 class VariableExpr (ArithmeticExpr):
     vtype = None
 
-    def __init__ (self, label, vtype, gid, check_prefix=True):
+    def __init__(self, label, vtype, gid, check_prefix=True):
         assert(isinstance(label, str))
         assert(vtype == int or vtype == Fraction)
         assert(type(gid) is int)
 
-        if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only.")
-            super(VariableExpr, self).__init__()
-        elif (sys.version_info.major == 3):
-            super().__init__()
-        else:
-            sys.exit("ERROR: not supported python version: " + str(sys.version_info))
+        super().__init__()
 
-        if (gid == PRESERVED_CONST_GID):
+        if gid == PRESERVED_CONST_GID:
             assert(label.startswith(PRESERVED_CONST_VPREFIX))
 
-        self.vtype       = vtype
         self.operands.append(label)
-        self.gid         = gid
+        self.vtype = vtype
+        self.gid = gid
 
-        if (check_prefix):
-            if (self.isPreservedVar()):
-                print("ERROR: the given label \"" + label + "\" has a preserved prefix.")
-                assert(False)
+        if check_prefix and self.isPreservedVar():
+            logging.error("The given label '{}' has a preserved prefix", label)
+            sys.exit(1)
 
         RegisterVariableExpr(self)
 
-    def isPreservedVar (self):
-        for pre in PRESERVED_VAR_LABEL_PREFIXES:
-            if (self.label().startswith(pre)):
-                return True
-        return False
+    def isPreservedVar(self):
+        return any([self.label().startswith(pre) for pre in
+                    PRESERVED_VAR_LABEL_PREFIXES])
 
-    def label (self):
+    def label(self):
         assert(len(self.operands) == 1)
         assert(isinstance(self.operands[0], str))
         return self.operands[0]
 
-    def __str__ (self):
-        return "([Var] " + self.toIRString() + ")"
+    def __str__(self):
+        return "([Var] {})".format(self.toIRString())
 
-    def idLabel (self):
-        return self.label() + "_eid_" + str(self.index)
+    def idLabel(self):
+        return "{}_eid_{}".format(self.label(), self.index)
 
-    def toCString (self, const_inline=False):
-        if (isConstVar(self)):
+    def toCString(self, const_inline=False):
+        if isConstVar(self):
             assert(self.lb().value() == self.ub().value())
             return self.lb().toCString()
         return self.label()
 
-    def toIRString (self):
-        if (self.vtype is int):
-            return "(" + self.label() + "$" + str(self.gid) + "$Int)"
-        else:
-            return "(" + self.label() + "$" + str(self.gid) + ")"
+    def toIRString(self):
+        suff = "$Int" if self.vtype == int else ""
+        return "({}${}{})".format(self.label(), self.gid, suff)
 
-    def toASTString (self):
+    def toASTString(self):
         return self.idLabel()
 
-    def toFPCoreString (self):
-        if (isConstVar(self)):
-            assert(self.hasLB() and self.hasUB() and self.lb().value() == self.ub().value())
+    def toFPCoreString(self):
+        if isConstVar(self):
+            assert(self.hasLB()
+                   and self.hasUB()
+                   and self.lb().value() == self.ub().value())
             return str(float(self.lb().value()))
-
         return self.label()
 
-    def __eq__ (self, rhs):
-        if (not isinstance(rhs, VariableExpr)):
+    def __eq__(self, rhs):
+        if not isinstance(rhs, VariableExpr):
             return False
-        return (self.label() == rhs.label() and self.type() == rhs.type() and self.getGid() == rhs.getGid())
+        return (self.label() == rhs.label()
+                and self.type() == rhs.type()
+                and self.getGid() == rhs.getGid())
 
-    def identical (self, rhs):
-        if (not isinstance(rhs, VariableExpr)):
-            return False
-        if (self.index == rhs.index):
+    def identical(self, rhs):
+        retval = (isinstance(rhs, VariableExpr)
+                  and self.index == rhs.index)
+        if retval:
             assert(self == rhs)
-            return True
-        else:
-            return False
 
-    def setLB (self, lb):
-        assert(isinstance(lb, ConstantExpr) or (type(lb) in [int, float]) or isinstance(lb, Fraciton))
+        return retval
 
-        if (not isinstance(lb, ConstantExpr)):
+    def setLB(self, lb):
+        assert(isinstance(lb, ConstantExpr)
+               or isinstance(lb, Fraciton)
+               or (type(lb) in {int, float}))
+
+        if not isinstance(lb, ConstantExpr):
             lb = ConstantExpr(lb)
 
-        if (self.lower_bound is None):
+        if self.lower_bound is None:
             self.lower_bound = lb
 
         assert(self.lower_bound.value() == lb.value())
 
-    def setUB (self, ub):
-        assert(isinstance(ub, ConstantExpr) or (type(ub) in [int, float]) or isinstance(ub, Fraciton))
+    def setUB(self, ub):
+        assert(isinstance(ub, ConstantExpr)
+               or isinstance(ub, Fraciton)
+               or (type(ub) in {int, float}))
 
-        if (not isinstance(ub, ConstantExpr)):
+        if not isinstance(ub, ConstantExpr):
             ub = ConstantExpr(ub)
 
-        if (self.upper_bound is None):
+        if self.upper_bound is None:
             self.upper_bound = ub
 
         assert(self.upper_bound.value() == ub.value())
 
-    def setBounds (self, lb, ub):
+    def setBounds(self, lb, ub):
         self.setLB(lb)
         self.setUB(ub)
 
-    def hasLB (self):
-        return (isinstance(self.lower_bound, ConstantExpr))
+    def hasLB(self):
+        return isinstance(self.lower_bound, ConstantExpr)
 
-    def hasUB (self):
-        return (isinstance(self.upper_bound, ConstantExpr))
+    def hasUB(self):
+        return isinstance(self.upper_bound, ConstantExpr)
 
-    def hasBounds (self):
-        return (self.hasLB() and self.hasUB())
+    def hasBounds(self):
+        return self.hasLB() and self.hasUB()
 
-    def lb (self):
+    def lb(self):
         assert(self.hasLB())
         assert(isinstance(self.lower_bound, ConstantExpr))
         return self.lower_bound
 
-    def ub (self):
+    def ub(self):
         assert(self.hasUB())
         assert(isinstance(self.upper_bound, ConstantExpr))
         return self.upper_bound
 
-    def type (self):
-        assert(self.vtype == int or self.vtype == Fraction)
+    def type(self):
+        assert(self.vtype in {int, Fraction})
         return self.vtype
 
-    def vars (self, by_label=True):
+    def vars(self, by_label=True):
         return [self]
 
-    def __hash__ (self):
+    def __hash__(self):
         return hash(self.label())
 
-    def getGid (self):
+    def getGid(self):
         return self.gid
 
-    def includedGids (self):
+    def includedGids(self):
         return [self.getGid()]
 
-    def concEval (self, vmap = {}):
+    def concEval(self, vmap = {}):
         assert(self in vmap.keys())
         retv = vmap[self]
-        assert((type(retv) is int) or (type(retv) is float) or (isinstance(retv, Fraction)))
+        assert(type(retv) in {int, float} or isinstance(retv, Fraction))
         return retv
 
-    def getCastings (self):
+    def getCastings(self):
         return []
 
-    def listCrisis (self):
+    def listCrisis(self):
         return []
 
     def copy(self, check_prefix=True):
-        ret = VariableExpr(self.label(), self.type(), self.getGid(), check_prefix)
+        ret = VariableExpr(self.label(), self.type(), self.getGid(),
+                           check_prefix)
 
-        if (self.hasLB()):
+        if self.hasLB():
             ret.setLB(self.lb())
-        if (self.hasUB()):
+        if self.hasUB():
             ret.setUB(self.ub())
 
         return ret
 
 
-
-# ==== unary operator ====
-UnaryOpLabels = ["sqrt", "abs", "-", "sin", "cos", "exp", "log"]
 class UnaryOp:
     gid   = None
     label = None
 
-    def __init__ (self, gid, label):
+    def __init__(self, gid, label):
         assert(type(gid)   is int)
         assert(type(label) is str)
         assert(label in UnaryOpLabels)
@@ -525,375 +508,352 @@ class UnaryOp:
         self.gid   = gid
         self.label = label
 
-    def toCString (self):
+    def toCString(self):
         return self.label
 
-    def toIRString (self):
+    def toIRString(self):
         return str(self)
 
-    def toASTString (self):
+    def toASTString(self):
         return self.label
 
-    def __str__ (self):
+    def __str__(self):
         return self.label
 
-    def __eq__ (self, rhs):
+    def __eq__(self, rhs):
         assert(isinstance(rhs, UnaryOp))
-        return (self.label == rhs.label)
+        return self.label == rhs.label
 
-    def identical (self, rhs):
-        assert(isinstance(rhs, UnaryOp))
-        return (self.label == rhs.label)
+    def identical(self, rhs):
+        return self == rhs
 
-    def __ne__ (self, rhs):
-        return (not (self == rhs))
+    def __ne__(self, rhs):
+        return not self == rhs
 
 
-# ==== unary expression ====
 class UnaryExpr (ArithmeticExpr):
     operator = None
 
-    def __init__ (self, opt, opd0):
+    def __init__(self, opt, opd0):
         assert(isinstance(opt, UnaryOp))
+        assert(opt.gid is not None)
         assert(isinstance(opd0, Expr))
 
-        if (opt.label == "-"):
-            sys.exit("ERROR: cannot directly create UnaryExpr -. It must be properly transfered to an expression tree.")
+        if opt.label == "-":
+            logging.error("Cannot directly create UnaryExpr '-'.")
+            logging.error("It must be properly transfered to an expression tree.")
+            sys.exit(1)
 
-        if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only.")
-            super(UnaryExpr, self).__init__()
-        elif (sys.version_info.major == 3):
-            super().__init__()
-        else:
-            sys.exit("ERROR: not supported python version: " + str(sys.version_info))
+        super().__init__()
 
         self.gid         = opt.gid
         self.operator    = opt
         self.operands.append(opd0)
 
-        assert(self.gid is not None)
-
-    def opd (self):
+    def opd(self):
         assert(len(self.operands) == 1)
         assert(isinstance(self.operands[0], Expr))
         return self.operands[0]
 
-    def __str__ (self):
-        return "([UExpr] " + str(self.operator) + " " + str(self.opd()) + ")"
+    def __str__(self):
+        return "([UExpr] {} {})".format(self.operator, self.opd())
 
-    def toCString (self, const_inline=False):
-        return self.operator.toCString() + "(" + self.opd().toCString(const_inline) + ")"
+    def toCString(self, const_inline=False):
+        return "{}({})".format(self.operator.toCString(),
+                               self.opd().toCString(const_inline))
 
-    def toIRString (self):
-        return "(" + self.operator.toIRString() + "$" + str(self.getGid()) + "(" + self.opd().toIRString() + "))"
+    def toIRString(self):
+        return "({}${}({}))".format(self.operator.toIRString(),
+                                    self.getGid(),
+                                    self.opd().toIRString())
 
-    def toASTString (self):
-        return "(" + self.operator.toASTString() + "(" + self.opd().toASTString() + "))"
+    def toASTString(self):
+        return "({}({}))".format(self.operator.toASTString(),
+                                 self.opd().toASTString())
 
-    def toFPCoreString (self):
-        assert(False), "Error: toFPCoreString doesn't support for Unary Expression"
+    def toFPCoreString(self):
+        logging.error("toFPCoreString doesn't support for Unary Expression")
+        sys.exit(1)
 
-    def __eq__ (self, rhs):
-        if (not isinstance(rhs, UnaryExpr)):
+    def __eq__(self, rhs):
+        if not isinstance(rhs, UnaryExpr):
             return False
         assert(isinstance(self.operator, UnaryOp))
         assert(isinstance(rhs.operator, UnaryOp))
 
-        if (not (self.operator == rhs.operator)):
-            return False
+        return (self.operator == rhs.operator
+                and self.getGid() == rhs.getGid()
+                and self.opd() == rhs.opd())
 
-        if (self.getGid() != rhs.getGid()):
-            return False
-
-        if (self.opd() == rhs.opd()):
-            return True
-        else:
-            return False
-
-    def identical (self, rhs):
-        if (not isinstance(rhs, UnaryExpr)):
+    def identical(self, rhs):
+        if not isinstance(rhs, UnaryExpr):
             return False
         assert(isinstance(self.operator, UnaryOp))
         assert(isinstance(rhs.operator, UnaryOp))
 
-        if (not (self.operator.identical( rhs.operator ))):
-            return False
+        return (self.operator.identical(rhs.operator)
+                and self.opd().identical(rhs.opd()))
 
-        if (self.opd().identical( rhs.opd() )):
-            return True
-        else:
-            return False
-
-    def setLB (self, lb):
+    def setLB(self, lb):
         assert(isinstance(lb, ConstantExpr))
-        if (self.operator.label in ["abs", "sqrt"]):
+        if self.operator.label in {"abs", "sqrt"}:
             assert(lb.value() >= Fraction(0, 1))
         self.lower_bound = lb
 
-    def setUB (self, ub):
+    def setUB(self, ub):
         assert(isinstance(ub, ConstantExpr))
-        if (self.operator.label in ["abs", "sqrt"]):
+        if self.operator.label in {"abs", "sqrt"}:
             assert(ub.value() >= Fraction(0, 1))
         self.upper_bound = ub
 
-    def setBounds (self, lb, ub):
+    def setBounds(self, lb, ub):
         self.setLB(lb)
         self.setUB(ub)
 
-    def hasLB (self):
-        return (isinstance(self.lower_bound, ConstantExpr))
+    def hasLB(self):
+        return isinstance(self.lower_bound, ConstantExpr)
 
-    def hasUB (self):
-        return (isinstance(self.upper_bound, ConstantExpr))
+    def hasUB(self):
+        return isinstance(self.upper_bound, ConstantExpr)
 
-    def hasBounds (self):
-        return (self.hasLB() and self.hasUB())
+    def hasBounds(self):
+        return self.hasLB() and self.hasUB()
 
-    def lb (self):
+    def lb(self):
         assert(self.hasLB())
         assert(isinstance(self.lower_bound, ConstantExpr))
         return self.lower_bound
 
-    def ub (self):
+    def ub(self):
         assert(self.hasUB())
         assert(isinstance(self.upper_bound, ConstantExpr))
         return self.upper_bound
 
-    def vars (self, by_label=True):
+    def vars(self, by_label=True):
         return self.opd().vars(by_label)
 
-    def getGid (self):
+    def getGid(self):
         return self.gid
 
-    def includedGids (self):
-        return tft_utils.unionSets([self.getGid()], self.opd().includedGids())
+    def includedGids(self):
+        return tft_utils.unionSets([self.getGid()], self.opd(). includedGids())
 
-    def concEval (self, vmap = {}):
+    def concEval(self, vmap = {}):
         retv = self.opd().concEval(vmap)
-        assert((type(retv) is int) or (type(retv) is float) or (isinstance(retv, Fraction)))
-        if (self.operator.label == "abs"):
+        assert(type(retv) in {int, float} or isinstance(retv, Fraction))
+
+        if self.operator.label == "abs":
             return abs(retv)
-        elif (self.operator.label == "sqrt"):
+        if self.operator.label == "sqrt":
             return math.sqrt(retv)
-        elif (self.operator.label == "-"):
-            if (type(retv) is int):
-                return (-1 * retv)
-            elif ((type(retv) is float) or (isinstance(retv, Fraction))):
-                return (-1.0 * retv)
-            else:
-                assert(False)
-        else:
-            sys.exit("ERROR: unknwon operator found in function \"concEval\" of a UnaryExpr")
+        if self.operator.label == "-":
+            if type(retv) is int:
+                return -1 * retv
+            if type(retv) is float or isinstance(retv, Fraction):
+                return -1.0 * retv
+            logging.error("Invalid type for unary negation: {}", type(retv))
+            sys.exit(-1)
 
-    def getCastings (self):
-        if (self.operator.label in ["abs", "-"]):
+        logging.error("Unknown unary operator: {}", self.operator.label)
+        sys.exit(1)
+
+    def getCastings(self):
+        if self.operator.label in {"abs", "-"}:
             return []
-        elif (self.operator.label == "sqrt"):
-            if (isinstance(self.opd(), ConstantExpr)):
+        if self.operator.label == "sqrt":
+            if isinstance(self.opd(), ConstantExpr):
                 return []
-            else:
-                return [(self.opd().getGid(), self.getGid())]
-        else:
-            sys.exit("ERROR: unknown operator found in function \"getCastings\" of a UnaryExpr")
+            return [(self.opd().getGid(), self.getGid())]
 
-    def listCrisis (self):
+        logging.error("Unknown unary operator: {}", self.operator.label)
+        sys.exit(1)
+
+    def listCrisis(self):
         return self.opd().listCrisis()
 
     def copy(self, check_prefix=True):
         ret = UnaryExpr(self.operator, self.opd().copy(check_prefix))
 
-        if (self.hasLB()):
+        if self.hasLB():
             ret.setLB(self.lb())
-        if (self.hasUB()):
+        if self.hasUB():
             ret.setUB(self.ub())
 
         return ret
 
 
-
-# ==== binary operator ====
-BinaryOpLabels = ["+", "-", "*", "/", "^"]
 class BinaryOp:
     gid   = None
     label = None
 
-    def __init__ (self, gid, label):
+    def __init__(self, gid, label):
         assert(type(gid)   is int)
         assert(type(label) is str)
-        if (label not in BinaryOpLabels):
-            print ("ERROR: invalid label for BinaryOp: " + label)
-        assert(label in BinaryOpLabels)
+        if label not in BinaryOpLabels:
+            logging.error("Invalid binary operator: {}", label)
+            sys.exit(1)
 
         self.gid   = gid
         self.label = label
 
-    def toCString (self):
+    def toCString(self):
         return self.label
 
-    def toIRString (self):
+    def toIRString(self):
         return str(self)
 
-    def toASTString (self):
+    def toASTString(self):
         return self.label
 
-    def __str__ (self):
+    def __str__(self):
         return self.label
 
-    def __eq__ (self, rhs):
+    def __eq__(self, rhs):
         assert(isinstance(rhs, BinaryOp))
-        return (self.label == rhs.label)
+        return self.label == rhs.label
 
-    def identical (self, rhs):
-        assert(isinstance(rhs, BinaryOp))
-        return (self.label == rhs.label)
+    def identical(self, rhs):
+        return self == rhs
 
-    def __ne__ (self, rhs):
-        return (not (self == rhs))
+    def __ne__(self, rhs):
+        return not self == rhs
 
 
-# ==== binary expression ====
 class BinaryExpr (ArithmeticExpr):
     operator = None
 
-    def __init__ (self, opt, opd0, opd1):
+    def __init__(self, opt, opd0, opd1):
         assert(isinstance(opt, BinaryOp))
+        assert(opt.gid is not None)
         assert(isinstance(opd0, Expr))
         assert(isinstance(opd1, Expr))
 
-        if (opt.label == "^"):
-            sys.exit("ERROR: cannot directly create BinaryExpr ^. It must be properly transfered to an expression tree.")
+        if opt.label == "^":
+            logging.error("Cannot directly create power expression.")
+            logging.error("It must be properly transfered to an expression"
+                          " tree.")
+            sys.exit(1)
 
-        if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only.")
-            super(BinaryExpr, self).__init__()
-        elif (sys.version_info.major == 3):
-            super().__init__()
-        else:
-            sys.exit("ERROR: not supported python version: " + str(sys.version_info))
+        super().__init__()
 
         self.gid         = opt.gid
         self.operator    = opt
         self.operands.append(opd0)
         self.operands.append(opd1)
 
-        assert(self.gid is not None)
-
-    def lhs (self):
+    def lhs(self):
         assert(len(self.operands) == 2)
         assert(isinstance(self.operands[0], Expr))
         return self.operands[0]
 
-    def rhs (self):
+    def rhs(self):
         assert(len(self.operands) == 2)
         assert(isinstance(self.operands[1], Expr))
         return self.operands[1]
 
-    def __str__ (self):
-        return "([BiExpr] " + str(self.operator) + " " + str(self.lhs()) + " " + str(self.rhs()) + ")"
+    def __str__(self):
+        return "([BiExpr] {} {} {})".format(self.operator,
+                                            self.lhs(),
+                                            self.rhs())
 
-    def toCString (self, const_inline=False):
-        return "(" + self.lhs().toCString(const_inline) + " " + self.operator.toCString() + " " + self.rhs().toCString(const_inline) + ")"
+    def toCString(self, const_inline=False):
+        return "({} {} {})".format(self.lhs().toCString(const_inline),
+                                   self.operator.toCString(),
+                                   self.rhs().toCString(const_inline))
 
-    def toIRString (self):
-        return "(" + self.lhs().toIRString() + " " + self.operator.toIRString() + "$" + str(self.getGid()) + " " + self.rhs().toIRString() + ")"
+    def toIRString(self):
+        return "({} {}${} {})".format(self.lhs().toIRString(),
+                                      self.operator.toIRString(),
+                                      self.getGid(),
+                                      self.rhs().toIRString())
 
-    def toASTString (self):
-        return "(" + self.lhs().toASTString() + " " + self.operator.toASTString() + " " + self.rhs().toASTString() + ")"
+    def toASTString(self):
+        return "({} {} {})".format(self.lhs().toASTString(),
+                                   self.operator.toASTString(),
+                                   self.rhs().toASTString())
 
-    def toFPCoreString (self):
+    def toFPCoreString(self):
         str_opt = self.operator.toCString()
-        assert(str_opt in ['+', '-', '*', '/']), "Error: toFPCoreString doesn't support operator : " + str_opt
+        if str_opt not in {'+', '-', '*', '/'}:
+            logging.error("toFPCoreString doesn't support operator: {}", str_opt)
+            sys.exit(1)
+        return "({} {} {})".format(str_opt,
+                                   self.lhs().toFPCoreString(),
+                                   self.rhs().toFPCoreString())
 
-        return "(" + str_opt + " " + self.lhs().toFPCoreString() + " " + self.rhs().toFPCoreString() + ")"
-
-    def __eq__ (self, rhs):
-        if (not isinstance(rhs, BinaryExpr)):
+    def __eq__(self, rhs):
+        if not isinstance(rhs, BinaryExpr):
             return False
         assert(isinstance(self.operator, BinaryOp))
         assert(isinstance(rhs.operator, BinaryOp))
 
-        if (not (self.operator == rhs.operator)):
+        if self.operator != rhs.operator or self.getGid() != rhs.getGid():
             return False
 
-        if (self.getGid() != rhs.getGid()):
-            return False
+        if self.operator.label in {"+", "*"}:
+            return ((self.lhs() == rhs.lhs() and self.rhs() == rhs.rhs())
+                    or (self.lhs() == rhs.rhs() and self.rhs() == rhs.lhs()))
 
-        if (self.operator.label in ["+", "*"]):
-            if   ((self.lhs() == rhs.lhs()) and (self.rhs() == rhs.rhs())):
-                return True
-            elif ((self.lhs() == rhs.rhs()) and (self.rhs() == rhs.lhs())):
-                return True
-            else:
-                return False
+        if self.operator.label in {"-", "/", "^"}:
+            return self.lhs() == rhs.lhs() and self.rhs() == rhs.rhs()
 
-        elif (self.operator.label in ["-", "/", "^"]):
-            if   ((self.lhs() == rhs.lhs()) and (self.rhs() == rhs.rhs())):
-                return True
-            else:
-                return False
+        logging.error("Unknown binary operator: {}", self.operator.label)
+        sys.exit(1)
 
-        else:
-            sys.exit("ERROR: unknown binary operator. " + str(self.operator.label))
-
-    def identical (self, rhs):
-        if (not isinstance(rhs, BinaryExpr)):
+    def identical(self, rhs):
+        if not isinstance(rhs, BinaryExpr):
             return False
         assert(isinstance(self.operator, BinaryOp))
         assert(isinstance(rhs.operator, BinaryOp))
 
-        if (not (self.operator.identical( rhs.operator ))):
+        if not self.operator.identical(rhs.operator):
             return False
 
-        if (self.operator.label in ["+", "*"]):
-            if (self.lhs().identical( rhs.lhs() ) and self.rhs().identical( rhs.rhs() )):
-                return True
-            elif (self.lhs().identical( rhs.rhs() ) and self.rhs().identical( rhs.lhs() )):
-                return True
-            else:
-                return False
+        if self.operator.label in ["+", "*"]:
+            return ((self.lhs().identical(rhs.lhs())
+                     and self.rhs().identical(rhs.rhs()))
+                    or (self.lhs().identical(rhs.rhs())
+                        and self.rhs().identical(rhs.lhs())))
 
-        elif (self.operator.label in ["-", "/", "^"]):
-            if (self.lhs().identical( rhs.lhs() ) and self.rhs().identical( rhs.rhs() )):
-                return True
-            else:
-                return False
+        if self.operator.label in ["-", "/", "^"]:
+            return (self.lhs().identical(rhs.lhs())
+                    and self.rhs().identical(rhs.rhs()))
 
-        else:
-            sys.exit("ERROR: unknown binary operator. " + str(self.operator.label))
+        logging.error("Unknown binary operator: {}", self.operator.label)
+        sys.exit(1)
 
-    def setLB (self, lb):
+    def setLB(self, lb):
         assert(isinstance(lb, ConstantExpr))
         self.lower_bound = lb
 
-    def setUB (self, ub):
+    def setUB(self, ub):
         assert(isinstance(ub, ConstantExpr))
         self.upper_bound = ub
 
-    def setBounds (self, lb, ub):
+    def setBounds(self, lb, ub):
         self.setLB(lb)
         self.setUB(ub)
 
-    def hasLB (self):
-        return (isinstance(self.lower_bound, ConstantExpr))
+    def hasLB(self):
+        return isinstance(self.lower_bound, ConstantExpr)
 
-    def hasUB (self):
-        return (isinstance(self.upper_bound, ConstantExpr))
+    def hasUB(self):
+        return isinstance(self.upper_bound, ConstantExpr)
 
-    def hasBounds (self):
-        return (self.hasLB() and self.hasUB())
+    def hasBounds(self):
+        return self.hasLB() and self.hasUB()
 
-    def lb (self):
+    def lb(self):
         assert(self.hasLB())
         assert(isinstance(self.lower_bound, ConstantExpr))
         return self.lower_bound
 
-    def ub (self):
+    def ub(self):
         assert(self.hasUB())
         assert(isinstance(self.upper_bound, ConstantExpr))
         return self.upper_bound
 
-    def vars (self, by_label=True):
+    def vars(self, by_label=True):
         vars_lhs = self.lhs().vars(by_label)
         vars_rhs = self.rhs().vars(by_label)
 
@@ -902,294 +862,255 @@ class BinaryExpr (ArithmeticExpr):
         for v in vars_rhs:
             was_there = False
 
-            if (by_label):
-                for rv in ret:
-                    if (v.label() == rv.label()):
+            for rv in ret:
+                if by_label:
+                    if v.label() == rv.label():
                         was_there = True
                         break
+                else:
+                    if v.index == rv.index:
+                        logging.error("Duplicate vars in different subexpressions: {}", v)
+                        sys.exit(1)
 
-            else:
-                for rv in ret:
-                    if (v.index == rv.index):
-                        print ("ERROR: duplicated vars in different subexpressions.")
-                        assert(False)
-
-            if (not was_there):
+            if not was_there:
                 ret.append(v)
 
         return ret
 
-    def getGid (self):
+    def getGid(self):
         return self.gid
 
-    def includedGids (self):
-        return tft_utils.unionSets([self.getGid()], tft_utils.unionSets(self.lhs().includedGids(), self.rhs().includedGids()))
+    def includedGids(self):
+        temp = tft_utils.unionSets(self.lhs().includedGids(),
+                                   self.rhs().includedGids())
+        return tft_utils.unionSets([self.getGid()], temp)
 
-    def concEval (self, vmap = {}):
+    def concEval(self, vmap = {}):
         retv_lhs = self.lhs().concEval(vmap)
-        assert((type(retv_lhs) is int) or (type(retv_lhs) is float) or (isinstance(retv_lhs, Fraction)))
+        assert(type(retv_lhs) in {int, float} or isinstance(retv_lhs, Fraction))
         retv_rhs = self.rhs().concEval(vmap)
-        assert((type(retv_rhs) is int) or (type(retv_rhs) is float) or (isinstance(retv_rhs, Fraction)))
+        assert(type(retv_rhs) in {int, float} or isinstance(retv_rhs, Fraction))
 
-        if (self.operator.label == "+"):
-            return (retv_lhs + retv_rhs)
-        elif (self.operator.label == "-"):
-            return (retv_lhs - retv_rhs)
-        elif (self.operator.label == "*"):
-            return (retv_lhs * retv_rhs)
-        elif (self.operator.label == "/"):
-            return (retv_lhs / retv_rhs)
-        elif (self.operator.label == "^"):
-            assert(type(retv_rhs) is int)
-            return math.pow(retv_lhs, retv_rhs)
-        else:
-            sys.exit("ERROR: unknown operator found in function \"similar\" of a BinaryExpr")
+        ops = {"+": lambda a,b: a+b,
+               "-": lambda a,b: a-b,
+               "*": lambda a,b: a*b,
+               "/": lambda a,b: a/b,
+               "^": lambda a,b: a**b,}
 
-    def getCastings (self):
-        if (self.operator.label in ["+", "-", "*", "/"]):
+        if self.operator.label not in ops:
+            logging.error("Unknown operator: {}", self.operator.label)
+            sys.exit(1)
+
+        return ops[self.operator.label](retv_lhs, retv_rhs)
+
+    def getCastings(self):
+        if self.operator.label in {"+", "-", "*", "/"}:
             ret_castings = []
-            if (isinstance(self.lhs(), ConstantExpr)):
-                pass
-            else:
+            if not isinstance(self.lhs(), ConstantExpr):
                 ret_castings.append((self.lhs().getGid(), self.getGid()))
-            if (isinstance(self.rhs(), ConstantExpr)):
-                pass
-            else:
+            if not isinstance(self.rhs(), ConstantExpr):
                 ret_castings.append((self.rhs().getGid(), self.getGid()))
             return ret_castings
-        elif (self.operator.label in "^"):
-            if (isinstance(self.lhs(), ConstantExpr)):
+        if self.operator.label == "^":
+            if isinstance(self.lhs(), ConstantExpr):
                 return []
-            else:
-                return [(self.lhs().getGid(), self.getGid())]
-        else:
-            sys.exit("ERROR: unknown operator found in function \"getCastings\" of a BinaryExpr")
+            return [(self.lhs().getGid(), self.getGid())]
 
-    def listCrisis (self):
+        logging.error("Unknown operator: {}", self.operator.label)
+        sys.exit(-1)
+
+    def listCrisis(self):
         lc = self.lhs().listCrisis() + self.rhs().listCrisis()
-        if (self.operator.label == "/"):
+        if self.operator.label == "/":
             return [self.rhs().toCString()] + lc
-        else:
-            return lc
+        return lc
 
     def copy(self, check_prefix=True):
         ret = BinaryExpr(self.operator,
                          self.lhs().copy(check_prefix),
                          self.rhs().copy(check_prefix))
 
-        if (self.hasLB()):
+        if self.hasLB():
             ret.setLB(self.lb())
-        if (self.hasUB()):
+        if self.hasUB():
             ret.setUB(self.ub())
 
         return ret
 
 
-
-# ==== class predicate ====
-BinaryRelationLabels = ["=", "<", "<="]
 class BinaryRelation:
     label = None
 
-    def __init__ (self, label):
+    def __init__(self, label):
         assert(label in BinaryRelationLabels)
         self.label = label
 
-    def __eq__ (self, rhs):
-        if (not isinstance(rhs, BinaryRelation)):
-            return False
-        return (self.label == rhs.label)
+    def __eq__(self, rhs):
+        return (isinstance(rhs, BinaryRelation)
+                and self.label == rhs.label)
 
-    def toIRString (self):
+    def toIRString(self):
         return self.label
 
-    def __str__ (self):
+    def __str__(self):
         return self.toIRString()
+
 
 class BinaryPredicate (Predicate):
     relation = None
 
-    def __init__ (self, relation, opd0, opd1):
+    def __init__(self, relation, opd0, opd1):
         assert(isinstance(relation, BinaryRelation))
         assert(relation.label in BinaryRelationLabels)
 
-        if (sys.version_info.major == 2):
-            sys.exit("Error: FPTuner is currently based on Python3 only.")
-            super(BinaryPredicate, self).__init__(False)
-        elif (sys.version_info.major == 3):
-            super().__init__(False)
+        super().__init__(False)
 
         self.relation = relation
         self.operands.append(opd0)
         self.operands.append(opd1)
 
-        if (self.relation.label in ["=", "<", "<="]):
+        if self.relation.label in {"=", "<", "<="}:
             assert(isinstance(self.lhs(), ArithmeticExpr))
             assert(isinstance(self.rhs(), ArithmeticExpr))
 
-    def lhs (self):
+    def lhs(self):
         assert(len(self.operands) == 2)
 
-        if (self.relation.label in ["=", "<", "<="]):
+        if self.relation.label in {"=", "<", "<="}:
             assert(isinstance(self.operands[0], Expr))
             assert(isinstance(self.operands[1], Expr))
             return self.operands[0]
 
-        else:
-            sys.exit("ERROR: invalid BinaryPredicate")
+        logger.error("Invalid binary predicate: {}", self.relation.label)
+        sys.exit(1)
 
-    def rhs (self):
+    def rhs(self):
         assert(len(self.operands) == 2)
 
-        if (self.relation.label in ["=", "<", "<="]):
+        if self.relation.label in {"=", "<", "<="}:
             assert(isinstance(self.operands[0], Expr))
             assert(isinstance(self.operands[1], Expr))
             return self.operands[1]
 
-        else:
-            sys.exit("ERROR: invalid BinaryPredicate")
+        logger.error("Invalid binary predicate: {}", self.relation.label)
+        sys.exit(1)
 
-    def vars (self):
+    def vars(self):
         return tft_utils.unionSets(self.lhs().vars(), self.rhs().vars())
 
-    def concEval (self, vmap = {}):
+    def concEval(self, vmap = {}):
         vlhs = self.lhs().concEval(vmap)
         vrhs = self.rhs().concEval(vmap)
 
-        if (self.relation.label == "="):
-            return (vlhs == vrhs)
+        rels = {"=": lambda a,b: a == b,
+                "<": lambda a,b: a < b,
+                "<=": lambda a,b: a <= b,}
 
-        elif (self.relation.label == "<"):
-            return (vlhs < vrhs)
+        if self.relation.label not in rels:
+            logger.error("Invalid binary predicate: {}", self.relation.label)
+            sys.exit(1)
 
-        elif (self.relation.label == "<="):
-            return (vlhs <= vrhs)
+        return rels[self.relation.label](vlhs, vrhs)
 
-        else:
-            sys.exit("Error: unhandled relation in concEval.")
-
-    def __eq__ (self, rhs):
-        if (not isinstance(rhs, BinaryPredicate)):
+    def __eq__(self, rhs):
+        if (not isinstance(rhs, BinaryPredicate)
+            or not (self.relation == rhs.relation)):
             return False
 
-        if (not (self.relation == rhs.relation)):
-            return False
+        if self.relation.label == "=":
+            return ((self.lhs() == rhs.lhs() and self.rhs() == rhs.rhs())
+                    or (self.lhs() == rhs.rhs() and self.rhs() == rhs.lhs()))
 
-        if (self.relation.label in ["="]):
-            return (((self.lhs() == rhs.lhs()) and (self.rhs() == rhs.rhs())) or ((self.lhs() == rhs.rhs()) and (self.rhs() == rhs.lhs())))
+        if self.relation.label in {"<", "<="}:
+            return self.lhs() == rhs.lhs() and self.rhs() == rhs.rhs()
 
-        elif (self.relation.label in ["<", "<="]):
-            return ((self.lhs() == rhs.lhs()) and (self.rhs() == rhs.rhs()))
+        logger.error("Invalid binary predicate: {}", self.relation.label)
+        sys.exit(1)
 
-        else:
-            sys.exit("ERROR: not handled binary relation for __eq__")
+    def toIRString(self):
+        return "({} {} {})".format(self.lhs().toIRString(),
+                                   self.relation.toIRString(),
+                                   self.rhs().toIRString())
 
-    def toIRString (self):
-        return "(" + self.lhs().toIRString() + " " + self.relation.toIRString() + " " + self.rhs().toIRString() + ")"
-
-    def __str__ (self):
+    def __str__(self):
         return self.toIRString()
 
 
-
-# ==== some expression judgements ====
-def isPowerOf2 (f):
+def isPowerOf2(f):
     assert(type(f) is float)
+    af = abs(f)
+    log2 = math.log(af, 2)
+    low = math.floor(log2)
+    high = math.ceil(log2)
+    return low == high
 
-    log2 = math.log(abs(f), 2.0)
-    return (int(log2) == log2)
 
-def isPreciseConstantExpr (expr):
+def isPreciseConstantExpr(expr):
     assert(isinstance(expr, ConstantExpr))
     f = float(expr.value())
+    low = math.floor(f)
+    high = math.ceil(f)
+    return low == high
 
-    if (f == 0.0):
-        return True
-    if (int(f) == f):
-        return True
 
-    return False
-
-def isPreciseOperation (expr):
+def isPreciseOperation(expr):
     assert(isinstance(expr, Expr))
 
-    if (isinstance(expr, ConstantExpr)):
+    if isinstance(expr, ConstantExpr):
         return isPreciseConstantExpr(expr)
 
-    elif (isinstance(expr, VariableExpr)):
-        if (expr.getGid() == PRESERVED_CONST_GID):
+    if isinstance(expr, VariableExpr):
+        if expr.getGid() == PRESERVED_CONST_GID:
             assert(expr.hasBounds())
             assert(expr.lb() == expr.ub())
             return isPreciseConstantExpr(expr.lb())
 
-        if (expr.hasBounds() and (expr.lb() == expr.ub())):
+        if expr.hasBounds() and expr.lb() == expr.ub():
             return isPreciseConstantExpr(expr.lb())
 
         return False
 
-    elif (isinstance(expr, UnaryExpr)):
-        if (expr.operator.label in ["-", "abs"]):
-            return True
-        else:
-            return False
+    if isinstance(expr, UnaryExpr):
+        return expr.operator.label in {"-", "abs"}
 
-    elif (isinstance(expr, BinaryExpr)):
-        if (expr.operator.label in ["+", "-"]):
-            if (isinstance(expr.lhs(), ConstantExpr) and
-                (float(expr.lhs().value()) == 0.0)):
-                return True
-            if (isinstance(expr.rhs(), ConstantExpr) and
-                (float(expr.rhs().value()) == 0.0)):
-                return True
-            if (isinstance(expr.lhs(), VariableExpr) and
-                  (expr.lhs().hasBounds() and
-                   (float(expr.lhs().lb().value()) == 0.0) and
-                   (float(expr.lhs().ub().value()) == 0.0))):
-                return True
-            if (isinstance(expr.rhs(), VariableExpr) and
-                  (expr.rhs().hasBounds() and
-                   (float(expr.rhs().lb().value()) == 0.0) and
-                   (float(expr.rhs().ub().value()) == 0.0))):
-                return True
+    if isinstance(expr, BinaryExpr):
+        if expr.operator.label in {"+", "-"}:
+            return ((isinstance(expr.lhs(), ConstantExpr)
+                     and float(expr.lhs().value()) == 0.0)
+                    or (isinstance(expr.rhs(), ConstantExpr)
+                        and float(expr.rhs().value()) == 0.0)
+                    or (isinstance(expr.lhs(), VariableExpr)
+                        and expr.lhs().hasBounds()
+                        and float(expr.lhs().lb().value()) == 0.0
+                        and float(expr.lhs().ub().value()) == 0.0)
+                    or (isinstance(expr.rhs(), VariableExpr)
+                        and expr.rhs().hasBounds()
+                        and float(expr.rhs().lb().value()) == 0.0
+                        and float(expr.rhs().ub().value()) == 0.0))
 
-        elif (expr.operator.label in ["*"]):
-            if (isinstance(expr.lhs(), ConstantExpr) and
-                isPowerOf2(float(expr.lhs().value()))):
-                return True
-            if (isinstance(expr.rhs(), ConstantExpr) and
-                isPowerOf2(float(expr.rhs().value()))):
-                return True
-#            if (isinstance(expr.lhs(), ConstantExpr) and
-#                (float(expr.lhs().value()) in [1.0, -1.0])):
-#                return True
-#            if (isinstance(expr.rhs(), ConstantExpr) and
-#                (float(expr.rhs().value()) in [1.0, -1.0])):
-#                return True
-            if (isinstance(expr.lhs(), VariableExpr) and
-                (expr.lhs().hasBounds() and
-                 (expr.lhs().lb() == expr.lhs().ub()) and
-                 isPowerOf2(float(expr.lhs().lb().value())))):
-                return True
-            if (isinstance(expr.rhs(), VariableExpr) and
-                (expr.rhs().hasBounds() and
-                 (expr.rhs().lb() == expr.rhs().ub()) and
-                 isPowerOf2(float(expr.rhs().lb().value())))):
-                return True
+        if expr.operator.label == "*":
+            return ((isinstance(expr.lhs(), ConstantExpr)
+                     and isPowerOf2(float(expr.lhs().value())))
+                    or (isinstance(expr.rhs(), ConstantExpr)
+                        and isPowerOf2(float(expr.rhs().value())))
+                    or (isinstance(expr.lhs(), VariableExpr)
+                        and expr.lhs().hasBounds()
+                        and expr.lhs().lb() == expr.lhs().ub()
+                        and isPowerOf2(float(expr.lhs().lb().value())))
+                    or (isinstance(expr.rhs(), VariableExpr)
+                        and expr.rhs().hasBounds()
+                        and expr.rhs().lb() == expr.rhs().ub()
+                        and isPowerOf2(float(expr.rhs().lb().value()))))
 
-        elif (expr.operator.label in ["/"]):
-            if (isinstance(expr.rhs(), ConstantExpr) and
-                (isPowerOf2(float(expr.rhs().value())))):
-                return True
-            if (isinstance(expr.rhs(), VariableExpr) and
-                (expr.rhs().hasBounds() and
-                 (expr.rhs().lb() == expr.rhs().ub()) and
-                 isPowerOf2(float(expr.rhs().lb().value())))):
-                return True
-
-        else:
-            pass
+        if expr.operator.label in ["/"]:
+            return ((isinstance(expr.rhs(), ConstantExpr)
+                     and isPowerOf2(float(expr.rhs().value())))
+                    or (isinstance(expr.rhs(), VariableExpr)
+                        and expr.rhs().hasBounds()
+                        and expr.rhs().lb() == expr.rhs().ub()
+                        and isPowerOf2(float(expr.rhs().lb().value()))))
 
         return False
 
-    else:
-        sys.exit("ERROR: unknown expression type.")
+    logger.error("Unknown expression type: {}", expr)
+    sys.exit(1)

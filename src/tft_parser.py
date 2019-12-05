@@ -7,16 +7,16 @@ import tft_error_form
 import tft_expr as EXPR
 import tft_utils
 
+from fractions import Fraction
+
 import math
 import os
 import re
 import sys
 import traceback
 
-from fractions import Fraction
 
 logger = Logger()
-
 
 COALESCE_CONST   = True
 VERBOSE          = False

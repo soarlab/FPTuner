@@ -169,12 +169,14 @@ def unionSets (s0, s1):
         if (e not in ret):
             ret.append(e)
     return ret
+
 def intersectSets (s0, s1):
     ret = []
     for e in s0:
         if (e in s1):
             ret.append(e)
     return ret
+
 def setMinus (s0, s1):
     ret = s0[:]
     for e in s1:
