@@ -14,9 +14,6 @@ import tft_ir_backend
 import tft_tuning
 import tft_alloc
 
-from input_to_tft import translate
-from pass_utils import get_runmain_input
-
 def error(*objs):
     print("ERROR:", *objs, file=sys.stderr)
     sys.exit(-1)

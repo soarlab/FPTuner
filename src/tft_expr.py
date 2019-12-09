@@ -2,6 +2,7 @@
 
 from fptuner_logging import Logger
 
+import color_printing
 import tft_utils
 
 from fractions import Fraction
@@ -10,7 +11,7 @@ import sys
 import math
 
 
-logger = Logger()
+logger = Logger(color=color_printing.blue)
 
 CNUM_PREFIX = "__cum"
 ERR_SUM_PREFIX = "__errsum_"
@@ -88,7 +89,6 @@ def RegisterVariableExpr(var):
 def ExprStatistics(expr, stat={}):
     assert(isinstance(expr, Expr))
 
-    # initialize stat
     if "# constants"  not in stat.keys():
         stat["# constants"]  = 0
     if "# variables"  not in stat.keys():
@@ -189,11 +189,12 @@ class ConstantExpr (ArithmeticExpr):
     def rational_value(self):
         if self.type() == int:
             return Fraction(self.value(), 1)
-        elif self.type() == Fraction:
+
+        if self.type() == Fraction:
             return self.value()
-        else:
-            logger.error("Invalid value type for ConstantExpr: {}", self.type())
-            sys.exit(1)
+
+        logger.error("Invalid value type for ConstantExpr: {}", self.type())
+        sys.exit(1)
 
     def lb(self):
         return self
@@ -219,15 +220,16 @@ class ConstantExpr (ArithmeticExpr):
                          self.type())
             sys.exit(1)
 
-    def toCString(self, const_inline=False): # to int or float string
+    def toCString(self, const_inline=False):
         if self.type() == int:
             return str(self.value())
-        elif self.type() == Fraction:
+
+        if self.type() == Fraction:
             assert(isinstance(self.value(), Fraction))
             return str(float(self.value()))
-        else:
-            logger.error("Invalid type of ConstantExpr: {}", self.type())
-            sys.exit(1)
+
+        logger.error("Invalid type of ConstantExpr: {}", self.type())
+        sys.exit(1)
 
     def toIRString(self):
         return "(" + self.toCString() + ")"
@@ -248,7 +250,7 @@ class ConstantExpr (ArithmeticExpr):
         if self.type() == Fraction and rhs.type() == int:
             return self.value() == Fraction(rhs.value(), 1)
 
-        logging.error("Invlaid __eq__ scenario of ConstExpr: {} __eq__ {}",
+        logging.error("Invalid __eq__ scenario of ConstExpr: {} __eq__ {}",
                       self.type(), rhs.type())
         sys.exit(1)
 
@@ -273,7 +275,7 @@ class ConstantExpr (ArithmeticExpr):
         if self.type() == Fraction and rhs.type() == int:
             return (self.value() > Fraction(rhs.value(), 1))
 
-        logging.error("Invlaid __gt__ scenario of ConstExpr: {} __gt__ {}",
+        logging.error("Invalid __gt__ scenario of ConstExpr: {} __gt__ {}",
                       self.type(), rhs.type())
         sys.exit(1)
 
@@ -287,7 +289,7 @@ class ConstantExpr (ArithmeticExpr):
         if self.type() == Fraction and rhs.type() == int:
             return (self.value() < Fraction(rhs.value(), 1))
 
-        logging.error("Invlaid __lt__ scenario of ConstExpr: {} __lt__ {}",
+        logging.error("Invalid __lt__ scenario of ConstExpr: {} __lt__ {}",
                       self.type(), rhs.type())
         sys.exit(1)
 

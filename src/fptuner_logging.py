@@ -99,7 +99,7 @@ class Logger():
     def error(self, message, *args):
         err = color_printing.red("ERROR") + ":"
         formatted_message = message.format(*args)
-        full_message = self._log(formatted_message, warn, sys.stderr)
+        full_message = self._log(formatted_message, err, sys.stderr)
         if Logger.LOG_FILE != sys.stdout:
             print(color.strip(full_message), file=Logger.LOG_FILE)
 

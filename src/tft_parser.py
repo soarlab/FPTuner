@@ -451,7 +451,7 @@ def EListInterpreter(elist = []):
     return retval
 
 
-def String2Expr(s, reject_internal):
+def old_String2Expr(s, reject_internal):
     logger.log("+" + "-"*78 + "+")
     logger.log("|" + " "*78 + "|")
     logger.dlog("Start: {} (reject_internal={})", s, reject_internal)
@@ -531,3 +531,19 @@ def String2Expr(s, reject_internal):
     logger.log("|" + " "*78 + "|")
     logger.log("+" + "-"*78 + "+")
     return retval
+
+from tft_lexer import lexer
+from tft_sly_parser import parser
+
+def String2Expr(s, reject_internal):
+    logger.log("+" + "-"*78 + "+")
+    logger.log("|" + " "*78 + "|")
+    logger.dlog("Start: {} (reject_internal={})", s, reject_internal)
+
+    expr = parser.parse(lexer.tokenize(s))
+
+    logger.dlog("Final expr: {}", expr)
+    logger.log("|" + " "*78 + "|")
+    logger.log("+" + "-"*78 + "+")
+
+    return expr
