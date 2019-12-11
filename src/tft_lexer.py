@@ -12,7 +12,7 @@ except ModuleNotFoundError:
     sys.exit(-1)
 
 
-logger = Logger(color=color_printing.yellow)
+logger = Logger(color=color_printing.yellow, level=Logger.HIGH)
 
 
 class FptunerLexer(Lexer):
@@ -28,16 +28,14 @@ class FptunerLexer(Lexer):
         # Literals
         FLOAT,
         INTEGER,
+        ROUND_MODE,
 
         # Infix Operators
         PLUS,
         MINUS,
         TIMES,
         DIVIDE,
-        #INFIX_POW,
-
-        # Assignment
-        # EQUALS,
+        INFIX_POW,
 
         # Deliminators
         LPAREN,
@@ -46,7 +44,9 @@ class FptunerLexer(Lexer):
         RBRACE,
         COMMA,
         DOLLAR_SIGN,
+        IN,
         EID,
+        CONST,
     }
 
     # Ignored input
@@ -59,18 +59,14 @@ class FptunerLexer(Lexer):
     # Variables
     NAME = r"[a-zA-Z][a-zA-Z0-9]*"
 
-    # BINOP
+    # Prefix operators
     NAME["pow"] = BINOP
-
-    # UNOP
     NAME["abs"] = UNOP
     NAME["cos"] = UNOP
     NAME["exp"] = UNOP
     NAME["log"] = UNOP
     NAME["sin"] = UNOP
     NAME["sqrt"] = UNOP
-
-    # ROUND
     NAME["rnd64"] = ROUND
     NAME["rnd"] = ROUND
 
@@ -95,17 +91,14 @@ class FptunerLexer(Lexer):
              r")"
              r")")
     INTEGER = r"\d+"
-
+    NAME["ne"] = ROUND_MODE #TODO add all modes
 
     # Infix Operators
     PLUS = r"\+"
     MINUS = r"-"
     TIMES = r"\*"
     DIVIDE = r"/"
-    #INFIX_POW = r"\^"
-
-    # Assignment
-    #EQUALS = r"="
+    INFIX_POW = r"\^"
 
     # Deliminators
     LPAREN = r"\("
@@ -114,51 +107,59 @@ class FptunerLexer(Lexer):
     RBRACE = r"\]"
     COMMA = r","
     DOLLAR_SIGN = r"\$"
+    NAME["in"] = IN
     EID = r"_eid_"
+    CONST = r"__const_"
 
     def error(self, t):
         logger.error("Line {}: Bad character '{}'", self.lineno, t.value[0])
         sys.exit(-1)
 
     if logger.should_log:
+        def NAME(self, t):
+            logger.log("{}", t)
+            return t
         def FLOAT(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def INTEGER(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def PLUS(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def MINUS(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def TIMES(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def DIVIDE(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def LPAREN(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def RPAREN(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def LBRACE(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def RBRACE(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def COMMA(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def DOLLAR_SIGN(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
             return t
         def EID(self, t):
-            logger.dlog("{}", t)
+            logger.log("{}", t)
+            return t
+        def CONST(self, t):
+            logger.log("{}", t)
             return t
 
 lexer = FptunerLexer()

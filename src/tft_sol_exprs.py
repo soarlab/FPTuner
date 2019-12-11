@@ -21,7 +21,7 @@ import traceback
 import subprocess as subp
 
 
-logger = Logger(color=color_printing.white)
+logger = Logger(color=color_printing.white, level=Logger.MEDIUM)
 
 FPREFIX_DOT_INPUT  = "__tft_expr."
 FPOSTFIX_DOT_INPUT = ".input"
@@ -78,16 +78,19 @@ def GenerateErrorTermsFromExpr(context_expr, expr,
                 error_expr  = error_exprs[i]
 
         if error_expr is None:
-            logger.error("<<<< expr >>>>")
-            logger.error(expr.toIRString())
-            logger.error(expr.toASTString())
-            logger.error(">>>> program exprs <<<<")
-            for pe in program_exprs:
-                logger.error(pe.toIRString())
-                logger.error(pe.toASTString())
-                logger.error("------------")
-            traceback.print_stack()
-            sys.exit(1)
+            # logger.error("<<<< expr >>>>")
+            # logger.error(expr.toIRString())
+            # logger.error(expr.toASTString())
+            # logger.error(">>>> program exprs <<<<")
+            # for pe in program_exprs:
+            #     logger.error(pe.toIRString())
+            #     logger.error(pe.toASTString())
+            #     logger.error("------------")
+            # traceback.print_stack()
+            # sys.exit(1)
+            prog_expr = expr
+            error_expr = tft_expr.ConstantExpr(0)
+            logger.warning("Injecting: {}", error_expr)
 
         my_et = tft_error_form.ErrorTerm(error_expr,
                                          context_expr.getGid(),

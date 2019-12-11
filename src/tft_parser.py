@@ -16,7 +16,7 @@ import sys
 import traceback
 
 
-logger = Logger()
+logger = Logger(level=Logger.MEDIUM)
 
 COALESCE_CONST   = True
 VERBOSE          = False
@@ -36,6 +36,7 @@ def sstrip(s):
 
 
 def dumpConsList(cons_list = []):
+    assert(False)
     logger.dlog("==== construction list dump ====")
 
     for i in range(0, len(cons_list)):
@@ -50,6 +51,7 @@ def dumpConsList(cons_list = []):
     sys.exit(1)
 
 def coalesceConstBinaryExpr(opd0, opd1):
+    assert(False)
     return (COALESCE_CONST
             and isinstance(opd0, EXPR.ConstantExpr)
             and isinstance(opd1, EXPR.ConstantExpr)
@@ -58,6 +60,7 @@ def coalesceConstBinaryExpr(opd0, opd1):
 
 
 def computeConstBinaryExpr(op, opd0, opd1):
+    assert(False)
     assert(isinstance(op, EXPR.BinaryOp))
     assert(isinstance(opd0, EXPR.ConstantExpr))
     assert(isinstance(opd1, EXPR.ConstantExpr))
@@ -85,6 +88,7 @@ def computeConstBinaryExpr(op, opd0, opd1):
 
 
 def String2Op(s, op_class, op_labels = []):
+    assert(False)
     s = sstrip(s)
 
     gid = -1
@@ -108,14 +112,17 @@ def String2Op(s, op_class, op_labels = []):
 
 
 def String2UnaryOp(s):
+    assert(False)
     return String2Op(s, EXPR.UnaryOp, EXPR.UnaryOpLabels)
 
 
 def String2BinaryOp(s):
+    assert(False)
     return String2Op(s, EXPR.BinaryOp, EXPR.BinaryOpLabels)
 
 
 def String2BinaryRelation(s):
+    assert(False)
     s = sstrip(s)
 
     if s not in EXPR.BinaryRelationLabels:
@@ -128,6 +135,7 @@ def String2BinaryRelation(s):
 
 
 def String2ConstantExpr(s):
+    assert(False)
     s = sstrip(s)
 
     try:
@@ -151,6 +159,7 @@ def String2ConstantExpr(s):
 
 
 def String2VariableExpr(s, reject_internal):
+    assert(False)
     s = sstrip(s)
 
     if String2ConstantExpr(s) is not None:
@@ -208,8 +217,8 @@ def String2VariableExpr(s, reject_internal):
                  "not defined", label, eid)
     sys.exit(1)
 
-
-def String2BoundedVariableExpr(s):
+def old_String2BoundedVariableExpr(s):
+    logger.warning("String2BoundedVariableExpr({})", s)
     tokens = tft_utils.String2Tokens(s, "in")
     assert(len(tokens) == 2)
     assert(tokens[1].startswith("[") and tokens[1].endswith("]"))
@@ -238,6 +247,7 @@ def String2BoundedVariableExpr(s):
 
 
 def ExpandConstPowerExpression(op, e_base, c_power):
+    assert(False)
     assert((isinstance(op, EXPR.BinaryOp)) and (op.label == "^"))
     assert(isinstance(e_base, EXPR.Expr))
     assert(float(c_power) == int(c_power))
@@ -267,6 +277,7 @@ def ExpandConstPowerExpression(op, e_base, c_power):
 
 
 def String2ConstBinaryExpr(s):
+    assert(False)
     opd0 = None
     op   = None
     opd1 = None
@@ -318,6 +329,7 @@ def String2ConstBinaryExpr(s):
 
 
 def EList2UnaryExpr(elist = []):
+    assert(False)
     assert(len(elist) > 0)
 
     if (len(elist) != 2
@@ -333,6 +345,7 @@ def EList2UnaryExpr(elist = []):
 
 
 def EList2BinaryExpr(elist = []):
+    assert(False)
     assert(len(elist) > 0)
 
     if (len(elist) == 2
@@ -373,6 +386,7 @@ def EList2BinaryExpr(elist = []):
 
 
 def EList2BinaryPredicate(elist = []):
+    assert(False)
     assert(len(elist) > 0)
 
     if (len(elist) != 3
@@ -389,6 +403,7 @@ def EList2BinaryPredicate(elist = []):
 
 
 def TokenInterpreter(s, reject_internal):
+    assert(False)
     s = sstrip(s)
 
     uop = String2UnaryOp(s)
@@ -430,6 +445,7 @@ def TokenInterpreter(s, reject_internal):
 
 
 def EListInterpreter(elist = []):
+    assert(False)
     assert(len(elist) in {1, 2, 3})
 
     if len(elist) == 1:
@@ -452,6 +468,7 @@ def EListInterpreter(elist = []):
 
 
 def old_String2Expr(s, reject_internal):
+    assert(False)
     logger.log("+" + "-"*78 + "+")
     logger.log("|" + " "*78 + "|")
     logger.dlog("Start: {} (reject_internal={})", s, reject_internal)
@@ -547,3 +564,10 @@ def String2Expr(s, reject_internal):
     logger.log("+" + "-"*78 + "+")
 
     return expr
+
+
+def String2BoundedVariableExpr(s):
+    logger.log("Working on bounded expression: {}", s)
+    expr = parser.parse(lexer.tokenize(s))
+    return expr
+

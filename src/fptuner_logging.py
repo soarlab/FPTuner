@@ -89,7 +89,7 @@ class Logger():
             self._log(formatted_message, pre=funcname+":")
 
     def warning(self, message, *args):
-        if Logger.LOG_LEVEL >= Logger.NONE:
+        if Logger.LOG_LEVEL > Logger.NONE:
             warn = color_printing.yellow("WARNING") + ":"
             formatted_message = message.format(*args)
             full_message = self._log(formatted_message, warn, sys.stderr)

@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 
+from fptuner_logging import Logger
+
+import tft_alloc
+import tft_error_form
+import tft_expr
+import tft_ir_api as IR
+import tft_ir_backend
+import tft_sol_exprs
+import tft_tuning
+import tft_utils
+
 import argparse
 import imp
 import os
 import sys
 
-import tft_expr
-import tft_utils
-import tft_sol_exprs
-import tft_error_form
-import tft_ir_api as IR
-import tft_ir_backend
-import tft_tuning
-import tft_alloc
+
+logger = Logger(level=Logger.LOW)
 
 def error(*objs):
     print("ERROR:", *objs, file=sys.stderr)
@@ -29,12 +34,9 @@ def main():
                         help="Expression Specification")
 
     parser.add_argument("-v", "--verbose",
-                        action="store_true", default=False,
-                        help="Verbose mode")
-
-    parser.add_argument("-d", "--debug",
-                        action="store_true", default=False,
-                        help="Debug mode")
+                        choices=["none", "quiet", "low", "medium", "high",],
+                        default="low",
+                        help="Verbosity level")
 
     parser.add_argument("-n", "--no-m2-check",
                         action="store_true", default=False,
@@ -79,13 +81,24 @@ def main():
 
     args = parser.parse_args()
 
+    if args.verbose == "none":
+        Logger.LOG_LEVEL = Logger.NONE
+    if args.verbose == "quiet":
+        Logger.LOG_LEVEL = Logger.QUIET
+    if args.verbose == "low":
+        Logger.LOG_LEVEL= Logger.LOW
+    if args.verbose == "medium":
+        Logger.LOG_LEVEL= Logger.MEDIUM
+    if args.verbose == "high":
+        Logger.LOG_LEVEL= Logger.HIGH
+
     INPUT_FILE = args.expr_spec
     if not os.path.isfile(INPUT_FILE):
         error("Input expression file doesn't exist: {}".format(INPUT_FILE))
 
-    tft_utils.FPTUNER_VERBOSE = args.verbose or args.debug
+    tft_utils.FPTUNER_VERBOSE = False
 
-    tft_utils.FPTUNER_DEBUG   = args.debug
+    tft_utils.FPTUNER_DEBUG   = False
 
     tft_utils.NO_M2_CHECK     = args.no_m2_check
 

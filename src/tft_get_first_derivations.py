@@ -6,6 +6,40 @@ import tft_expr
 import tft_utils
 import subprocess as subp
 
+# import shutil
+# import os.path as path
+# gelpia_path = shutil.which("gelpia")
+# gelpia_dir = path.dirname(gelpia_path)
+
+# sys.path.append(gelpia_dir)
+# import gelpia_logging as logging
+# logging.set_log_level(logging.QUIET)
+# logging.set_log_filename(None)
+
+# from function_to_lexed import function_to_lexed
+# from lexed_to_parsed import lexed_to_parsed
+# from pass_lift_inputs_and_inline_assigns import \
+#     pass_lift_inputs_and_inline_assigns
+# from pass_simplify import pass_simplify
+# from pass_reverse_diff import pass_reverse_diff
+
+# def gelpia_derivations(exp, vs):
+#     assigns = ["{} = [{}, {}];".format(v.toASTString(),
+#                                        v.lb().value(),
+#                                        v.ub().value()) for v in vs]
+#     function = "\n".join(assigns) + "\n" + exp.toASTString()
+#     tokens = function_to_lexed(function)
+#     tree = lexed_to_parsed(tokens)
+#     exp, inputs = pass_lift_inputs_and_inline_assigns(tree)
+#     exp = pass_simplify(exp, inputs)
+#     d, diff_exp = pass_reverse_diff(exp, inputs)
+#     assert(d == True)
+#     assert(diff_exp[0] == "Return")
+#     diff_exp = diff_exp[1]
+#     assert(diff_exp[0] == "Tuple")
+#     diff_exp = diff_exp[2]
+#     assert(diff_exp[0] == "Box")
+#     diffs = diff_exp[1:]
 
 # ========
 # global variables
@@ -33,6 +67,9 @@ class TextTerm:
         assert(type(text_comment) is str)
         self.text_expr = text_expr
         self.text_comment = text_comment
+
+    def __str__(self):
+        return "TextTerm({}, {})".format(self.text_expr, self.text_comment)
 
 
 # ========
@@ -191,13 +228,15 @@ def GetFirstDerivations (expr):
         fpt_outputs = []
         for aline in exe_fpt.stdout:
             aline = tft_utils.Bytes2String(aline)
-            if (VERBOSE):
-                print (aline)
+            #print(aline)
             fpt_outputs.append(aline)
 
         exe_fpt.communicate()
 
         # -- read result file --
         ParseFPTaylorResults(cstr_expr, vs, fpt_outputs)
+
+    #print([str(d) for d in CACHE_TEXT_TERMS[cstr_expr]])
+    # gelpia_derivations(expr, vs)
 
     return CACHE_TEXT_TERMS[cstr_expr]

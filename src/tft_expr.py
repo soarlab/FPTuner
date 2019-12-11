@@ -11,7 +11,7 @@ import sys
 import math
 
 
-logger = Logger(color=color_printing.blue)
+logger = Logger(color=color_printing.blue, level=Logger.HIGH)
 
 CNUM_PREFIX = "__cum"
 ERR_SUM_PREFIX = "__errsum_"
@@ -542,8 +542,8 @@ class UnaryExpr (ArithmeticExpr):
         assert(isinstance(opd0, Expr))
 
         if opt.label == "-":
-            logging.error("Cannot directly create UnaryExpr '-'.")
-            logging.error("It must be properly transfered to an expression tree.")
+            logger.error("Cannot directly create UnaryExpr '-'.")
+            logger.error("It must be properly transfered to an expression tree.")
             sys.exit(1)
 
         super().__init__()

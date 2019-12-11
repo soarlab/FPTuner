@@ -16,204 +16,402 @@ except ModuleNotFoundError:
     sys.exit(-1)
 
 
-logger = Logger()
+logger = Logger(level=Logger.HIGH)
 
+# need to change: add non-tft-expr rules for const building
+#                 add unary minus
+#
+# desired prescidence:
+#   left-to-right: + -
+#   left-to-right: * /
+#   right-to-left: ^
+#   not-applicable: () functions
+
+# <entry> ::= <variable_definition>
+#           | <add_sub>
+#
+# <variable_definition> ::= <variable> in [ <literal> , <literal> ]
+#
+# <add_sub> ::= <add_sub> <add> <mul_div>
+#             | <add_sub> <sub> <mul_div>
+#             | <mul_div>
+#
+# <mul_div> ::= <mul_div> <mul> <negation>
+#             | <mul_div> <div> <negation>
+#             | <negation>
+#
+# <negation> ::= <sub> <negation>
+#              | <power>
+#
+# <power> ::= <group_func> <pow> <power>
+#           | <group_func>
+#
+# <group_func> ::= ( <add_sub> )
+#                | BINOP ( <add_sub> , <add_sub> )
+#                | BINOP $ <literal_integer> ( <add_sub> , <add_sub> )
+#                | UNOP ( <add_sub> )
+#                | UNOP $ <literal_integer> ( <add_sub> )
+#                | <round>
+#                | <atom>
+#
+# <round> ::= ROUND [ <literal_integer> , ROUND_MODE , <literal_float> , <literal_integer> , <literal_integer> ] ( <expression> )
+#           | ROUND ( <expression> )
+#
+# <atom> ::= <const>
+#          | <variable>
+#
+# <const> ::= <float>
+#           | <integer>
+#
+#
+# <variable> ::= NAME
+#              | NAME $ <literal_integer>
+#              | NAME _eid_ <literal_integer>
+#              | __const_ INTEGER $ <literal_integer>
+#              | __const_ INTEGER _eid_ <literal_integer>
+#
+# <add> ::= +
+#         | + $ <literal_integer>
+#
+# <sub> ::= -
+#         | - $ <literal_integer>
+#
+# <mul> ::= *
+#         | * $ <literal_integer>
+#
+# <div> ::= /
+#         | / $ <literal_integer>
+#
+# <pow> ::= ^
+#         | ^ $ <literal_integer>
+#
+# <float> ::= FLOAT
+#
+# <integer> ::= INTEGER
+#
+# <literal> ::= <literal_integer>
+#             | <literal_float>
+#
+# <literal_integer> ::= - <literal_integer>
+#                     | INTEGER
+#
+# <literal_float> ::= - <literal_float>
+#                     | FLOAT
 
 class FptunerParser(Parser):
     tokens = FptunerLexer.tokens
 
+    # entry
+    @_("variable_definition")
+    def entry(self, p):
+        logger.log(" <entry> ::= <variable_definition>")
+        logger.log("             {}", p.variable_definition)
+        return p.variable_definition
 
-    # expression
-    @_("expression add term",
-       "expression sub term")
-    def expression(self, p):
-        logger.log(" expression : expression {} term", p._slice[-2].type)
+    @_("add_sub")
+    def entry(self, p):
+        logger.log(" <entry> ::= <add_sub>")
+        logger.log("             {}", p.add_sub)
+        return p.add_sub
+
+
+    # variable_definition
+    @_("variable IN LBRACE literal COMMA literal RBRACE")
+    def variable_definition(self, p):
+        logger.log(" <variable_definition> ::= <variable> in [ <literal> , <literal> ]")
+        logger.log("                           {} in [ {} , {} ]",
+                   p.variable, p.literal0, p.literal1)
+        lower = EXPR.ConstantExpr(p.literal0)
+        upper = EXPR.ConstantExpr(p.literal1)
+        p.variable.setBounds(lower, upper)
+        return p.variable
+
+
+    # add_sub
+    @_("add_sub add mul_div",
+       "add_sub sub mul_div")
+    def add_sub(self, p):
+        logger.log(" <add_sub> ::= <add_sub> <{}> <mul_div>", p._slice[-2].type)
         logger.log("              {} {} {}",
-                   p.expression, p[1], p.term)
-        return EXPR.BinaryExpr(p[1], p.expression, p.term)
+                   p.add_sub, p[1], p.mul_div)
+        op = p[1]
+        return EXPR.BinaryExpr(op, p.add_sub, p.mul_div)
 
-    @_("term")
-    def expression(self, p):
-        logger.log(" expression : term")
-        logger.log("              {}", p.term)
-        return p.term
-
-    # term
-    @_("term mul factor",
-       "term div factor")
-    def term(self, p):
-        logger.log(" term : term {} factor", p._slice[-1].type)
-        logger.log("        {} {} {}", p.term, p[1], p.factor)
-        return EXPR.BinaryExpr(p[1], p.term, p.factor)
-
-    @_("factor")
-    def term(self, p):
-        logger.log(" term : factor")
-        logger.log("       {}", p.factor)
-        return p.factor
+    @_("mul_div")
+    def add_sub(self, p):
+        logger.log(" <add_sub> ::= <mul_div>")
+        logger.log("               {}", p.mul_div)
+        return p.mul_div
 
 
-    # factor
-    @_("const",
-       "variable",
-       "func")
-    def factor(self, p):
-        logger.log(" factor : {}", p._slice[-1].type)
-        logger.log("          {}", p[0])
+    # mul_div
+    @_("mul_div mul negation",
+       "mul_div div negation")
+    def mul_div(self, p):
+        logger.log(" <mul_div> ::= <mul_div> <{}> <negation>", p._slice[-1].type)
+        logger.log("               {} {} {}", p.mul_div, p[1], p.negation)
+        op = p[1]
+        return EXPR.BinaryExpr(op, p.mul_div, p.negation)
+
+    @_("negation")
+    def mul_div(self, p):
+        logger.log(" <mul_div> : <negation>")
+        logger.log("             {}", p.negation)
+        return p.negation
+
+
+    # negation
+    @_("sub negation")
+    def negation(self, p):
+        logger.log(" <negation> ::= <sub> <negation>")
+        logger.log("                {} {}", p.sub, p.negation)
+        neg_one = EXPR.ConstantExpr(-1)
+        op = EXPR.BinaryOp(p.sub.gid, "*")
+        return EXPR.BinaryExpr(op, neg_one, p.negation)
+
+    @_("power")
+    def negation(self, p):
+        logger.log(" <negation> ::= <power>")
+        logger.log("                {}", p.power)
+        return p.power
+
+
+    # power
+    @_("group_func pow power")
+    def power(self, p):
+        logger.log(" <power> ::= <group_func> <pow> <power>")
+        logger.log("             {} {} {}", p.group_func, p.pow, p.power)
+        return EXPR.BinaryExpr(p.pow, p.group_func, p.power)
+
+    @_("group_func")
+    def power(self, p):
+        logger.log(" <power> ::= <group_func>")
+        logger.log("             {}", p.group_func)
+        return p.group_func
+
+
+    # group_func
+    @_("LPAREN add_sub RPAREN")
+    def group_func(self, p):
+        logger.log(" <group_func> ::= ( <add_sub> )")
+        logger.log("                  ( {} )", p.add_sub)
+        return p.add_sub
+
+    @_("BINOP LPAREN add_sub COMMA add_sub RPAREN")
+    def group_func(self, p):
+        logger.log(" <group_func> ::= BINOP ( <add_sub> , <add_sub> )")
+        logger.log("                  {} ( {} , {} )",
+                   p[0], p.add_sub0, p.add_sub1)
+        gid = -1
+        op = EXPR.BinaryOp(gid, p[0])
+        return EXPR.BinaryExpr(op, p.add_sub0, p.add_sub1)
+
+    @_("BINOP DOLLAR_SIGN literal_integer LPAREN add_sub COMMA add_sub RPAREN")
+    def group_func(self, p):
+        logger.log(" <group_func> ::= BINOP $ <literal_integer> ( <add_sub> , <add_sub> )")
+        logger.log("                  {} $ {} ( {} , {} )",
+                   p[0], p.literal_integer, p.add_sub0, p.add_sub1)
+        gid = p.literal_integer
+        op = EXPR.BinaryOp(gid, p[0])
+        return EXPR.BinaryExpr(op, p.add_sub0, p.add_sub1)
+
+    @_("UNOP LPAREN add_sub RPAREN")
+    def group_func(self, p):
+        logger.log(" <group_func> ::= UNOP ( <add_sub> )")
+        logger.log("                  {} ( {} )",
+                   p[0], p.add_sub)
+        gid = -1
+        op = EXPR.UnaryOp(gid, p[0])
+        return EXPR.UnaryExpr(op, p.add_sub)
+
+    @_("UNOP DOLLAR_SIGN literal_integer LPAREN add_sub RPAREN")
+    def group_func(self, p):
+        logger.log(" <group_func> ::= UNOP $ <literal_integer> ( <add_sub> )")
+        logger.log("                  {} $ {} ( {} )",
+                   p[0], p.literal_integer, p.add_sub)
+        gid = p.literal_integer
+        op = EXPR.UnaryOp(gid, p[0])
+        return EXPR.UnaryExpr(op, p.add_sub)
+
+    @_("round")
+    def group_func(self, p):
+        logger.log(" <group_func> ::= <round>")
+        logger.log("                  {}", p.round)
+        return p.round
+
+    @_("atom")
+    def group_func(self, p):
+        logger.log(" <group_func> ::= <atom>")
+        logger.log("                  {}", p.atom)
+        return p.atom
+
+
+    # round
+    @_("ROUND LBRACE literal_integer COMMA ROUND_MODE COMMA literal_float COMMA literal_integer COMMA literal_integer RBRACE LPAREN add_sub RPAREN")
+    def round(self, p):
+        logger.log(" <round> : ROUND [ <literal_integer> , ROUND_MODE , <literal_float> , <literal_integer> , <literal_integer> ] ( <add_sub> )")
+        logger.log("           {} [ {} , {} , {} , {} , {} ] ( {} )",
+                   p[0], p.literal_integer0, p[4], p.literal_float, p.literal_integer1, p.literal_integer2, p.add_sub)
+        return p.add_sub
+
+    @_("ROUND LPAREN add_sub RPAREN")
+    def round(self, p):
+        logger.log(" <round> : ROUND LPAREN <add_sub> RPAREN")
+        logger.log("         {}({})",
+                   p[0], p.add_sub)
+        return p.add_sub
+
+
+    # atom
+    @_("float",
+       "integer")
+    def atom(self, p):
+        logger.log(" <atom> ::= <{}>", p._slice[-1].type)
+        logger.log("            {}", p[0])
         return p[0]
 
-    @_("LPAREN expression RPAREN")
-    def factor(self, p):
-        logger.log(" factor : LPAREN expression RPAREN")
-        logger.log("          ( {} )", p.expression)
-        return p.expression
+    @_("variable")
+    def atom(self, p):
+        logger.log(" <atom> ::= <variable>")
+        logger.log("            {}", p.variable)
+        return p.variable
+
+
+    # variable
+    @_("NAME")
+    def variable(self, p):
+        logger.log(" <variable> ::= NAME")
+        logger.log("                {}", p[0])
+        label = p[0]
+        vtype = Fraction
+        gid = -1
+        return EXPR.VariableExpr(label, vtype, gid, True)
+
+    @_("NAME DOLLAR_SIGN literal_integer")
+    def variable(self, p):
+        logger.log(" <variable> ::= NAME $ <literal_integer>")
+        logger.log("                {} $ {}", p[0], p.literal_integer)
+        label = p[0]
+        vtype = Fraction
+        gid = int(p.literal_integer)
+        return EXPR.VariableExpr(label, vtype, gid, True)
+
+    @_("NAME EID literal_integer")
+    def variable(self, p):
+        logger.log(" <variable> ::= NAME _eid_ <literal_integer>")
+        logger.log("                {} _eid_ {}", p[0], p.literal_integer)
+        eid = int(p.literal_integer)
+        for ve in EXPR.ALL_VariableExprs:
+            if ve.index == eid:
+                return ve
+        logger.error("Variable labeled with eid {} was not defined", eid)
+        sys.exit(1)
+
+    @_("CONST INTEGER DOLLAR_SIGN literal_integer")
+    def variable(self, p):
+        logger.log(" <variable> ::= __const_ INTEGER $ <literal_integer>")
+        logger.log("                {} {} $ {}", p[0], p[1], p.literal_integer)
+        label = p[0] + p[1]
+        vtype = Fraction
+        gid = int(p.literal_integer)
+        return EXPR.VariableExpr(label, vtype, gid, True)
+
+    @_("CONST INTEGER EID literal_integer")
+    def variable(self, p):
+        logger.log("variable ::= __const_ INTEGER _eid_ literal_integer")
+        logger.log("             {} {} ${}", p[0], p[1], p.literal_integer)
+        eid = int(p.literal_integer)
+        for ve in EXPR.ALL_VariableExprs:
+            if ve.index == eid:
+                return ve
+        logger.error("Variable labeled with eid {} was not defined", eid)
+        sys.exit(1)
 
 
     # add
     @_("PLUS")
     def add(self, p):
-        logger.log(" add : PLUS")
-        logger.log("       {}", p[0])
+        logger.log(" <add> ::= +")
+        logger.log("           {}", p[0])
         gid = -1
         return EXPR.BinaryOp(gid, p[0])
 
-    @_("PLUS DOLLAR_SIGN INTEGER")
+    @_("PLUS DOLLAR_SIGN literal_integer")
     def add(self, p):
-        logger.log(" add : PLUS DOLLAR_SIGN INTEGER")
-        logger.log("       {}${}", p[0], p[2])
-        gid = int(p[2])
+        logger.log(" <add> ::= + DOLLAR_SIGN literal_integer")
+        logger.log("           {} $ {}", p[0], p.literal_integer)
+        gid = int(p.literal_integer)
         return EXPR.BinaryOp(gid, p[0])
 
 
     # sub
     @_("MINUS")
     def sub(self, p):
-        logger.log(" sub : MINUS")
-        logger.log("       {}", p[0])
+        logger.log(" <sub> ::= -")
+        logger.log("           {}", p[0])
         gid = -1
         return EXPR.BinaryOp(gid, p[0])
 
-    @_("MINUS DOLLAR_SIGN INTEGER")
+    @_("MINUS DOLLAR_SIGN literal_integer")
     def sub(self, p):
-        logger.log(" sub : MINUS DOLLAR_SIGN INTEGER")
-        logger.log("       {}${}", p[0], p[2])
-        gid = int(p[2])
+        logger.log(" <sub> ::= - $ <literal_integer>")
+        logger.log("           {} $ {}", p[0], p.literal_integer)
+        gid = int(p.literal_integer)
         return EXPR.BinaryOp(gid, p[0])
 
 
     # mul
     @_("TIMES")
     def mul(self, p):
-        logger.log(" mul : TIMES")
-        logger.log("       {}", p[0])
+        logger.log(" <mul> ::= *")
+        logger.log("           {}", p[0])
         gid = -1
         return EXPR.BinaryOp(gid, p[0])
 
-    @_("TIMES DOLLAR_SIGN INTEGER")
+    @_("TIMES DOLLAR_SIGN literal_integer")
     def mul(self, p):
-        logger.log(" mul : TIMES DOLLAR_SIGN INTEGER")
-        logger.log("       {}${}", p[0], p[2])
-        gid = int(p[2])
+        logger.log(" <mul> ::= * $ <literal_integer>")
+        logger.log("           {} $ {}", p[0], p.literal_integer)
+        gid = int(p.literal_integer)
         return EXPR.BinaryOp(gid, p[0])
 
 
     # div
     @_("DIVIDE")
     def div(self, p):
-        logger.log(" div : DIVIDE")
-        logger.log("       {}", p[0])
+        logger.log(" <div> ::= /")
+        logger.log("           {}", p[0])
         gid = -1
         return EXPR.BinaryOp(gid, p[0])
 
-    @_("DIVIDE DOLLAR_SIGN INTEGER")
+    @_("DIVIDE DOLLAR_SIGN literal_integer")
     def div(self, p):
-        logger.log(" div : DIVIDE DOLLAR_SIGN INTEGER")
-        logger.log("       {}${}", p[0], p[2])
-        gid = int(p[2])
+        logger.log(" <div> ::= / $ literal_integer")
+        logger.log("           {} $ {}", p[0], p.literal_integer)
+        gid = int(p.literal_integer)
         return EXPR.BinaryOp(gid, p[0])
 
 
-    # # infix_pow
-    # @_("INFIX_POW")
-    # def infix_pow(self, p):
-    #     logger.log(" infix_pow : INFIX_POW")
-    #     logger.log("             {}", p[0])
-    #     gid = -1
-    #     return EXPR.BinaryOp(gid, p[0])
+    # pow
+    @_("INFIX_POW")
+    def pow(self, p):
+        logger.log(" <pow> ::= ^")
+        logger.log("           {}", p[0])
+        gid = -1
+        return EXPR.BinaryOp(gid, p[0])
 
-    # @_("INFIX_POW DOLLAR_SIGN INTEGER")
-    # def infix_pow(self, p):
-    #     logger.log(" infix_pow : INFIX_POW DOLLAR_SIGN INTEGER")
-    #     logger.log("             {}${}", p[0], p[2])
-    #     gid = int(p[2])
-    #     return EXPR.BinaryOp(gid, p[0])
-
-
-    # const
-    @_("float",
-       "integer")
-    def const(self, p):
-        logger.log(" const : {}", p._slice[-1])
-        logger.log("         {}", p[0])
-        return p[0]
-
-
-    # func
-    @_("binop",
-       "unop",
-       "round")
-    def func(self, p):
-        logger.log(" func : {}", p._slice[-1])
-        logger.log("        {}", p[0])
-        return p[0]
-
-
-    # binop
-    @_("BINOP LPAREN expression COMMA expression RPAREN")
-    def binop(self, p):
-        logger.log(" binop : BINOP LPAREN expression COMMA expression RPAREN")
-        logger.log("         {}({}, {})",
-                   pp[0], p.expression0, p.expression1)
-        sys.exit(1)
-        return something
-
-
-    # unop
-    @_("UNOP LPAREN expression RPAREN")
-    def unop(self, p):
-        logger.log("func: BINOP LPAREN expression RPAREN")
-        logger.log("      BINOP LPAREN {} RPAREN", p.expression)
-        sys.exit(1)
-        return something
-
-
-    # round
-    @_("ROUND LBRACE INTEGER COMMA NAME COMMA FLOAT COMMA INTEGER COMMA INTEGER RBRACE LPAREN expression RPAREN")
-    def round(self, p):
-        logger.log(" round : <full spec>")
-        logger.log("         {}[{},{},{},{},{}]()",
-                   p[0], p[2], p[4], p[6], p[8], p[10], p.expression)
-        return p.expression
-
-    @_("ROUND LBRACE INTEGER COMMA NAME COMMA FLOAT COMMA MINUS INTEGER COMMA INTEGER RBRACE LPAREN expression RPAREN")
-    def round(self, p):
-        logger.log(" round : <full spec>")
-        logger.log("         {}[{},{},{},{},{}]",
-                   p[0], p[2], p[4], p[6], p[9], p[11])
-        return p.expression
-
-    @_("ROUND LPAREN expression RPAREN")
-    def round(self, p):
-        logger.log(" round : ROUND LPAREN expression RPAREN")
-        logger.log("         {}({})",
-                   p[0], p.expression)
-        return p.expression
+    @_("INFIX_POW DOLLAR_SIGN literal_integer")
+    def pow(self, p):
+        logger.log(" <pow> ::= ^ $ literal_integer")
+        logger.log("           {} $ {}", p[0], p.literal_integer)
+        gid = int(p.literal_integer)
+        return EXPR.BinaryOp(gid, p[0])
 
 
     # float
     @_("FLOAT")
     def float(self, p):
-        logger.log(" float : FLOAT")
+        logger.log(" <float> ::= FLOAT")
         logger.log("         {}", p[0])
         return EXPR.ConstantExpr(float(p[0]))
 
@@ -221,38 +419,46 @@ class FptunerParser(Parser):
     # integer
     @_("INTEGER")
     def integer(self, p):
-        logger.log(" integer : INTGER")
-        logger.log("           {}", p[0])
+        logger.log(" <integer> ::= INTGER")
+        logger.log("               {}", p[0])
         return EXPR.ConstantExpr(int(p[0]))
 
 
-    # variable
-    @_("NAME")
-    def variable(self, p):
-        logger.log("variable : NAME")
-        logger.log("           {}", p[0])
-        vtype = Fraction
-        gid = -1
-        return EXPR.VariableExpr(p[0], vtype, gid, True)
+    # literal
+    @_("literal_integer",
+       "literal_float")
+    def literal(self, p):
+        logger.log(" <literal> ::= <{}>", p._slice[-1].type)
+        logger.log("               {}", p[0])
+        return p[0]
 
-    @_("NAME DOLLAR_SIGN INTEGER")
-    def variable(self, p):
-        logger.log("variable : NAME DOLLAR_SIGN INTEGER")
-        logger.log("           {}${}", p[0], p[2])
-        vtype = Fraction
-        gid = int(p[2])
-        return EXPR.VariableExpr(p[0], vtype, gid, True)
 
-    @_("NAME EID INTEGER")
-    def variable(self, p):
-        logger.log("variable : NAME EID INTEGER")
-        logger.log("           {}_eid_{}", p[0], p[2])
-        eid = int(p[2])
-        for ve in EXPR.ALL_VariableExprs:
-            if ve.index == eid:
-                return ve
-        logger.error("Variable labeled with eid {} was not defined", eid)
-        sys.exit(1)
+    # literal_integer
+    @_("MINUS literal_integer")
+    def literal_integer(self, p):
+        logger.log(" <literal_integer> ::= - <literal_integer>")
+        logger.log("                       {} {}", p[0], p[1])
+        return - p.literal_integer
+
+    @_("INTEGER")
+    def literal_integer(self, p):
+        logger.log(" <literal_integer> ::= INTEGER")
+        logger.log("                       {}", p[0])
+        return int(p[0])
+
+
+    # literal_float
+    @_("MINUS literal_float")
+    def literal_float(self, p):
+        logger.log(" <literal_float> ::= - <literal_float>")
+        logger.log("                     {} {}", p[0], p[1])
+        return - p.literal_float
+
+    @_("FLOAT")
+    def literal_float(self, p):
+        logger.log(" <literal_float> ::= FLOAT")
+        logger.log("                     {}", p[0])
+        return float(p[0])
 
 
     # errors
