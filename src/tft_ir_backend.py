@@ -37,7 +37,16 @@ def TypeExpr (gid):
 def UnaryOperatorString (uop, bw):
     assert(type(uop) is str)
 
-    if   (uop == "exp"):
+    if (uop == "abs"):
+        if   (bw == tft_alloc.EPSILON_32):
+            return "absf"
+        elif (bw == tft_alloc.EPSILON_64):
+            return "abs"
+        elif (bw == tft_alloc.EPSILON_128):
+            return "absq"
+        else:
+            pass
+    elif (uop == "exp"):
         if   (bw == tft_alloc.EPSILON_32):
             return "expf"
         elif (bw == tft_alloc.EPSILON_64):
@@ -330,7 +339,7 @@ def ColorExpr(expr, alloc, plain=False):
 
         sys.exit("Error: not supported expr 4 ColorExpr.")
     bw_mine = alloc[expr.getGid()]
-    return color(plain, bw_mine, "(") + _ColorExpr(expr, alloc) +color(plain, bw_mine, ")")
+    return color(plain, bw_mine, "(") + _ColorExpr(expr, alloc) + color(plain, bw_mine, ")")
 
 
 # ==== to FPTaylor query ====
@@ -365,6 +374,7 @@ def ExportExpr4FPTaylorSanitation (expr, alloc, qfname):
 
 # ==== to colored s-expression ====
 def ExportColorInsts(alloc):
+    print(alloc)
     assert((type(N_CPP_REPEATS) is int) and (1 <= N_CPP_REPEATS))
     assert(isinstance(alloc, tft_alloc.Alloc))
     assert(all([isinstance(expr, tft_expr.Expr) for expr in tft_ir_api.CPP_INSTS]))

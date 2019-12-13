@@ -34,8 +34,12 @@ class Logger():
 
         frame = inspect.stack()[1]
         module = inspect.getmodule(frame[0])
+        if module is None:
+            self.module = "Unknown"
+            return
         filename = module.__file__
         base = path.basename(filename)
+        assert(base is not None)
         self.module = path.splitext(base)[0]
 
         Logger.LOGGER_COUNT += 1

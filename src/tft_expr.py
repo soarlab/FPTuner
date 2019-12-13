@@ -250,7 +250,7 @@ class ConstantExpr (ArithmeticExpr):
         if self.type() == Fraction and rhs.type() == int:
             return self.value() == Fraction(rhs.value(), 1)
 
-        logging.error("Invalid __eq__ scenario of ConstExpr: {} __eq__ {}",
+        logger.error("Invalid __eq__ scenario of ConstExpr: {} __eq__ {}",
                       self.type(), rhs.type())
         sys.exit(1)
 
@@ -275,7 +275,7 @@ class ConstantExpr (ArithmeticExpr):
         if self.type() == Fraction and rhs.type() == int:
             return (self.value() > Fraction(rhs.value(), 1))
 
-        logging.error("Invalid __gt__ scenario of ConstExpr: {} __gt__ {}",
+        logger.error("Invalid __gt__ scenario of ConstExpr: {} __gt__ {}",
                       self.type(), rhs.type())
         sys.exit(1)
 
@@ -289,7 +289,7 @@ class ConstantExpr (ArithmeticExpr):
         if self.type() == Fraction and rhs.type() == int:
             return (self.value() < Fraction(rhs.value(), 1))
 
-        logging.error("Invalid __lt__ scenario of ConstExpr: {} __lt__ {}",
+        logger.error("Invalid __lt__ scenario of ConstExpr: {} __lt__ {}",
                       self.type(), rhs.type())
         sys.exit(1)
 
@@ -353,7 +353,7 @@ class VariableExpr (ArithmeticExpr):
         self.gid = gid
 
         if check_prefix and self.isPreservedVar():
-            logging.error("The given label '{}' has a preserved prefix", label)
+            logger.error("The given label '{}' has a preserved prefix", label)
             sys.exit(1)
 
         RegisterVariableExpr(self)
@@ -574,7 +574,7 @@ class UnaryExpr (ArithmeticExpr):
                                  self.opd().toASTString())
 
     def toFPCoreString(self):
-        logging.error("toFPCoreString doesn't support for Unary Expression")
+        logger.error("toFPCoreString doesn't support for Unary Expression")
         sys.exit(1)
 
     def __eq__(self, rhs):
@@ -653,10 +653,10 @@ class UnaryExpr (ArithmeticExpr):
                 return -1 * retv
             if type(retv) is float or isinstance(retv, Fraction):
                 return -1.0 * retv
-            logging.error("Invalid type for unary negation: {}", type(retv))
+            logger.error("Invalid type for unary negation: {}", type(retv))
             sys.exit(-1)
 
-        logging.error("Unknown unary operator: {}", self.operator.label)
+        logger.error("Unknown unary operator: {}", self.operator.label)
         sys.exit(1)
 
     def getCastings(self):
@@ -667,7 +667,7 @@ class UnaryExpr (ArithmeticExpr):
                 return []
             return [(self.opd().getGid(), self.getGid())]
 
-        logging.error("Unknown unary operator: {}", self.operator.label)
+        logger.error("Unknown unary operator: {}", self.operator.label)
         sys.exit(1)
 
     def listCrisis(self):
@@ -692,7 +692,7 @@ class BinaryOp:
         assert(type(gid)   is int)
         assert(type(label) is str)
         if label not in BinaryOpLabels:
-            logging.error("Invalid binary operator: {}", label)
+            logger.error("Invalid binary operator: {}", label)
             sys.exit(1)
 
         self.gid   = gid
@@ -731,8 +731,8 @@ class BinaryExpr (ArithmeticExpr):
         assert(isinstance(opd1, Expr))
 
         if opt.label == "^":
-            logging.error("Cannot directly create power expression.")
-            logging.error("It must be properly transfered to an expression"
+            logger.error("Cannot directly create power expression.")
+            logger.error("It must be properly transfered to an expression"
                           " tree.")
             sys.exit(1)
 
@@ -777,7 +777,7 @@ class BinaryExpr (ArithmeticExpr):
     def toFPCoreString(self):
         str_opt = self.operator.toCString()
         if str_opt not in {'+', '-', '*', '/'}:
-            logging.error("toFPCoreString doesn't support operator: {}", str_opt)
+            logger.error("toFPCoreString doesn't support operator: {}", str_opt)
             sys.exit(1)
         return "({} {} {})".format(str_opt,
                                    self.lhs().toFPCoreString(),
@@ -799,7 +799,7 @@ class BinaryExpr (ArithmeticExpr):
         if self.operator.label in {"-", "/", "^"}:
             return self.lhs() == rhs.lhs() and self.rhs() == rhs.rhs()
 
-        logging.error("Unknown binary operator: {}", self.operator.label)
+        logger.error("Unknown binary operator: {}", self.operator.label)
         sys.exit(1)
 
     def identical(self, rhs):
@@ -821,7 +821,7 @@ class BinaryExpr (ArithmeticExpr):
             return (self.lhs().identical(rhs.lhs())
                     and self.rhs().identical(rhs.rhs()))
 
-        logging.error("Unknown binary operator: {}", self.operator.label)
+        logger.error("Unknown binary operator: {}", self.operator.label)
         sys.exit(1)
 
     def setLB(self, lb):
@@ -871,7 +871,7 @@ class BinaryExpr (ArithmeticExpr):
                         break
                 else:
                     if v.index == rv.index:
-                        logging.error("Duplicate vars in different subexpressions: {}", v)
+                        logger.error("Duplicate vars in different subexpressions: {}", v)
                         sys.exit(1)
 
             if not was_there:
@@ -900,7 +900,7 @@ class BinaryExpr (ArithmeticExpr):
                "^": lambda a,b: a**b,}
 
         if self.operator.label not in ops:
-            logging.error("Unknown operator: {}", self.operator.label)
+            logger.error("Unknown operator: {}", self.operator.label)
             sys.exit(1)
 
         return ops[self.operator.label](retv_lhs, retv_rhs)
@@ -918,7 +918,7 @@ class BinaryExpr (ArithmeticExpr):
                 return []
             return [(self.lhs().getGid(), self.getGid())]
 
-        logging.error("Unknown operator: {}", self.operator.label)
+        logger.error("Unknown operator: {}", self.operator.label)
         sys.exit(-1)
 
     def listCrisis(self):
