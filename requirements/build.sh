@@ -10,10 +10,12 @@ LOG="${SCRIPT_LOCATION}/log.txt"
 rm -f "${LOG}"
 
 function finish {
-    if [ ! $SUCCESS ]
+    if [ "$SUCCESS" == 1 ]
     then
 	echo "FPTuner requirements failed to build."
 	echo "See ${LOG} for details."
+    else
+	echo "Success"
     fi
 }
 trap finish EXIT
