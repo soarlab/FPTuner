@@ -1,0 +1,8 @@
+;; -*- mode: scheme -*-
+
+(FPCore (re im)
+        :name "complex_sine_and_cosine"
+        :cite (herbie-2015)
+        :pre (and (<= 0 re 10)
+                  (<= 0 im 10))
+        (* (* 0.5 (sin re)) (- (exp (- im)) (exp im))))

@@ -1,0 +1,9 @@
+;; -*- mode: scheme -*-
+
+(FPCore (a b c)
+        :name "triangle5"
+        :cite (darulova-kuncak-2014)
+        :pre (and (<= 1 a 9) (<= 1 b 9) (<= 1 c 9)
+                  (> (+ a b) (+ c 1e-5)) (> (+ a c) (+ b 1e-5)) (> (+ b c) (+ a 1e-5)))
+        (let ([s (/ (+ (+ a b) c) 2)])
+          (sqrt (* (* (* s (- s a)) (- s b)) (- s c)))))

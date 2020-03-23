@@ -1,0 +1,8 @@
+;; -*- mode: scheme -*-
+
+(FPCore (a b c)
+        :name "triangle"
+        :cite (darulova-kuncak-2014)
+        :pre (and (<= 9.0 a 9.0) (<= 4.71 b 4.89) (<= 4.71 c 4.89))
+        (let ([s (/ (+ (+ a b) c) 2)])
+          (sqrt (* (* (* s (- s a)) (- s b)) (- s c)))))

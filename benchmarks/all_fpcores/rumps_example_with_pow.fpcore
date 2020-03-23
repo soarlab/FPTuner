@@ -1,0 +1,15 @@
+;; -*- mode: scheme -*-
+
+(FPCore (a b)
+        :name "rumps_example_with_pow"
+        :example ([a 77617] [b 33096])
+
+        (+ (+ (+
+               (* 333.75 (pow b 6))
+               (* (pow a 2) (- (- (-
+                                   (* (* 11 (pow a 2)) (pow b 2))
+                                   (pow b 6))
+                                  (* 121 (pow b 4)))
+                               2)))
+              (* 5.5 (pow b 8)))
+           (/ a (* 2 b))))

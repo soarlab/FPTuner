@@ -1,0 +1,9 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+        :name "sqroot"
+        :cite (darulova-kuncak-2014 solovyev-et-al-2015)
+        :fpbench-domain mathematics
+        :pre (<= 0 x 1)
+        (- (+ (- (+ 1.0 (* 0.5 x)) (* (* 0.125 x) x))
+              (* (* (* 0.0625 x) x) x)) (* (* (* (* 0.0390625 x) x) x) x)))

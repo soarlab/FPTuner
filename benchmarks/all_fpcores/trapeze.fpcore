@@ -1,0 +1,17 @@
+;; -*- mode: scheme -*-
+
+(FPCore (u)
+        :name "trapeze"
+        :cite (damouche-martel-chapoutot-fmics15)
+        :fpbench-domain mathematics
+        :pre (<= 1.11 u 2.22)
+        (let* ([a 0.25] [b 5000] [n 25] [h (/ (- b a) n)])
+          (while* (< xa 5000)
+                  ([xb 0 (let ([v (+ xa h)]) (if (> v 5000) 5000 v))]
+                   [r
+                    0
+                    (let ([gxa (/ u (- (+ (- (* (* (* 0.7 xa) xa) xa) (* (* 0.6 xa) xa)) (* 0.9 xa)) 0.2))]
+                          [gxb (/ u (- (+ (- (* (* (* 0.7 xb) xb) xb) (* (* 0.6 xb) xb)) (* 0.9 xb)) 0.2))])
+                      (+ r (* (* (+ gxa gxb) 0.5) h)))]
+                   [xa  0.25 (+ xa h)])
+                  r)))

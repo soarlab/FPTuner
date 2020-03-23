@@ -1,0 +1,15 @@
+;; -*- mode: scheme -*-
+
+(FPCore (lat1 lat2  lon1 lon2)
+        :name "azimuth"
+        :cite (solovyev-et-al-2015)
+        :precision binary64
+        :pre (and (<= 0 lat1 0.4) (<= 0.5 lat2 1)
+                  (<= 0 lon1 3.14159265) (<= -3.14159265 lon2 -0.5))
+        (let ([dLon (- lon2 lon1)])
+          (let ([s_lat1 (sin lat1)] [c_lat1 (cos lat1)]
+                [s_lat2 (sin lat2)] [c_lat2 (cos lat2)]
+                [s_dLon (sin dLon)] [c_dLon (cos dLon)])
+            (atan
+             (/ (* c_lat2 s_dLon)
+                (- (* c_lat1 s_lat2) (* (* s_lat1 c_lat2) c_dLon)))))))

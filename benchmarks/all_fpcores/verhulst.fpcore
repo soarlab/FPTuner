@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+        :name "verhulst"
+        :cite (darulova-kuncak-2014 solovyev-et-al-2015)
+        :fpbench-domain science
+        :precision binary64
+        :pre (<= 0.1 x 0.3)
+        (let ([r 4.0]
+              [K 1.11])
+          (/ (* r x) (+ 1 (/ x K)))))

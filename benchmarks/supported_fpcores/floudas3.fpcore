@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x1 x2)
+        :name "floudas3"
+        :precision binary64
+        :pre (and (<= 0 x1 2) (<= 0 x2 3) (>= (+ (* -2 (* (* x1 x1) (* x1 x1))) 2) x2))
+        (+ (- (* -12 x1) (* 7 x2)) (* x2 x2)))

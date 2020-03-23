@@ -1,0 +1,23 @@
+;; -*- mode: scheme -*-
+
+(FPCore (h y_n* c)
+        :name "runge_kutta_4"
+        :description "Solve the differential equation `y' = (c - y)^2
+Inputs: Step size `h`; initial condition `y_n*`; paramter `c`"
+        :cite (damouche-martel-chapoutot-fmics15)
+        :fpbench-domain mathematics
+        :precision binary32
+        :pre (and (< 0 y_n* 100) (< 10e-6 h 0.1) (< 50 c 200))
+        :example ([h 0.1] [y_n* 10.1] [c 100.1])
+        (let ([sixieme (/ 1 6)] [eps 0.005] [k 1.2])
+          (while (> e eps)
+                 ([y_n
+                   y_n*
+                   (let* ([k1 (let ([v (- c y_n)]) (* (* k v) v))]
+                          [k2 (let ([v (- c (+ y_n (* (* 0.5 h) k1)))]) (* (* k v) v))]
+                          [k3 (let ([v (- c (+ y_n (* (* 0.5 h) k2)))]) (* (* k v) v))]
+                          [k4 (let ([v (- c (+ y_n (* h k3)))]) (* (* k v) v))])
+                     (+ y_n (* (* sixieme h) (+ (+ (+ k1 (* 2.0 k2)) (* 2.0 k3)) k4))))]
+                  [i 0.0 (+ i 1.0)]
+                  [e 1.0 (- e eps)])
+                 (fabs e)))) ;; `i` is also an output but is skipped for now

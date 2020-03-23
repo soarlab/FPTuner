@@ -1,0 +1,10 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+        :name "squareRoot3"
+        :cite (darulova-kuncak-2014)
+        :pre (< 0 x 10)
+        :rosa-ensuring 1e-10
+        (if (< x 1e-5)
+            (+ 1 (* 0.5 x))
+            (sqrt (+ 1 x))))

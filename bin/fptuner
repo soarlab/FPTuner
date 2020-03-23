@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+
+from fpcore_logging import Logger
+from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError
+from fpcore_lexer import FPCoreLexer
+from fpcore_parser import FPCoreParser
+from gurobi_result import GurobiResult
+
+import all_modifications_ast
+import fptuner_argument_parser
+import sys
+
+
+logger = Logger(level=Logger.HIGH, color=Logger.green)
+
+
+def main(argv):
+    args = fptuner_argument_parser.parse_args(argv)
+
+    bit_widths = ["fp32", "fp64"]
+    sins = ["sin", "my_sin"]
+    operations = {"sin": sins}
+    search_space = {"error_bound": args.error,
+                    "bit_widths": bit_widths,
+                    "operations": operations}
+
+    lexer = FPCoreLexer()
+    parser = FPCoreParser()
+
+    for query_file in args.query_files:
+        print(query_file)
+
+        try:
+            with open(query_file, "r") as f:
+                text = f.read()
+        except FileNotFoundError:
+            logger.error("Unable to find file '{}'", query_file)
+            continue
+
+        # todo: add try catch for lex and parse errors
+        tokens = lexer.tokenize(text)
+        fpcores = parser.parse(tokens)
+
+        if len(fpcores) == 0:
+            logger.error("No FPCore found in file '{}'", query_file)
+            continue
+
+        for fpcore in fpcores:
+            print(fpcore)
+            try:
+                ssa = fpcore.to_single_assignment(search_space)
+                ssa.get_fptaylor_forms()
+                ssa.get_fptaylor_maximums()
+                #print(ssa)
+                GurobiResult(ssa)
+
+            except DomainError as e:
+                if e.lower is None and e.upper is None:
+                    logger.error("No domain defined for '{}'", e.name)
+                elif e.lower is None:
+                    logger.error("No lower bound defined for '{}'", e.name)
+                else:
+                    logger.error("No upper bound defined for '{}'", e.name)
+
+            except UnsupportedError as e:
+                msg = "Found unsupported FPCore language statement type '{}'"
+                logger.error(msg, e.statement_type)
+
+            except NoPreError:
+                logger.error("No :pre property defined")
+
+            except BadPreError as e:
+                logger.error("Unable to process precondition: '{}'", e.pre)
+
+            print()
+            print()
+
+
+if __name__ == "__main__":
+    try:
+        retval = main(sys.argv)
+    except KeyboardInterrupt:
+        sys.exit(1)
+    sys.exit(retval)

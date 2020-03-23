@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+        :name "sineOrder3"
+        :cite (darulova-kuncak-2014 solovyev-et-al-2015)
+        :fpbench-domain mathematics
+        :precision binary64
+        :pre (< -2 x 2)
+        :rosa-post (=> res (< -1 res 1))
+        :rosa-ensuring 1e-14
+        (- (* 0.954929658551372 x) (* 0.12900613773279798 (* (* x x) x))))

@@ -1,0 +1,8 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x1 x2 x3 x4 x5 x6)
+        :name "kepler0"
+        :precision binary64
+        :pre (and (<= 4 x1 6.36) (<= 4 x2 6.36) (<= 4 x3 6.36) (<= 4 x4 6.36) (<= 4 x5 6.36) (<= 4 x6 6.36))
+        (+ (- (- (+ (* x2 x5) (* x3 x6)) (* x2 x3)) (* x5 x6))
+           (* x1 (+ (+ (- (+ (+ (- x1) x2) x3) x4) x5) x6))))

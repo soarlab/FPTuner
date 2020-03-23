@@ -1,0 +1,19 @@
+;; -*- mode: scheme -*-
+
+(FPCore (t0 w0 N)
+        :name "pendulum"
+        :fpbench-domain science
+        :pre (and (< -2 t0 2) (< -5 w0 5))
+        :example ([N 1000])
+        (let ([h 0.01]
+              [L 2.0]
+              [m 1.5]
+              [g 9.80665])
+          (while (< n N)
+                 ([t t0 (let ([k1w (* (/ (- g) L) (sin t))])
+                          (let ([k2t (+ w (* (/ h 2) k1w))])
+                            (+ t (* h k2t))))]
+                  [w w0 (let ([k2w (* (/ (- g) L) (sin (+ t (* (/ h 2) w))))])
+                          (+ w (* h k2w)))]
+                  [n 0 (+ n 1)])
+                 t)))

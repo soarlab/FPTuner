@@ -1,0 +1,9 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x0 x1 x2 x3 x4 x5 x6 x7)
+        :name "test02_sum8"
+        :precision binary64
+        :pre (and (< 1 x0 2) (< 1 x1 2) (< 1 x2 2)
+                  (< 1 x3 2) (< 1 x4 2) (< 1 x5 2)
+                  (< 1 x6 2) (< 1 x7 2))
+        (+ (+ (+ (+ (+ (+ (+ x0 x1) x2) x3) x4) x5) x6) x7))

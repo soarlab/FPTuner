@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x0 x1 x2 x3)
+        :name "test06_sums4_sum1"
+        :precision binary32
+        :pre (and (< -1e-5 x0 1.00001) (< 0 x1 1) (< 0 x2 1) (< 0 x3 1))
+        (+ (+ (+ x0 x1) x2) x3))

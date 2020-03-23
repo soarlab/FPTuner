@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (a b c)
+        :name "triangle1"
+        :cite (darulova-kuncak-2014)
+        :pre (and (<= 1 a 9) (<= 1 b 9) (<= 1 c 9)
+                  (> (+ a b) (+ c 0.1)) (> (+ a c) (+ b 0.1)) (> (+ b c) (+ a 0.1)))
+        :rosa-post (=> res (<= 0.29 res 35.1))
+        :rosa-ensuring 2.7e-11
+        (let ([s (/ (+ (+ a b) c) 2)])
+          (sqrt (* (* (* s (- s a)) (- s b)) (- s c)))))

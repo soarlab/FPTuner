@@ -1,0 +1,10 @@
+;; -*- mode: scheme -*-
+
+(FPCore (u v T)
+        :name "doppler3"
+        :cite (darulova-kuncak-2014)
+        :fpbench-domain science
+        :precision binary64
+        :pre (and (<= -30 u 120) (<= 320 v 20300) (<= -50 T 30))
+        (let ([t1 (+ 331.4 (* 0.6 T))])
+          (/ (* (- t1) v) (* (+ t1 u) (+ t1 u)))))

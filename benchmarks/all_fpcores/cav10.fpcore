@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x)
+        :name "cav10"
+        :cite (darulova-kuncak-2014)
+        :pre (< 0 x 10)
+        :rosa-post (=> res (<= 0 res 3.0))
+        :rosa-ensuring 3.0
+        (if (>= (- (* x x) x) 0)
+            (/ x 10)
+            (+ (* x x) 2)))

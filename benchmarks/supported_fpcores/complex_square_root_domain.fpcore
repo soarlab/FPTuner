@@ -1,0 +1,8 @@
+;; -*- mode: scheme -*-
+
+(FPCore (re im)
+        :name "complex_square_root"
+        :cite (herbie-2015)
+        :pre (and (<= 0 re 10)
+                  (<= 0.00390625 im 10))
+        (* 0.5 (sqrt (* 2.0 (+ (sqrt (+ (* re re) (* im im))) re)))))

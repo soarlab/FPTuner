@@ -1,0 +1,8 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x n)
+        :name "nmse_problem_3_4_6"
+        :cite (hamming-1987 herbie-2015)
+        :fpbench-domain textbook
+        :pre (>= x 0)
+        (- (pow (+ x 1) (/ 1 n)) (pow x (/ 1 n))))

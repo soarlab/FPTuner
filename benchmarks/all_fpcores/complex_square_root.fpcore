@@ -1,0 +1,6 @@
+;; -*- mode: scheme -*-
+
+(FPCore (re im)
+        :name "complex_square_root"
+        :cite (herbie-2015)
+        (* 0.5 (sqrt (* 2.0 (+ (sqrt (+ (* re re) (* im im))) re)))))

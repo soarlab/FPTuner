@@ -1,0 +1,22 @@
+;; -*- mode: scheme -*-
+
+(FPCore (y yd)
+        :name "lead_lag_system"
+        :description "Move a mass from an initial position to a desired position.
+Inputs: Initial position `y`; desired position `yd`"
+        :cite (feron-ieee10 damouche-martel-chapoutot-fmics15)
+        :fpbench-domain controls
+        :precision binary32
+        :pre (and (< 0 yd 50) (< 0 y 50))
+        :example ([y 2.5] [yd 5.0])
+        (let ([eps 0.01] [Dc -1280.0]
+              [Ac00 .499] [Ac01 -.05] [Ac10 .010] [Ac11 1.00]
+              [Bc0 1.0] [Bc1 0.0] [Cc0 564.48] [Cc1 0.0])
+          (while* (> e eps)
+                  ([yc  0.0 (let ([v (- y yd)]) (if (< v -1.0) -1.0 (if (< 1.0 v) 1.0 v)))]
+                   [u   0.0 (+ (* Cc0 xc0) (+ (* Cc1 xc1) (* Dc yc)))]
+                   [xc0 0.0 (+ (* Ac00 xc0) (+ (* Ac01 xc1) (* Bc0 yc)))]
+                   [xc1 0.0 (+ (* Ac10 xc0) (+ (* Ac11 xc1) (* Bc1 yc)))]
+                   [i   0.0 (+ i 1.0)]
+                   [e   1.0 (fabs (- yc xc1))])
+                  xc1)))

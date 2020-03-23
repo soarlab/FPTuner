@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (a b c)
+        :name "nmse_p42_positive"
+        :cite (hamming-1987 herbie-2015)
+        :fpbench-domain textbook
+        :pre (and (>= (* b b) (* 4 (* a c)))
+                  (<= 0.00390625 a 5)
+                  (<= 10.00390625 b 15)
+                  (<= 0 c 5))
+        (/ (+ (- b) (sqrt (- (* b b) (* 4 (* a c))))) (* 2 a)))

@@ -1,0 +1,10 @@
+;; -*- mode: scheme -*-
+
+(FPCore (v)
+        :name "carbonGas"
+        :cite (darulova-kuncak-2014 solovyev-et-al-2015)
+        :fpbench-domain science
+        :precision binary64
+        :pre (<= 0.1 v 0.5)
+        (let ([p 3.5e7] [a 0.401] [b 42.7e-6] [t 300] [n 1000] [k 1.3806503e-23])
+          (- (* (+ p (* (* a (/ n v)) (/ n v))) (- v (* n b))) (* (* k n) t))))

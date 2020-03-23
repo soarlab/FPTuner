@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (a b2 c)
+        :name "nmse_problem_3_2_1_negative"
+        :cite (hamming-1987 herbie-2015)
+        :fpbench-domain textbook
+        :pre (and (>= (* b2 b2) (* a c))
+                  (<= 0.00390625 a 5)
+                  (<= 10.00390625 b2 15)
+                  (<= 0 c 5))
+        (/ (- (- b2) (sqrt (- (* b2 b2) (* a c)))) a))

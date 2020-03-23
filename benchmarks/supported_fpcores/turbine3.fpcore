@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (v w r)
+        :name "turbine3"
+        :cite (darulova-kuncak-2014 solovyev-et-al-2015)
+        :fpbench-domain controls
+        :precision binary64
+        :pre (and (<= -4.5 v -0.3) (<= 0.4 w 0.9) (<= 3.8 r 7.8))
+        (- (- (- 3 (/ 2 (* r r)))
+              (/ (* (* 0.125 (+ 1 (* 2 v))) (* (* (* w w) r) r)) (- 1 v)))
+           0.5))

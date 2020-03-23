@@ -1,0 +1,32 @@
+;; -*- mode: scheme -*-
+
+(FPCore (sr* sl*)
+        :name "odometry"
+        :description "Compute the position of a robot from the speed of the wheels.
+Inputs: Speed `sl`, `sr` of the left and right wheel, in rad/s."
+        :cite (damouche-martel-chapoutot-fmics15)
+        :fpbench-domain controls
+        :precision binary32
+        :pre (and (< 0.05 sl* (* 2 PI)) (< 0.05 sr* (* 2 PI)))
+        :example ([sr* 0.0785398163397] [sl* 0.0525398163397])
+        (let ([inv_l 0.1] [c 12.34])
+          (while* (< t 1000)
+                  ([delta_dl 0.0 (* c sl)]
+                   [delta_dr 0.0 (* c sr)]
+                   [delta_d  0.0 (* (+ delta_dl delta_dr) 0.5)]
+                   [delta_theta 0.0 (* (- delta_dr delta_dl) inv_l)]
+                   [arg  0.0 (+ theta (* delta_theta 0.5))]
+                   ;; cos
+                   [cosi 0.0 (+ (- 1 (* (* arg arg) 0.5)) (* (* (* (* arg arg) arg) arg) 0.0416666666))]
+                   [x 0.0 (+ x (* delta_d cosi))]
+                   ;; sin
+                   [sini 0.0 (+ (- arg (* (* (* arg arg) arg) 0.1666666666))
+                                (* (* (* (* (* arg arg) arg) arg) arg) 0.008333333))]
+                   [y 0.0 (+ y (* delta_d sini))]
+                   [theta -.985 (+ theta delta_theta)]
+                   [t 0 (+ t 1)]
+                   [tmp sl* sl]
+                   [sl sl* (if (== j 50) sr sl)]
+                   [sr sr* (if (== j 50) tmp sr)]
+                   [j 0 (if (== j 50) 0 (+ j 1))])
+                  x))) ;; `y` is also an output but is skipped for now

@@ -1,0 +1,11 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x1 x2 x3)
+        :name "rigidBody2"
+        :cite (darulova-kuncak-2014 solovyev-et-al-2015)
+        :fpbench-domain science
+        :precision binary64
+        :pre (and (<= -15 x1 15) (<= -15 x2 15) (<= -15 x3 15))
+        (- (+ (- (+ (* (* (* 2 x1) x2) x3) (* (* 3 x3) x3))
+                 (* (* (* x2 x1) x2) x3)) (* (* 3 x3) x3))
+           x2))

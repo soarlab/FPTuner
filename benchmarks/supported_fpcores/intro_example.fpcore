@@ -1,0 +1,7 @@
+;; -*- mode: scheme -*-
+
+(FPCore (t)
+        :name "intro_example"
+        :cite (solovyev-et-al-2015)
+        :pre (<= 0 t 999)
+        (/ t (+ t 1)))
