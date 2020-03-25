@@ -1,4 +1,8 @@
-requirements/FPTaylor/
-requirements/debug_eniroment.sh
-requirements/gelpia/
-requirements/log.txt
+/requirements/FPTaylor/
+/requirements/debug_eniroment.sh
+/requirements/gelpia/
+/requirements/gurobi[0-9]*
+/requirements/log.txt
+__pycache__
+log
+tmp
