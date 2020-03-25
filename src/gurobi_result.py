@@ -1,20 +1,19 @@
 
 
+from fpcore_ast import Variable, Number, Operation
 from fpcore_logging import Logger
-import gurobipy as gp
 from gurobipy import GRB
 
+import gurobipy as gp
+import infix_str_ast
 
-logger = Logger()
+logger = Logger(level=Logger.HIGH)
 
 
 class GurobiResult:
-    BIT_WIDTH_TO_DENOM = {
-        "fp16": 2**11,
-        "fp32": 2**24,
-        "fp64": 2**53,
-        "fp128": 2**113,
-        }
+    BIT_WIDTH_ORDER = ["fp32", "fp64", "fp128"]
+    DENOM_ORDER = [2**24, 2**53, 2**113]
+    BIT_WIDTH_TO_DENOM = dict(zip(BIT_WIDTH_ORDER, DENOM_ORDER))
 
     def __init__(self, ssa, scale=1000):
         self.scale = scale

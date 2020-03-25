@@ -29,6 +29,11 @@ def parse_args(argv):
                             nargs="?",
                             type=str,
                             help="Redirect logging to given file.")
+    arg_parser.add_argument("-b", "--bit-widths",
+                            nargs="+",
+                            choices=["fp32", "fp64", "fp128"],
+                            default=["fp32", "fp64"],
+                            help="Bit widths to search over")
 
     args = arg_parser.parse_args(argv[1:])
 
@@ -37,10 +42,15 @@ def parse_args(argv):
     if args.log_file is not None:
         Logger.set_log_filename(args.log_file)
 
+    bws = set(args.bit_widths)
+    bws = list(bws)
+    args.bit_widths = sorted(bws, key=lambda s: int(s[2:]))
+
     logger("Argument settings:")
     logger("  query_files: {}", args.query_files)
     logger("        error: {}", args.error)
     logger("    verbosity: {}", args.verbosity)
     logger("     log_file: {}", args.log_file)
+    logger("   bit_widths: {}", args.bit_widths)
 
     return args

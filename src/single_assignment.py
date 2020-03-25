@@ -24,6 +24,7 @@ class SingleAssignment:
 
     def __init__(self, search_space):
         self.search_space = search_space
+        self.name = None
         self.inputs = OrderedDict()
         self.definitions = OrderedDict()
         self.fptaylor_forms = dict()

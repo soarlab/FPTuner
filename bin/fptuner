@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 
+import os.path as path
+import sys
+
+PYTHON_DIR = path.abspath(path.dirname(__file__))
+GIT_DIR = path.split(PYTHON_DIR)[0]
+sys.path.append(path.join(GIT_DIR, "src"))
+sys.path.append(path.join(GIT_DIR, "src", "fptaylor"))
+sys.path.append(path.join(GIT_DIR, "src", "fpcore_parser", "src"))
+
+import check_requirements
+
 from fpcore_logging import Logger
 from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError
 from fpcore_lexer import FPCoreLexer
@@ -8,7 +19,6 @@ from gurobi_result import GurobiResult
 
 import all_modifications_ast
 import fptuner_argument_parser
-import sys
 
 
 logger = Logger(level=Logger.HIGH, color=Logger.green)
@@ -17,11 +27,10 @@ logger = Logger(level=Logger.HIGH, color=Logger.green)
 def main(argv):
     args = fptuner_argument_parser.parse_args(argv)
 
-    bit_widths = ["fp32", "fp64"]
     sins = ["sin", "my_sin"]
     operations = {"sin": sins}
     search_space = {"error_bound": args.error,
-                    "bit_widths": bit_widths,
+                    "bit_widths": args.bit_widths,
                     "operations": operations}
 
     lexer = FPCoreLexer()
@@ -51,8 +60,7 @@ def main(argv):
                 ssa = fpcore.to_single_assignment(search_space)
                 ssa.get_fptaylor_forms()
                 ssa.get_fptaylor_maximums()
-                #print(ssa)
-                GurobiResult(ssa)
+                gr = GurobiResult(ssa)
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:

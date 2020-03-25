@@ -255,6 +255,12 @@ def to_single_assignment(self, search_space):
     #       Returning a SingleAssignment
     ssa = SingleAssignment(search_space)
 
+    # Get the name
+    name = "func"
+    for prop in self.properties:
+        if prop.name == "name":
+            name = prop.value
+
     # Grab domain bounds
     domains = properties_to_argument_domains(self)
     initial_environment = dict()
