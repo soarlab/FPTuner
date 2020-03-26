@@ -1,28 +1,27 @@
 
 
+from fpcore_logging import Logger
+
 import os
 import os.path as path
 import subprocess
 import sys
 
 
+logger = Logger(color=Logger.yellow)
+
 SRC_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(SRC_DIR)[0]
-
-from fpcore_logging import Logger
-
-
-logger = Logger(color=Logger.yellow)
 
 
 def append_to_environ(pathname, addition):
     try:
         current = os.environ[pathname]
         os.environ[pathname] = "{}:{}".format(addition, current)
-        logger("  {} = {}", pathname, os.environ[pathname])
+        logger("{} = {}", pathname, os.environ[pathname])
     except KeyError:
         os.environ[pathname] = addition
-        logger("  new {} = {}", pathname, os.environ[pathname])
+        logger("new {} = {}", pathname, os.environ[pathname])
 
 
 # External requirements
@@ -68,5 +67,4 @@ except FileNotFoundError:
     except FileNotFoundError as e:
         logger.error("Unable to run fptaylor")
         logger.error("Have the requirements been built?")
-        logger.error(e)
         sys.exit(1)

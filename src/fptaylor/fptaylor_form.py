@@ -38,11 +38,9 @@ class FPTaylorForm:
         if len(self.forms) != other.forms:
             return False
         for exp in self.forms:
-            if exp not in other.forms:
+            if exp not in other.forms or self.forms[exp] != other.forms[exp]:
                 return False
-            if self.forms[exp] != other.forms[exp]:
-                return False
-            return True
+        return True
 
     def __add__(self, other):
         retval = FPTaylorForm(None, None)
@@ -86,7 +84,7 @@ class FPTaylorForm:
     def to_gurobi(self, eps):
         parts = list()
         for exp, maximum in self.maximums.items():
-            if exp == "exp":
+            if exp == "eps":
                 parts.append(eps*maximum)
             else:
                 parts.append((2**exp)*maximum)

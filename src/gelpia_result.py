@@ -42,7 +42,7 @@ class GelpiaResult:
 
     def __init__(self, inputs, expr):
         # Format inputs, target expression, and set as member
-        # todo: will the float cast loose information?
+        # todo: this float cast can loose information
         lines = ["{} = [{}, {}];".format(name,
                                          float(Fraction(domain[0].source)),
                                          float(Fraction(domain[1].source)))

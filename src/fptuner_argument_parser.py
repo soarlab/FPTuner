@@ -20,7 +20,6 @@ def parse_args(argv):
                             help="The error bound to stay under.")
     arg_parser.add_argument("-v", "--verbosity",
                             nargs="?",
-                            type=str,
                             default="low",
                             const="medium",
                             choices=list(Logger.CONSTANT_DICT),
@@ -42,8 +41,7 @@ def parse_args(argv):
     if args.log_file is not None:
         Logger.set_log_filename(args.log_file)
 
-    bws = set(args.bit_widths)
-    bws = list(bws)
+    bws = list(set(args.bit_widths))
     args.bit_widths = sorted(bws, key=lambda s: int(s[2:]))
 
     logger("Argument settings:")

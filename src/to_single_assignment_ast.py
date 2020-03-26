@@ -1,9 +1,8 @@
 
 
 from ast_modifier import add_method
-from exceptions import (BadPreError, ClassError, DomainError, FeatureError,
-                        NoPreError, OperationError, UnsupportedError,
-                        VariableError)
+from exceptions import (BadPreError, DomainError, FeatureError, NoPreError,
+                        OperationError, UnsupportedError, VariableError)
 from fpcore_ast import (ASTNode, Binding, Cast, Constant, FPCore, If, Let,
                         LetStar, Number, Operation, Variable, While, WhileStar)
 from fpcore_logging import Logger
@@ -19,7 +18,10 @@ SUPPORTED = {"*", "+", "-", "/", "atan", "cos", "exp", "log", "pow", "sin",
 
 @add_method(ASTNode)
 def to_single_assignment(self, ssa, environment_stack):
-    raise ClassError("to_single_assignment", type(self).__name__)
+    # Make sure calling __eq__ leads to an error if not overridden
+    class_name = type(self).__name__
+    msg = "to_single_assignment not implemented for class {}"
+    raise NotImplementedError(msg.format(class_name))
 
 
 # Only override func for leaf classes so unimplemented versions are caught by
@@ -135,7 +137,6 @@ def to_single_assignment(self, ssa, environment_stack):
 @add_method(Binding)
 def to_single_assignment(self, ssa, environment_stack):
     # Expand body using the environment stack
-    # This should allow shadowing
     expanded = self.value.expand(ssa, environment_stack)
 
     # Note: This deviates from the normal return of a Variable. An environment
@@ -150,7 +151,7 @@ def properties_to_argument_domains(fpcore):
     properties = fpcore.properties
 
     def normalize_comparison(comp):
-        # given an n-arry comparison return a list of comparisons which all use
+        # Given an n-arry comparison return a list of comparisons which all use
         # "<=" and only have two arguments
 
         # Only simple domains are supported
@@ -180,11 +181,13 @@ def properties_to_argument_domains(fpcore):
         return ret_list
 
     def get_domains(precondition_list):
-        lower_domains = {a.source: None for a in arguments}
-        upper_domains = {a.source: None for a in arguments}
+        # Search preconditions for variable domains
+        string_arguments = {a.source for a in arguments}
+        lower_domains = {s: None for s in string_arguments}
+        upper_domains = {s: None for s in string_arguments}
 
         def is_input(x):
-            return type(x) == Variable and x.source in upper_domains
+            return type(x) == Variable and x.source in string_arguments
 
         for pre in precondition_list:
 
@@ -260,6 +263,10 @@ def to_single_assignment(self, search_space):
     for prop in self.properties:
         if prop.name == "name":
             name = prop.value
+    ss.name = name
+
+    # Keep properties from fpcore
+    ssa.properties = self.properties
 
     # Grab domain bounds
     domains = properties_to_argument_domains(self)

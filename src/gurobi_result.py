@@ -7,6 +7,7 @@ from gurobipy import GRB
 import gurobipy as gp
 import infix_str_ast
 
+
 logger = Logger(level=Logger.HIGH)
 
 

@@ -10,23 +10,19 @@ class FPTunerError(Exception):
     pass
 
 
-class ClassError(FPTunerError):
-    """ Indicates that a function was not overridden by a given class """
-    def __init__(self, func_name, class_name):
-        self.func_name = func_name
-        self.class_name = class_name
-
-
 class FeatureError(FPTunerError):
-    """ Indicates that a language feature was used that has not yet been
-    implemented """
+    """
+    Indicates that a language feature was used that has not yet been
+    implemented
+    """
     def __init__(self, feature_name):
         self.feature_name = feature_name
 
 
 class VariableError(FPTunerError):
-    """ Indicates that a variable was used without a definition being given
-    first """
+    """
+    Indicates that a variable was used without a definition being given first
+    """
     def __init__(self, name):
         self.name = name
 
@@ -70,28 +66,36 @@ class NameClashError(FPTunerError):
 
 
 class SingleOperationError(FPTunerError):
-    """ Indicates that more than a single operation was added as a
-    SingleAssignment subexpression """
+    """
+    Indicates that more than a single operation was added as a
+    SingleAssignment subexpression
+    """
     def __init__(self, value):
         self.value = str(value)
 
 
 class FPTaylorMatchError(FPTunerError):
-    """ Indicates that matching FPTaylor forms with the SingleAssignment
-    definitions failed """
+    """
+    Indicates that matching FPTaylor forms with the SingleAssignment
+    definitions failed
+    """
     def __init__(self, unmatched):
         self.unamtched = unmatched
 
 
 class FPTaylorMatchOneError(FPTaylorMatchError):
-    """ Indicates that matching FPTaylor forms failed where one form was
-    intended to be unmatched """
+    """
+    Indicates that matching FPTaylor forms failed where one form was
+    intended to be unmatched
+    """
     pass
 
 
 class UnreachableError(FPTunerError):
-    """ Indicates that the corresponding code path was thought to be
-    unreachable """
+    """
+    Indicates that the corresponding code path was thought to be
+    unreachable
+    """
     pass
 
 
@@ -106,8 +110,10 @@ class FPTaylorRuntimeError(FPTunerError):
 
 
 class FPTaylorFormError(FPTunerError):
-    """ Indicates that the forms and corrsponding original expressions parsed
-    from FPTaylor's output do not match in length """
+    """
+    Indicates that the forms and corrsponding original expressions parsed
+    from FPTaylor's output do not match in length
+    """
     def __init__(self, out, forms, originals):
         self.out = out
         self.forms = forms
@@ -115,7 +121,9 @@ class FPTaylorFormError(FPTunerError):
 
 
 class FPTaylorLexError(FPTunerError):
-    """ Indicates a lexing error for the FPTaylor Parser """
+    """
+    Indicates a lexing error for the FPTaylor Parser
+    """
     def __init__(self, lineno, tok):
         self.lineno = lineno
         self.tok = tok

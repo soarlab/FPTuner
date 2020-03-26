@@ -1,8 +1,8 @@
 
 
-from fpcore_logging import Logger
 from ast_modifier import add_method
 from fpcore_ast import ASTNode, Number, Operation
+from fpcore_logging import Logger
 from fractions import Fraction
 
 
@@ -31,11 +31,9 @@ def is_positive_power_of_two(n):
 
 
 def is_power_of_two(n):
-    # Either a Number or int are expected
+    # A Number is expected
     if type(n) == Number:
         frac = Fraction(n.source)
-    elif type(n) == int:
-        frac = Fraction(n)
     else:
         return False
 
@@ -72,7 +70,7 @@ def can_have_fptaylor_form(self, ssa):
         return False
 
     # FPTaylor does not create error forms for negative powers of two
-    if frac.denominator != 1 and is_power_of_two(frac.denominator):
+    if frac.denominator != 1 and is_positive_power_of_two(frac.denominator):
         return False
 
     # Assume all other literals have an associated error form

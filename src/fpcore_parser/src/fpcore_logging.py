@@ -101,10 +101,12 @@ class Logger():
 
     @classmethod
     def set_log_level(self_class, level):
-        # Set log level unconditionally
+        # Check level
         if type(level) != int:
             msg = "level must be an int, found '{}'".format(type(level))
             raise TypeError(msg)
+
+        # Set class variable
         self_class.LOG_LEVEL = level
 
     @classmethod
@@ -113,9 +115,10 @@ class Logger():
         if self_class.LOG_FILE != sys.stdout:
             msg = "Attempted to set log filename twice"
             raise RuntimeError(msg)
+
         # Open the indicated logfile
         # todo: What should be done if this fails or there are issues
-        #     during the lifetime?
+        #       during the lifetime?
         self_class.LOG_FILE = open(filename, "w")
 
     # +-----------------------------------------------------------------------+
@@ -124,7 +127,8 @@ class Logger():
     def __init__(self, level=None, color=None, def_color=None):
         # Use defaults if arguments aren't set
         #     Note: ternary has to be used for level since a level of 0 is
-        #           valid
+        #           valid (ie '0 if 0 is not None else 40 == 0' vs
+        #                                        '0 or 40 == 40')
         self.level = level if level is not None else Logger.EXTRA
         self.color = color or Logger.white
         self.def_color = def_color or Logger.white
@@ -150,20 +154,22 @@ class Logger():
         # If this was the last logger and the log had been sent to a file close
         #     the file
         # todo: This is only called when the object is garbage collected
-        #     and so has no garantee that it will ever be called. This means we
-        #     will most likely leave an open file handle on exit, but I don't
-        #     know of a better way to do this. Context managers won't help
-        #     since a logger is meant to be made at the beginning of a module.
+        #       and so has no garantee that it will ever be called
+        #       This means we will most likely leave an open file handle on
+        #       exit, but I don't know of a better way to do this
+        #       Context managers won't help since a logger is meant to be
+        #       made at the beginning of a module
         Logger.LOGGER_COUNT -= 1
         if Logger.LOGGER_COUNT == 0 and Logger.LOG_FILE != sys.stdout:
             Logger.LOG_FILE.close()
             Logger.LOG_FILE = None
 
     def __call__(self, message, *args):
+        # Convenience alias for log
         self.log(message, *args)
 
     def should_log(self, level=None):
-        # With no argument check against the member variable
+        # With no level check against the member variable
         level = self.level if level is None else level
         return level <= Logger.LOG_LEVEL
 
@@ -172,7 +178,7 @@ class Logger():
         out = out or Logger.LOG_FILE
 
         # Add begining parts to message and finish all formating
-        pre = "" if pre is None else " " + pre
+        pre = pre or ""
         mod = self.color(self.module)
         full_message = "{}:{} {}".format(mod, pre, formatted_message)
 
@@ -188,7 +194,8 @@ class Logger():
 
     def format_message(self, message, *args):
         # Don't try to format if args aren't given
-        # This allows logging of an object without explicit string conversion
+        # This allows logging of an object without the caller using an
+        # explicit string conversion
         if len(args) == 0:
             return str(message)
         return message.format(*args)
@@ -210,15 +217,16 @@ class Logger():
         if self.should_log():
             frame = inspect.stack()[1]
             funcname = self.def_color(frame.function)
+            formatted_funcname = " {}:".format(funcname)
             formatted_message = self.format_message(message, *args)
-            self._log(formatted_message, pre=funcname+":")
+            self._log(formatted_message, pre=formatted_funcname)
 
     def warning(self, message, *args):
-        # Only quiet warnings when on the 'NONE' level
+        # Only silence warnings when on the NONE level
         if self.should_log(Logger.QUIET):
 
             # Warnings go to stderr
-            warn = Logger.yellow("WARNING") + ":"
+            warn = " {}:".format(Logger.yellow("WARNING"))
             formatted_message = self.format_message(message, *args)
             full_message = self._log(formatted_message, warn, sys.stderr)
 
@@ -228,7 +236,7 @@ class Logger():
 
     def error(self, message, *args):
         # Errors always go to stderr
-        err = Logger.red("ERROR") + ":"
+        err = " {}:".format(Logger.red("ERROR"))
         formatted_message = self.format_message(message, *args)
         full_message = self._log(formatted_message, err, sys.stderr)
 

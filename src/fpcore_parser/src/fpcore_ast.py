@@ -1,7 +1,7 @@
 
 
-from fpcore_logging import Logger
 from fpcore_lexer import FPCoreLexer
+from fpcore_logging import Logger
 
 import sys
 
@@ -26,8 +26,8 @@ class ASTNode:
 
     def __str__(self):
         class_name = type(self).__name__
-        logger.error("__str__ is not defined for {}", class_name)
-        sys.exit(1)
+        msg = "__str__ is not defined for {}".format(class_name)
+        raise NotImplementedError(msg)
 
     def __repr__(self):
         class_name = type(self).__name__
@@ -39,6 +39,7 @@ class ASTNode:
 # +---------------------------------------------------------------------------+
 class Expr(ASTNode):
     def __init__(self):
+        super().__init__()
         self.properties = list()
 
     def add_properties(self, properties):
@@ -99,17 +100,23 @@ class Operation(Expr):
             logger.error("Possible unary operations:\n{}",
                          "\n".join(sorted(FPCoreLexer.UNARY_OPERATIONS)))
             sys.exit(1)
-        elif (len(args) == 2
-              and op not in FPCoreLexer.BINARY_OPERATIONS):
+
+        elif len(args) == 2 and op not in FPCoreLexer.BINARY_OPERATIONS:
             logger.error("Operation '{}' is not binary, given: {}", op, args)
+            logger.error("Possible binary operations:\n{}",
+                         "\n".join(sorted(FPCoreLexer.BINARY_OPERATIONS)))
             sys.exit(1)
-        elif (len(args) == 3
-              and op not in FPCoreLexer.TERNARY_OPERATIONS):
+
+        elif len(args) == 3 and op not in FPCoreLexer.TERNARY_OPERATIONS:
             logger.error("Operation '{}' is not ternary, given: {}", op, args)
+            logger.error("Possible ternary operations:\n{}",
+                         "\n".join(sorted(FPCoreLexer.TERNARY_OPERATIONS)))
             sys.exit(1)
-        elif (len(args) >= 4
-              and op not in FPCoreLexer.NARY_OPERATIONS):
+
+        elif len(args) >= 4 and op not in FPCoreLexer.NARY_OPERATIONS:
             logger.error("Operation '{}' is not n-ary, given: {}", op, args)
+            logger.error("Possible n-ary operations:\n{}",
+                         "\n".join(sorted(FPCoreLexer.NARY_OPERATIONS)))
             sys.exit(1)
 
         self.op = op
@@ -302,6 +309,6 @@ class FPCore(ASTNode):
         properties_repr = list_to_repr(self.properties)
         return ("FPCore([{}],\n"
                 "       [{}],\n"
-                "      {})").format(arguments_repr,
-                                    properties_repr,
-                                    repr(self.expression))
+                "       {})").format(arguments_repr,
+                                     properties_repr,
+                                     repr(self.expression))

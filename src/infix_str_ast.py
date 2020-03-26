@@ -1,9 +1,8 @@
 
 
-from fpcore_logging import Logger
 from ast_modifier import add_method
-from exceptions import ClassError
 from fpcore_ast import ASTNode, Atom, Operation
+from fpcore_logging import Logger
 
 
 logger = Logger()
@@ -17,7 +16,8 @@ INFIX = {"+", "-", "*", "/"}
 def infix_str(self):
     # Make sure calling infix_str leads to an error if not overridden
     class_name = type(self).__name__
-    raise ClassError("infix_str", class_name)
+    msg = "infix_str not implemented for class {}".format(class_name)
+    raise NotImplementedError(msg)
 
 
 @add_method(Atom)

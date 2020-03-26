@@ -2,10 +2,10 @@
 
 from fpcore_lexer import FPCoreLexer
 
-import fpcore_ast
+import can_have_fptaylor_form_ast
 import equals_ast
 import expand_ast
-import can_have_fptaylor_form_ast
+import fpcore_ast
 import infix_str_ast
 import to_single_assignment_ast
 

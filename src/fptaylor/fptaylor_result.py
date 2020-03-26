@@ -56,13 +56,12 @@ class FPTaylorResult:
             f.write(self.query)
             f.flush()
 
-            # Put together FPTaylor command
+            # Put together the FPTaylor command
             flags = " ".join([k+" "+v for k, v in self.config.items()])
             command = "fptaylor {} {}".format(flags, f.name)
             logger.llog(Logger.HIGH, "command: {}", command)
 
             # Call FPTaylor
-            # todo: catch when fptaylor is not in the env
             with subprocess.Popen(shlex.split(command),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE) as p:
@@ -73,7 +72,6 @@ class FPTaylorResult:
                 self.out = raw_out.decode("utf8")
                 self.err = raw_err.decode("utf8")
                 self.retcode = p.returncode
-
 
                 # If anything went wrong in the call unceremoniusly exit
                 if self.retcode != 0:

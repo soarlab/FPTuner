@@ -1,9 +1,8 @@
 
 
-from fpcore_logging import Logger
 from ast_modifier import add_method
-from exceptions import ClassError
 from fpcore_ast import ASTNode, Atom, Operation, Number
+from fpcore_logging import Logger
 from fractions import Fraction
 
 
@@ -14,14 +13,14 @@ logger = Logger()
 def __eq__(self, other):
     # Make sure calling __eq__ leads to an error if not overridden
     class_name = type(self).__name__
-    raise ClassError("__eq__", class_name)
+    msg = "__eq__ not implemented for class {}".format(class_name)
+    raise NotImplementedError(msg)
 
 
 @add_method(Atom)
 def __eq__(self, other):
     # Variables and Constants can be checked by string equality
-    return (type(self) == type(other)
-            and self.source == other.source)
+    return type(self) == type(other) and self.source == other.source
 
 
 @add_method(Number)

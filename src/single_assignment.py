@@ -25,6 +25,7 @@ class SingleAssignment:
     def __init__(self, search_space):
         self.search_space = search_space
         self.name = None
+        self.properties = None
         self.inputs = OrderedDict()
         self.definitions = OrderedDict()
         self.fptaylor_forms = dict()
@@ -163,7 +164,7 @@ class SingleAssignment:
         unmatched = list()
 
         for orig, form in fptaylor_forms:
-            form.change_exp(-53, "exp")
+            form.change_exp(-53, "eps")
             form.expand_forms(self)
             found = False
             for name, expanded in unused:

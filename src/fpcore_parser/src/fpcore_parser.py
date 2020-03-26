@@ -1,10 +1,10 @@
 
 
-from fpcore_logging import Logger
 from fpcore_lexer import FPCoreLexer
+from fpcore_logging import Logger
 from sly import Parser
 
-import fpcore_ast
+import fpcore_ast as ast
 import sys
 
 
@@ -26,19 +26,19 @@ class FPCoreParser(Parser):
     # fpcore
     @_("LP FPCORE LP argument_plus RP property_plus expr RP")
     def fpcore(self, p):
-        return fpcore_ast.FPCore(p.argument_plus, p.property_plus, p.expr)
+        return ast.FPCore(p.argument_plus, p.property_plus, p.expr)
 
     @_("LP FPCORE LP RP property_plus expr RP")
     def fpcore(self, p):
-        return fpcore_ast.FPCore(None, p.property_plus, p.expr)
+        return ast.FPCore(None, p.property_plus, p.expr)
 
     @_("LP FPCORE LP argument_plus RP expr RP")
     def fpcore(self, p):
-        return fpcore_ast.FPCore(p.argument_plus, None, p.expr)
+        return ast.FPCore(p.argument_plus, None, p.expr)
 
     @_("LP FPCORE LP RP expr RP")
     def fpcore(self, p):
-        return fpcore_ast.FPCore(p[1], None, None, p.expr)
+        return ast.FPCore(p[1], None, None, p.expr)
 
     # argument
     @_("symbol")
@@ -74,67 +74,67 @@ class FPCoreParser(Parser):
        "DECNUM",
        "HEXNUM")
     def number(self, p):
-        return fpcore_ast.Number(p[0])
+        return ast.Number(p[0])
 
     @_("LP DIGITS DECNUM DECNUM DECNUM RP")
     def number(self, p):
-        return fpcore_ast.Number(" ".join(p[1:4]))
+        return ast.Number(" ".join(p[1:4]))
 
     # constant
     @_("CONSTANT")
     def constant(self, p):
-        return fpcore_ast.Constant(p[0])
+        return ast.Constant(p[0])
 
     # operation
     @_("LP OPERATION expr_plus RP")
     def operation(self, p):
-        return fpcore_ast.Operation(p[1], *p.expr_plus)
+        return ast.Operation(p[1], *p.expr_plus)
 
     # if_expr
     @_("LP IF expr expr expr RP")
     def if_expr(self, p):
-        return fpcore_ast.If(p.expr0, p.expr1, p.expr2)
+        return ast.If(p.expr0, p.expr1, p.expr2)
 
     # let
     @_("LP LET LP binding_plus RP expr RP")
     def let(self, p):
-        return fpcore_ast.Let(p.binding_plus, p.expr)
+        return ast.Let(p.binding_plus, p.expr)
 
     @_("LP LET LP RP expr RP")
     def let(self, p):
-        return fpcore_ast.Let(None, p.expr)
+        return ast.Let(None, p.expr)
 
     # let_star
     @_("LP LET_STAR LP binding_plus RP expr RP")
     def let_star(self, p):
-        return fpcore_ast.LetStar(p.binding_plus, p.expr)
+        return ast.LetStar(p.binding_plus, p.expr)
 
     @_("LP LET_STAR LP RP expr RP")
     def let_star(self, p):
-        return fpcore_ast.LetStar(None, p.expr)
+        return ast.LetStar(None, p.expr)
 
     # while_expr
     @_("LP WHILE expr LP while_binding_plus RP expr RP")
     def while_expr(self, p):
-        return fpcore_ast.While(p.expr0, p.while_binding_plus, p.expr1)
+        return ast.While(p.expr0, p.while_binding_plus, p.expr1)
 
     @_("LP WHILE expr LP RP expr RP")
     def while_expr(self, p):
-        return fpcore_ast.While(p.expr0, None, p.expr1)
+        return ast.While(p.expr0, None, p.expr1)
 
     # while_star
     @_("LP WHILE_STAR expr LP while_binding_plus RP expr RP")
     def while_star(self, p):
-        return fpcore_ast.WhileStar(p.expr0, p.while_binding_plus, p.expr1)
+        return ast.WhileStar(p.expr0, p.while_binding_plus, p.expr1)
 
     @_("LP WHILE_STAR expr LP RP expr RP")
     def while_star(self, p):
-        return fpcore_ast.WhileStar(p.expr0, None, p.expr1)
+        return ast.WhileStar(p.expr0, None, p.expr1)
 
     # cast
     @_("LP CAST expr RP")
     def cast(self, p):
-        return fpcore_ast.Cast(p.expr)
+        return ast.Cast(p.expr)
 
     # property_expr
     @_("LP BANG property_plus expr RP")
@@ -151,11 +151,11 @@ class FPCoreParser(Parser):
        "COLON symbol operation",  # modification
        "COLON symbol let")   # modification
     def property(self, p):
-        return fpcore_ast.Property(str(p.symbol), p[2])
+        return ast.Property(str(p.symbol), p[2])
 
     @_("COLON symbol LP binding_plus RP")  # modification
     def property(self, p):
-        return fpcore_ast.Property(str(p.symbol), p.binding_plus)
+        return ast.Property(str(p.symbol), p.binding_plus)
 
     # data
     @_("symbol")
@@ -181,17 +181,17 @@ class FPCoreParser(Parser):
     # binding
     @_("LB symbol expr RB")
     def binding(self, p):
-        return fpcore_ast.Binding(p.symbol, p.expr)
+        return ast.Binding(p.symbol, p.expr)
 
     # while_binding
     @_("LB symbol expr expr RB")
     def while_binding(self, p):
-        return fpcore_ast.WhileBinding(p.symbol, p.expr0, p.expr1)
+        return ast.WhileBinding(p.symbol, p.expr0, p.expr1)
 
     # symbol
     @_("SYMBOL")
     def symbol(self, p):
-        return fpcore_ast.Variable(p[0])
+        return ast.Variable(p[0])
 
     # argument_plus
     @_("argument argument_plus")
@@ -250,7 +250,7 @@ class FPCoreParser(Parser):
     # errors
     def error(self, p):
         if p:
-            logger.error("Line {}: Syntax error at {}", p.lineno, str(p))
+            logger.error("Line {}: Syntax error at {}", p.lineno, p)
         else:
             logger.error("Unexpected end of FPCore")
         sys.exit(1)
