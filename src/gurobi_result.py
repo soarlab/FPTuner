@@ -123,3 +123,4 @@ class GurobiResult:
         self.model.addConstr(cost == sum(self.bit_width_costs.values())
                              + sum(self.operation_costs.values()))
         return cost
+

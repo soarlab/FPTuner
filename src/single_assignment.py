@@ -16,7 +16,6 @@ logger = Logger()
 
 class SingleAssignment:
     FPTAYLOR_ROUNDS = {
-        "fp16": "rnd16",
         "fp32": "rnd32",
         "fp64": "rnd64",
         "fp128": "rnd128",

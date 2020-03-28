@@ -16,6 +16,7 @@ from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError
 from fpcore_lexer import FPCoreLexer
 from fpcore_parser import FPCoreParser
 from gurobi_result import GurobiResult
+from tuned_expression import TunedExpression
 
 import all_modifications_ast
 import fptuner_argument_parser
@@ -61,6 +62,9 @@ def main(argv):
                 ssa.get_fptaylor_forms()
                 ssa.get_fptaylor_maximums()
                 gr = GurobiResult(ssa)
+                tr = TunedExpression(ssa, gr)
+                print()
+                print(tr.to_c_function())
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:
@@ -80,8 +84,7 @@ def main(argv):
             except BadPreError as e:
                 logger.error("Unable to process precondition: '{}'", e.pre)
 
-            print()
-            print()
+            print("\n\n\n")
 
 
 if __name__ == "__main__":
