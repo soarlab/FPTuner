@@ -74,7 +74,10 @@ class TunedExpression():
         lines.append(signature)
         lines.append("{")
 
-        # todo: add range asserts
+        for name, domain in self.inputs.items():
+            raw = "    assert({0} <= {1} && {1} <= {2});"
+            line = raw.format(domain[0], name, domain[1])
+            lines.append(line)
 
         for name, value in self.definitions.items():
             my_type = self.types[name]
