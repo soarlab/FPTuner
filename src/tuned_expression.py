@@ -11,7 +11,9 @@ logger = Logger()
 class TunedExpression():
     TYPES = ["fp32", "fp64", "fp128"]
     DECLS = ["float", "double", "__float128"]
+    ROUNDS = ["rnd32", "rnd64", "rnd128"]
     TYPES_TO_DECLS = dict(zip(TYPES, DECLS))
+    TYPES_TO_ROUNDS = dict(zip(TYPES, ROUNDS))
 
     def __init__(self, ssa, gr):
         self.name = ssa.name
@@ -91,6 +93,32 @@ class TunedExpression():
         lines.append("}")
 
         return "\n".join(lines)
+
+    def to_fptaylor(self):
+        lines = list()
+
+        lines.append("{")
+
+        lines.append("Variables")
+        for name, domain in self.inputs.items():
+            lines.append("  real {} in [{}, {}];".format(name, *domain))
+        lines.append("")
+
+        lines.append("Definitions")
+        for name, value in self.definitions.items():
+            typ = self.types[name]
+            rnd = TunedExpression.TYPES_TO_ROUNDS[typ]
+            lines.append("  {} {}= {};".format(name, rnd, value.infix_str()))
+        lines.append("")
+
+        lines.append("Expressions")
+        def_keys = list(self.definitions.keys())
+        lines.append("  {};".format(def_keys[-1]))
+
+        lines.append("}")
+
+        query = "\n".join(lines)
+        return query
 
     def init_types(self, gr):
         types = dict()

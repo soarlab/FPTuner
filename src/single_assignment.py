@@ -127,7 +127,7 @@ class SingleAssignment:
 
         lines.append("Variables")
         for name, domain in self.inputs.items():
-            lines.append("  real {} in [{},{}];".format(name, *domain))
+            lines.append("  real {} in [{}, {}];".format(name, *domain))
         lines.append("")
 
         lines.append("Definitions")
