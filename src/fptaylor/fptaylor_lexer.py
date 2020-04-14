@@ -66,7 +66,7 @@ class FPTaylorLexer(Lexer):
         "cos",
         "exp",
         "log",
-        "sin", "my_sin",
+        "sin", "zero_sin", "one_sin", "m_one_sin", "taylor_1_sin", "taylor_3_sin",
         "sqrt",
         "tan",
     ], key=len)
