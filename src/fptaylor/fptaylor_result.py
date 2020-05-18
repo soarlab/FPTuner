@@ -81,7 +81,7 @@ class FPTaylorResult:
                                                self.err,
                                                self.retcode)
 
-                # Warn when FPTaylor compains about infinity and domain errors
+                # Warn when FPTaylor complains about infinity and domain errors
                 # todo: handle when this occurs
                 logger.llog(Logger.HIGH, "out:\n{}", self.out.strip())
                 if len(self.err) != 0:

@@ -1,0 +1,10 @@
+;; -*- mode: scheme -*-
+
+(FPCore (x r lat lon)
+        :name "sphere"
+        :cite (solovyev-et-al-2015)
+        :precision binary64
+        :pre (and (<= -10 x 10) (<= 0 r 10)
+                  (<= -1.570796 lat 1.570796) (<= -3.14159265 lon 3.14159265))
+        (let ([sinLat (sin lat)] [cosLon (cos lon)])
+          (+ x (* (* r sinLat) cosLon))))

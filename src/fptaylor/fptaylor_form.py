@@ -7,7 +7,7 @@ from fptaylor_parser import FPTaylorParser
 from gelpia_result import GelpiaResult
 
 
-logger = Logger()
+logger = Logger(level=Logger.HIGH, color=Logger.cyan)
 
 
 class FPTaylorForm:
@@ -76,16 +76,23 @@ class FPTaylorForm:
             new_forms[exp] = form.expand(ssa)
         self.forms = new_forms
 
-    def maximize(self, inputs):
+    def maximize(self, inputs, memoized):
         for exp, form in self.forms.items():
-            res = GelpiaResult(inputs, form)
-            self.maximums[exp] = res.max_upper
+            key = str(inputs) + str(form)
+            if key not in memoized:
+                memoized[key] = GelpiaResult(inputs, form).max_upper
+            else:
+                logger("Memoized result for: {}", key)
+            self.maximums[exp] = memoized[key]
 
-    def to_gurobi(self, eps):
+    def to_gurobi(self, eps, scale):
         parts = list()
+        parts_str = list()
         for exp, maximum in self.maximums.items():
             if exp == "eps":
-                parts.append(eps*maximum)
+                parts.append(eps*maximum*scale)
+                parts_str.append("{}*{}*{}".format(eps.VarName, maximum, scale))
             else:
-                parts.append((2**exp)*maximum)
-        return sum(parts)
+                parts.append((2**exp)*maximum*scale)
+                parts_str.append("{}*{}*{}".format(2**exp, maximum, scale))
+        return sum(parts), " + ".join(parts_str)

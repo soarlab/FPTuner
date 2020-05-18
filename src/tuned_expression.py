@@ -20,6 +20,7 @@ class TunedExpression():
         self.properties = ssa.properties
         self.inputs = ssa.inputs
         self.definitions = ssa.definitions
+        self.search_operations = ssa.search_space["operations"]
         self.types = None
         self.operators = None
         self.info = None
@@ -31,20 +32,24 @@ class TunedExpression():
 
     def __str__(self):
         lines = [
-            "   operations: {}".format(self.info["operations"]),
-            "         fp32: {}".format(self.info["fp32_operations"]),
-            "         fp64: {}".format(self.info["fp64_operations"]),
-            "        fp128: {}".format(self.info["fp128_operations"]),
-            "        casts: {}".format(self.info["casts"]),
-            "     up_casts: {}".format(self.info["up_casts"]),
-            " fp32 -> fp64: {}".format(self.info["fp32_to_fp64_casts"]),
-            "fp32 -> fp128: {}".format(self.info["fp32_to_fp128_casts"]),
-            "fp64 -> fp128: {}".format(self.info["fp64_to_fp128_casts"]),
-            "   down_casts: {}".format(self.info["up_casts"]),
-            " fp64 -> fp32: {}".format(self.info["fp64_to_fp32_casts"]),
-            "fp128 -> fp32: {}".format(self.info["fp128_to_fp32_casts"]),
-            "fp128 -> fp64: {}".format(self.info["fp128_to_fp64_casts"]),
+            "   operations\t{}".format(self.info["operations"]),
+            "         fp32\t{}".format(self.info["fp32_operations"]),
+            "         fp64\t{}".format(self.info["fp64_operations"]),
+            "        fp128\t{}".format(self.info["fp128_operations"]),
+            "        casts\t{}".format(self.info["casts"]),
+            "     up_casts\t{}".format(self.info["up_casts"]),
+            " fp32 -> fp64\t{}".format(self.info["fp32_to_fp64_casts"]),
+            "fp32 -> fp128\t{}".format(self.info["fp32_to_fp128_casts"]),
+            "fp64 -> fp128\t{}".format(self.info["fp64_to_fp128_casts"]),
+            "   down_casts\t{}".format(self.info["up_casts"]),
+            " fp64 -> fp32\t{}".format(self.info["fp64_to_fp32_casts"]),
+            "fp128 -> fp32\t{}".format(self.info["fp128_to_fp32_casts"]),
+            "fp128 -> fp64\t{}".format(self.info["fp128_to_fp64_casts"]),
         ]
+        for op_kind in self.search_operations:
+            for op in self.search_operations[op_kind]:
+                lines.append("{:>13}\t{}".format(op, self.info[op]))
+
         return "\n".join(lines)
 
     def _get_input_type(self, name):
@@ -122,7 +127,7 @@ class TunedExpression():
 
     def init_types(self, gr):
         types = dict()
-        for name, bools in gr.eps_bools.items():
+        for name, bools in gr.bit_width_bools.items():
             found = False
             for bw_name, gvar in bools.items():
                 if gvar.x > 0.9:
@@ -184,6 +189,9 @@ class TunedExpression():
                 "fp64_to_fp32_casts": 0,
                 "fp128_to_fp32_casts": 0,
                 "fp128_to_fp64_casts": 0,}
+        for op_kind in self.search_operations:
+            for op in self.search_operations[op_kind]:
+                info[op] = 0
         def update_info(name, value, my_type=None):
             if type(value) != Operation:
                 return
@@ -195,6 +203,11 @@ class TunedExpression():
                 info["fp64_operations"] += 1
             if my_type == "fp128":
                 info["fp128_operations"] += 1
+
+            for op_kind in self.search_operations:
+                if value.op in self.search_operations[op_kind]:
+                    info[value.op] += 1
+                    break
 
             for a in value.args:
                 if type(a) == Operation:

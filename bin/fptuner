@@ -28,13 +28,16 @@ logger = Logger(level=Logger.HIGH, color=Logger.green)
 def main(argv):
     args = fptuner_argument_parser.parse_args(argv)
 
-    sins = [
-        "zero_sin", "one_sin", "m_one_sin",
-        "taylor_1_sin",
-        "taylor_3_sin",
-        "sin",
-    ]
-    operations = {"sin": sins}
+    sins = [row[1] for row in all_modifications_ast.OperationTable
+            if row[0] == "sin"]
+    exps = [row[1] for row in all_modifications_ast.OperationTable
+            if row[0] == "exp"]
+    logs = [row[1] for row in all_modifications_ast.OperationTable
+            if row[0] == "log"]
+
+    operations = {"sin": sins,
+                  "exp": exps,
+                  "log": logs}
     search_space = {"error_bound": args.error,
                     "bit_widths": args.bit_widths,
                     "operations": operations}
@@ -67,7 +70,7 @@ def main(argv):
                 ssa.get_fptaylor_maximums()
                 gr = GurobiResult(ssa)
                 tr = TunedExpression(ssa, gr)
-                print(tr.to_fptaylor())
+                print(tr)
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:

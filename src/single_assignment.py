@@ -8,8 +8,8 @@ from fpcore_ast import Operation, Number, Variable
 from fpcore_logging import Logger
 from fptaylor_result import FPTaylorResult
 
+import all_modifications_ast
 import copy
-
 
 logger = Logger()
 
@@ -133,9 +133,17 @@ class SingleAssignment:
         lines.append("Definitions")
         for name, value in self.definitions.items():
             rnd = SingleAssignment.FPTAYLOR_ROUNDS[bit_selection[name]]
+            vstr = value.infix_str()
             if name in oper_selection:
-                value = Operation(oper_selection[name], *value.args)
-            lines.append("  {} {}= {};".format(name, rnd, value.infix_str()))
+                op = oper_selection[name]
+                value = Operation(op, *value.args)
+                vstr = value.infix_str()
+                fptop = all_modifications_ast.OperationToFPTaylor[op]
+                if op != fptop:
+                    vstr = vstr.replace(op, fptop)
+                    while vstr.count("(") != vstr.count(")"):
+                        vstr += ")"
+            lines.append("  {} {}= {};".format(name, rnd, vstr))
         lines.append("")
 
         lines.append("Expressions")
@@ -180,6 +188,11 @@ class SingleAssignment:
             for name, expanded in unused:
                 logger.warning("  {} = {}", name, expanded)
 
+        if len(unmatched) != 0:
+            logger.warning("Unmatched FPTaylor forms:")
+            for name, expanded in unmatched:
+                logger.warning("  {} = {}", name, expanded)
+
         return match, unmatched
 
     def get_fptaylor_forms(self):
@@ -219,8 +232,8 @@ class SingleAssignment:
                 possible = self.get_possible({target_name: new_value})
                 match, unmatched = self.match_fptaylor_forms(fptaylor_forms,
                                                              possible)
-                if len(unmatched) != 1:
-                    raise FPTaylorMatchOneError(unmatched)
+
+
                 for name, form in match.items():
                     default = self.fptaylor_forms[name]["default"]
                     if default != form:
@@ -232,10 +245,16 @@ class SingleAssignment:
                 else:
                     existing = copy.copy(forms["default"])
 
-                new = existing + unmatched[0][1]
+                if len(unmatched) == 1:
+                    new = existing + unmatched[0][1]
+                elif len(unmatched) == 0:
+                    new = existing
+                else:
+                    raise FPTaylorMatchOneError(unmatched)
                 forms[(target_name, oper)] = new
 
     def get_fptaylor_maximums(self):
+        memoized = dict()
         for name, forms in self.fptaylor_forms.items():
             for key, form in forms.items():
-                form.maximize(self.inputs)
+                form.maximize(self.inputs, memoized)

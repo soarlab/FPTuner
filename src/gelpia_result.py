@@ -29,11 +29,11 @@ class GelpiaResult:
 
     # Tell gelpia to always try as hard as possible
     CONFIG = {
-        "epsilons": (0, 0, 0),
-        "timeout": 0,
+        "epsilons": (1e-4, 1e-4, 0),
+        "timeout": 10,
         "grace": 0,
         "update": 0,
-        "iters": 0,
+        "iters": 2**18,
         "seed": 0,
         "debug": False,
         "src_dir": gelpia.SRC_DIR,
