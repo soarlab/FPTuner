@@ -4,6 +4,7 @@ from exceptions import GelpiaInfError
 from fpcore_logging import Logger
 from fractions import Fraction
 from math import isinf
+from multiprocessing import Process, Value
 
 import gelpia
 import gelpia_logging
@@ -52,11 +53,33 @@ class GelpiaResult:
         logger.log("query:\n{}", self.query)
 
         # Run and set results as member
-        self.max_lower, self.max_upper = gelpia.find_max(function=self.query,
+        max_lower = Value("d", float("nan"))
+        max_upper = Value("d", float("nan"))
+        max_args = {"function": self.query,
+                    "max_lower": max_lower,
+                    "max_upper": max_upper}
+        max_args.update(GelpiaResult.CONFIG)
+        p = Process(target=gelpia.find_max, kwargs=max_args)
+
+        p.start()
+
+        self.min_lower, self.min_upper = gelpia.find_min(function=self.query,
                                                          **GelpiaResult.CONFIG)
 
-        if isinf(self.max_upper):
+        p.join()
+
+        self.max_lower = max_lower.value
+        self.max_upper = max_upper.value
+
+        self.abs_max = max(self.max_upper, -self.min_lower)
+
+        if isinf(self.abs_max):
             raise GelpiaInfError(self.query)
 
-        logger.llog(Logger.HIGH, "result = [{}, {}]",
+        logger.llog(Logger.HIGH, "min = [{}, {}]",
+                    self.min_lower, self.min_upper)
+        logger.llog(Logger.HIGH, "max = [{}, {}]",
                     self.max_lower, self.max_upper)
+        logger.llog(Logger.HIGH, "abs_max = {}",
+                    self.abs_max)
+

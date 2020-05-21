@@ -17,12 +17,14 @@ class GurobiResult:
     DENOM_ORDER = [2**24, 2**53, 2**113]
     BIT_WIDTH_TO_DENOM = dict(zip(BIT_WIDTH_ORDER, DENOM_ORDER))
 
-    def __init__(self, ssa, scale=10000):
+    def __init__(self, ssa, max_error, scale=1e3):
+        self.max_error = max_error
         self.string_list = list()
         self.scale = scale
         self.ssa = ssa
         self.model = gp.Model()
         self.model.Params.OutputFlag = 0
+        self.model.Params.NumericFocus = 3
         self.bit_width_bools = self.get_bit_width_bools()
         self.epses = self.get_epses()
         self.operation_bools = self.get_operation_bools()
@@ -31,8 +33,6 @@ class GurobiResult:
         self.bit_width_costs = self.get_bit_width_costs()
         self.operation_costs = self.get_operation_costs()
         self.cost = self.add_cost()
-
-        max_error = self.ssa.search_space["error_bound"]
 
         self.model.addConstr(self.error <= scale*max_error)
         self.model.update()

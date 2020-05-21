@@ -19,8 +19,9 @@ class TunedExpression():
         self.name = ssa.name
         self.properties = ssa.properties
         self.inputs = ssa.inputs
-        self.definitions = ssa.definitions
+        self.definitions = ssa.definitions.copy()
         self.search_operations = ssa.search_space["operations"]
+        self.error_bound = gr.max_error
         self.types = None
         self.operators = None
         self.info = None
@@ -51,6 +52,20 @@ class TunedExpression():
                 lines.append("{:>13}\t{}".format(op, self.info[op]))
 
         return "\n".join(lines)
+
+    def tsv(self):
+        header = ["Error_bound"]
+        parts = ["{}".format(self.error_bound)]
+        idx = 0
+        for name in self.definitions:
+            header.append("{}-type".format(idx))
+            parts.append(self.types[name])
+            if name in self.operators:
+                op = self.operators[name]
+                header.append("{}-op".format(idx))
+                parts.append(op)
+            idx += 1
+        return "\t".join(header), "\t".join(parts)
 
     def _get_input_type(self, name):
         counts = {"fp32": 0, "fp64": 0, "fp128": 0}
@@ -155,7 +170,9 @@ class TunedExpression():
 
     def inplace_operators(self):
         for name, op in self.operators.items():
-            self.definitions[name].op = op
+            old = self.definitions[name]
+            new = Operation(op, *old.args)
+            self.definitions[name] = new
 
     def inline_untyped(self):
         to_remove = set()

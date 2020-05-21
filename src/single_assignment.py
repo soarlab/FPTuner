@@ -33,12 +33,10 @@ class SingleAssignment:
 
     def _string_lines(self):
         lines = list()
-        err = self.search_space["error_bound"]
         bits = " ".join(self.search_space["bit_widths"])
         ops = self.search_space["operations"]
         lines.append("SingleAssignment:")
         lines.append("  search_space:")
-        lines.append("    error_bound = {}".format(err))
         lines.append("    bit_widths = {}".format(bits))
         lines.append("    operations = {}".format(ops))
 
@@ -58,11 +56,11 @@ class SingleAssignment:
             if len(forms) == 0:
                 lines.append("    {} = not_computed".format(name))
                 continue
-            lines.append("    {} = {}".format(name, forms["default"]))
+            lines.append("    {} = {} => {}".format(name, value.op, forms["default"]))
             for key, form in forms.items():
                 if key == "default":
                     continue
-                lines.append("        {} = {}".format(key, form))
+                lines.append("        {} => {}".format(key[1], form))
 
         return lines
 
@@ -257,4 +255,4 @@ class SingleAssignment:
         memoized = dict()
         for name, forms in self.fptaylor_forms.items():
             for key, form in forms.items():
-                form.maximize(self.inputs, memoized)
+                form.abs_maximize(self.inputs, memoized)

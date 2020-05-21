@@ -17,6 +17,7 @@ def parse_args(argv):
     arg_parser.add_argument("-e", "--error",
                             required=True,
                             type=float,
+                            nargs="+",
                             help="The error bound to stay under.")
     arg_parser.add_argument("-v", "--verbosity",
                             nargs="?",
@@ -43,6 +44,8 @@ def parse_args(argv):
 
     bws = list(set(args.bit_widths))
     args.bit_widths = sorted(bws, key=lambda s: int(s[2:]))
+
+    args.error.sort(reverse=True)
 
     logger("Argument settings:")
     logger("  query_files: {}", args.query_files)

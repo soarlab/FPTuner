@@ -38,8 +38,7 @@ def main(argv):
     operations = {"sin": sins,
                   "exp": exps,
                   "log": logs}
-    search_space = {"error_bound": args.error,
-                    "bit_widths": args.bit_widths,
+    search_space = {"bit_widths": args.bit_widths,
                     "operations": operations}
 
     lexer = FPCoreLexer()
@@ -68,9 +67,19 @@ def main(argv):
                 ssa = fpcore.to_single_assignment(search_space)
                 ssa.get_fptaylor_forms()
                 ssa.get_fptaylor_maximums()
-                gr = GurobiResult(ssa)
-                tr = TunedExpression(ssa, gr)
-                print(tr)
+                first_header = None
+                for e in args.error:
+                    gr = GurobiResult(ssa, e)
+                    tr = TunedExpression(ssa, gr)
+                    header, row = tr.tsv()
+                    if first_header is None:
+                        first_header = header
+                        print(header)
+                    elif first_header != header:
+                        logger.error("Header mismatch: \n{} \n{}",
+                                     first_header, header)
+                        sys.exit(1)
+                    print(row)
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:
